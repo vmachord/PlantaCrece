@@ -1,12 +1,18 @@
 package com.pim.planta;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.pim.planta.db.DatabaseHelper;
+import com.pim.planta.db.SQLite;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,5 +26,17 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        try {
+            SQLite.createContainer();
+            // Crear instancia de la clase helper
+            DatabaseHelper dbHelper = new DatabaseHelper(this);
+
+            // Abrir la base de datos (esto creará la base de datos si no existe)
+            dbHelper.getWritableDatabase();
+            dbHelper.agregarUsuario("Juan", "juan@example.com");
+
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 }
