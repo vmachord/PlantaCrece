@@ -16,8 +16,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 
 public class JardinActivity extends AppCompatActivity {
-    private static final int USAGE_PERMISSION_REQUEST_CODE = 1001;
-    private static final String PACKAGE_NAME = "com.pim.planta"; // Cambia esto a tu paquete
     private int variableContador;
     private static final String TARGET_PACKAGE_NAME = "com.google.android.googlequicksearchbox"; // Paquete de Google
     private TextView textViewPlantoo;
@@ -31,12 +29,14 @@ public class JardinActivity extends AppCompatActivity {
 
         if (!hasUsageStatsPermission()) {
             Toast.makeText(this, "Por favor habilita el acceso a estadísticas de uso.", Toast.LENGTH_LONG).show();
+            //Redirige al usuario a la configuración de Android para habilitar el acceso a las estadísticas de uso
             startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
         } else {
             trackAppUsage();
         }
     }
 
+    //Se llama cada vez que la actividad vuelve a ser visible
     @Override
     protected void onResume() {
         super.onResume();
@@ -44,7 +44,7 @@ public class JardinActivity extends AppCompatActivity {
             trackAppUsage();
         }
     }
-
+    //Verifica si la aplicación tiene permiso para acceder a las estadísticas de uso del dispositivo
     private boolean hasUsageStatsPermission() {
         AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
         int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
@@ -60,7 +60,20 @@ public class JardinActivity extends AppCompatActivity {
         List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
                 UsageStatsManager.INTERVAL_DAILY, currentTime - 86400000, currentTime);
 
-        long googleUsageTime = 0; // Variable para almacenar el tiempo de uso de Google
+        long googleUsageTime = 0;
+        long instagramUsageTime = 0;
+        long tiktokUsageTime = 0;
+        long youtubeUsageTime = 0;
+        long twitterUsageTime = 0;
+        long facebookUsageTime = 0;
+
+        // Nombres de los paquetes de las aplicaciones
+        final String GOOGLE_PACKAGE_NAME = "com.google.android.googlequicksearchbox";
+        final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
+        final String TIKTOK_PACKAGE_NAME = "com.zhiliaoapp.musically";
+        final String YOUTUBE_PACKAGE_NAME = "com.google.android.youtube";
+        final String TWITTER_PACKAGE_NAME = "com.twitter.android";
+        final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
 
         if (usageStatsList != null && !usageStatsList.isEmpty()) {
             for (UsageStats usageStats : usageStatsList) {
@@ -68,8 +81,28 @@ public class JardinActivity extends AppCompatActivity {
                 long totalTimeInForeground = usageStats.getTotalTimeInForeground();
 
                 // Verifica si la aplicación es Google y acumula su tiempo de uso
-                if (TARGET_PACKAGE_NAME.equals(packageName)) {
+                if (GOOGLE_PACKAGE_NAME.equals(packageName)) {
                     googleUsageTime += totalTimeInForeground;
+                }
+                // Verifica si la aplicación es Instagram
+                if (INSTAGRAM_PACKAGE_NAME.equals(packageName)) {
+                    instagramUsageTime += totalTimeInForeground;
+                }
+                // Verifica si la aplicación es TikTok
+                if (TIKTOK_PACKAGE_NAME.equals(packageName)) {
+                    tiktokUsageTime += totalTimeInForeground;
+                }
+                // Verifica si la aplicación es YouTube
+                if (YOUTUBE_PACKAGE_NAME.equals(packageName)) {
+                    youtubeUsageTime += totalTimeInForeground;
+                }
+                // Verifica si la aplicación es Twitter
+                if (TWITTER_PACKAGE_NAME.equals(packageName)) {
+                    twitterUsageTime += totalTimeInForeground;
+                }
+                // Verifica si la aplicación es Facebook
+                if (FACEBOOK_PACKAGE_NAME.equals(packageName)) {
+                    facebookUsageTime += totalTimeInForeground;
                 }
 
                 // Para depuración: imprime el uso de cada aplicación
@@ -79,9 +112,18 @@ public class JardinActivity extends AppCompatActivity {
             Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
         }
 
-        // Actualiza el TextView con el tiempo de uso de Google
-        textViewPlantoo.setText("Tiempo de uso de Google: " + formatTime(googleUsageTime));
+        // Actualiza el TextView con los tiempos de uso de cada aplicación
+        String usageSummary = "Tiempo de uso:\n" +
+                "Google: " + formatTime(googleUsageTime) + "\n" +
+                "Instagram: " + formatTime(instagramUsageTime) + "\n" +
+                "TikTok: " + formatTime(tiktokUsageTime) + "\n" +
+                "YouTube: " + formatTime(youtubeUsageTime) + "\n" +
+                "Twitter: " + formatTime(twitterUsageTime) + "\n" +
+                "Facebook: " + formatTime(facebookUsageTime);
+
+        textViewPlantoo.setText(usageSummary);
     }
+
 
     private String formatTime(long milliseconds) {
         long seconds = (milliseconds / 1000) % 60;
