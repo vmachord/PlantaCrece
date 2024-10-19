@@ -18,7 +18,6 @@ import java.util.List;
 
 public class JardinActivity extends AppCompatActivity {
     private int variableContador;
-    private static final String TARGET_PACKAGE_NAME = "com.google.android.googlequicksearchbox"; // Paquete de Google
     private TextView textViewPlantoo;
 
     @Override
@@ -67,33 +66,28 @@ public class JardinActivity extends AppCompatActivity {
         long twitterUsageTime = 0;
         long facebookUsageTime = 0;
 
-        final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
-        final String TIKTOK_PACKAGE_NAME = "com.zhiliaoapp.musically";
-        final String YOUTUBE_PACKAGE_NAME = "com.google.android.youtube";
-        final String TWITTER_PACKAGE_NAME = "com.twitter.android";
-        final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
-
         if (usageStatsList != null && !usageStatsList.isEmpty()) {
-            for (UsageStats usageStats : usageStatsList) {
+            for (UsageStats usageStats : usageStatsList) { // Recorre la lista de uso de aplicaciones
                 String packageName = usageStats.getPackageName();
                 long totalTimeInForeground = usageStats.getTotalTimeInForeground();
 
-                if (INSTAGRAM_PACKAGE_NAME.equals(packageName)) {
-                    instagramUsageTime += totalTimeInForeground;
+                switch (packageName) {
+                    case "com.instagram.android":
+                        instagramUsageTime += totalTimeInForeground;
+                        break;
+                    case "com.zhiliaoapp.musically":
+                        tiktokUsageTime += totalTimeInForeground;
+                        break;
+                    case "com.google.android.youtube":
+                        youtubeUsageTime += totalTimeInForeground;
+                        break;
+                    case "com.twitter.android":
+                        twitterUsageTime += totalTimeInForeground;
+                        break;
+                    case "com.facebook.katana":
+                        facebookUsageTime += totalTimeInForeground;
+                        break;
                 }
-                if (TIKTOK_PACKAGE_NAME.equals(packageName)) {
-                    tiktokUsageTime += totalTimeInForeground;
-                }
-                if (YOUTUBE_PACKAGE_NAME.equals(packageName)) {
-                    youtubeUsageTime += totalTimeInForeground;
-                }
-                if (TWITTER_PACKAGE_NAME.equals(packageName)) {
-                    twitterUsageTime += totalTimeInForeground;
-                }
-                if (FACEBOOK_PACKAGE_NAME.equals(packageName)) {
-                    facebookUsageTime += totalTimeInForeground;
-                }
-
                 // Para depuración: imprime el uso de cada aplicación
                 Log.d("AppUsage", "Uso de " + packageName + ": " + totalTimeInForeground + " milisegundos");
             }
