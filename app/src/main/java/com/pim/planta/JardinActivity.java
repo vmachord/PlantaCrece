@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 
 public class JardinActivity extends AppCompatActivity {
-    private int variableContador;
     private TextView textViewPlantoo;
 
     @Override
