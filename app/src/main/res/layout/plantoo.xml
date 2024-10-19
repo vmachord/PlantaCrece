@@ -9,9 +9,19 @@
         android:id="@+id/textViewPlantoo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="364dp"
-        android:layout_marginEnd="144dp"
+        android:layout_marginTop="120dp"
+        android:layout_marginEnd="164dp"
         android:text="Hello Plantoo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="259dp"
+        android:layout_height="178dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="76dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/image_1" />
 </androidx.constraintlayout.widget.ConstraintLayout>

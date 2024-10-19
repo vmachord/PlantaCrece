@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,15 +61,12 @@ public class JardinActivity extends AppCompatActivity {
         List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
                 UsageStatsManager.INTERVAL_DAILY, currentTime - 86400000, currentTime);
 
-        long googleUsageTime = 0;
         long instagramUsageTime = 0;
         long tiktokUsageTime = 0;
         long youtubeUsageTime = 0;
         long twitterUsageTime = 0;
         long facebookUsageTime = 0;
 
-        // Nombres de los paquetes de las aplicaciones
-        final String GOOGLE_PACKAGE_NAME = "com.google.android.googlequicksearchbox";
         final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
         final String TIKTOK_PACKAGE_NAME = "com.zhiliaoapp.musically";
         final String YOUTUBE_PACKAGE_NAME = "com.google.android.youtube";
@@ -80,27 +78,18 @@ public class JardinActivity extends AppCompatActivity {
                 String packageName = usageStats.getPackageName();
                 long totalTimeInForeground = usageStats.getTotalTimeInForeground();
 
-                // Verifica si la aplicación es Google y acumula su tiempo de uso
-                if (GOOGLE_PACKAGE_NAME.equals(packageName)) {
-                    googleUsageTime += totalTimeInForeground;
-                }
-                // Verifica si la aplicación es Instagram
                 if (INSTAGRAM_PACKAGE_NAME.equals(packageName)) {
                     instagramUsageTime += totalTimeInForeground;
                 }
-                // Verifica si la aplicación es TikTok
                 if (TIKTOK_PACKAGE_NAME.equals(packageName)) {
                     tiktokUsageTime += totalTimeInForeground;
                 }
-                // Verifica si la aplicación es YouTube
                 if (YOUTUBE_PACKAGE_NAME.equals(packageName)) {
                     youtubeUsageTime += totalTimeInForeground;
                 }
-                // Verifica si la aplicación es Twitter
                 if (TWITTER_PACKAGE_NAME.equals(packageName)) {
                     twitterUsageTime += totalTimeInForeground;
                 }
-                // Verifica si la aplicación es Facebook
                 if (FACEBOOK_PACKAGE_NAME.equals(packageName)) {
                     facebookUsageTime += totalTimeInForeground;
                 }
@@ -112,16 +101,58 @@ public class JardinActivity extends AppCompatActivity {
             Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
         }
 
+        // Calcular la media del tiempo de uso (excluyendo Google)
+        int appCount = 5; // Cinco aplicaciones: Instagram, TikTok, YouTube, Twitter y Facebook
+        long totalUsageTime = instagramUsageTime + tiktokUsageTime + youtubeUsageTime + twitterUsageTime + facebookUsageTime;
+        long averageUsageTime = totalUsageTime / appCount;
+
+        // Mostrar la imagen adecuada según la media
+        int imageIndex = getImageBasedOnAverageTime(averageUsageTime);
+
         // Actualiza el TextView con los tiempos de uso de cada aplicación
         String usageSummary = "Tiempo de uso:\n" +
-                "Google: " + formatTime(googleUsageTime) + "\n" +
                 "Instagram: " + formatTime(instagramUsageTime) + "\n" +
                 "TikTok: " + formatTime(tiktokUsageTime) + "\n" +
                 "YouTube: " + formatTime(youtubeUsageTime) + "\n" +
                 "Twitter: " + formatTime(twitterUsageTime) + "\n" +
-                "Facebook: " + formatTime(facebookUsageTime);
+                "Facebook: " + formatTime(facebookUsageTime) + "\n" +
+                "Media de uso: " + formatTime(averageUsageTime);
 
         textViewPlantoo.setText(usageSummary);
+        setImageBasedOnUsage(imageIndex);
+    }
+
+    // Función para calcular el índice de la imagen según la media de tiempo de uso
+    private int getImageBasedOnAverageTime(long averageUsageTime) {
+        if (averageUsageTime < 60000) { // menos de 1 minuto
+            return 10;
+        } else if (averageUsageTime < 300000) { // menos de 5 minutos
+            return 9;
+        } else if (averageUsageTime < 900000) { // menos de 15 minutos
+            return 8;
+        } else if (averageUsageTime < 1800000) { // menos de 30 minutos
+            return 7;
+        } else if (averageUsageTime < 3600000) { // menos de 1 hora
+            return 6;
+        } else if (averageUsageTime < 7200000) { // menos de 2 horas
+            return 5;
+        } else if (averageUsageTime < 10800000) { // menos de 3 horas
+            return 4;
+        } else if (averageUsageTime < 14400000) { // menos de 4 horas
+            return 3;
+        } else if (averageUsageTime < 18000000) { // menos de 5 horas
+            return 2;
+        } else {
+            return 1; // más de 5 horas
+        }
+    }
+
+    // Función para mostrar la imagen según el índice
+    private void setImageBasedOnUsage(int imageIndex) {
+        String imageName = "image_" + imageIndex;
+        int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
+        ImageView imageView = findViewById(R.id.imageView);
+        imageView.setImageResource(resID);
     }
 
 
