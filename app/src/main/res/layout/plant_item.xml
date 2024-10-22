@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/plant_imageview"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/ic_launcher_background" />
+
+    <TextView
+        android:id="@+id/plant_name_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/plant_imageview"
+        android:layout_marginStart="16dp"
+        android:text="Nombre de la planta"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/plant_description_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_below="@id/plant_name_textview"
+        android:layout_toEndOf="@id/plant_imageview"
+        android:text="Descripción de la planta"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray"/>
+
+</RelativeLayout>

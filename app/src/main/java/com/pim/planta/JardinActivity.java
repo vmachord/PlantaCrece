@@ -8,14 +8,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
-
 public class JardinActivity extends AppCompatActivity {
     private TextView textViewPlantoo;
 
@@ -25,6 +28,11 @@ public class JardinActivity extends AppCompatActivity {
         setContentView(R.layout.plantoo);
 
         textViewPlantoo = findViewById(R.id.textViewPlantoo);
+        Button botonMostrarListado = findViewById(R.id.button);
+        botonMostrarListado.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
+            startActivity(intent);
+        });
 
         if (!hasUsageStatsPermission()) {
             Toast.makeText(this, "Por favor habilita el acceso a estadísticas de uso.", Toast.LENGTH_LONG).show();
