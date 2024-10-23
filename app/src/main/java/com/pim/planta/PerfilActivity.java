@@ -78,7 +78,7 @@ public class PerfilActivity extends AppCompatActivity{
         // Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         // startActivityForResult(intent, 100);
 
-        profileImageView.setImageResource(R.drawable.DefaultProfile);
+        profileImageView.setImageResource(R.drawable.default_profile);
     }
 
     // Si usas un Intent para seleccionar la imagen, puedes sobrescribir onActivityResult aquí.
