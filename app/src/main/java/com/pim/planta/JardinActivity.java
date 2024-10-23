@@ -34,6 +34,12 @@ public class JardinActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        Button botonMostrarPerfil = findViewById(R.id.button2);
+        botonMostrarPerfil.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
+            startActivity(intent);
+        });
+
         if (!hasUsageStatsPermission()) {
             Toast.makeText(this, "Por favor habilita el acceso a estadísticas de uso.", Toast.LENGTH_LONG).show();
             //Redirige al usuario a la configuración de Android para habilitar el acceso a las estadísticas de uso

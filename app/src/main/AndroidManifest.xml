@@ -29,9 +29,14 @@
         <activity
             android:name=".JardinActivity"
             android:exported="true" />
+
         <activity
         android:name=".PlantListActivity"
         android:exported="true" />
+
+        <activity
+            android:name=".PerfilActivity"
+            android:exported="true" />
     </application>
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ManifestOrder,ProtectedPermissions"/>
 </manifest>
