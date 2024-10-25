@@ -50,11 +50,11 @@ public class PerfilActivity extends AppCompatActivity{
         // Crear entradas para el gráfico de barras
         ArrayList<BarEntry> barEntries = new ArrayList<>();
 
-        // Añadir barras para diferentes días con valores en distintas posiciones (0, 1, 2, 3...)
-        barEntries.add(new BarEntry(0, new float[]{2f, 3f, 1f, 4f, 5f}));  // Día 1
-        barEntries.add(new BarEntry(1, new float[]{3f, 1f, 2f, 7f, 1f}));  // Día 2
-        barEntries.add(new BarEntry(2, new float[]{10f, 3f, 1f, 4f, 5f})); // Día 3
-        barEntries.add(new BarEntry(3, new float[]{2f, 3f, 1f, 4f, 5f}));  // Día 4
+        // Añadir barras para diferentes días con valores en distintas posiciones
+        barEntries.add(new BarEntry(0, new float[]{2f, 3f, 1f, 4f, 5f}));
+        barEntries.add(new BarEntry(1, new float[]{3f, 1f, 2f, 7f, 1f}));
+        barEntries.add(new BarEntry(2, new float[]{10f, 3f, 1f, 4f, 5f}));
+        barEntries.add(new BarEntry(3, new float[]{2f, 3f, 1f, 4f, 5f}));
 
         // Añadir los colores al gráfico de barras
         BarDataSet barDataSet = addColorOnGraph(barEntries);
