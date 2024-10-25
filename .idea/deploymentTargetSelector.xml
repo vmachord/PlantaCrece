@@ -4,11 +4,14 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-10-25T15:57:50.388809800Z">
+        <DropdownSelection timestamp="2024-10-25T16:39:22.601530700Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\ayuda223\.android\avd\Medium_Phone_API_35.avd" />
+              <DeviceId pluginId="FirebaseDirectAccess" identifier="reservation=projects/device-streaming-c6267772/deviceSessions/session-2e9wksfmg4fts" />
             </handle>
+            <template>
+              <DeviceId pluginId="FirebaseDirectAccess" type="TEMPLATE" identifier="model_id=akita/34" />
+            </template>
           </Target>
         </DropdownSelection>
         <DialogSelection />

@@ -35,7 +35,7 @@ public class PerfilActivity extends AppCompatActivity{
         //ESTO QUITAR CUANDO LA BARRA DE BUSQUEDA DE PAU FUNCIONE
         Button botonMostrarListado = findViewById(R.id.buttonPlanta);
         botonMostrarListado.setOnClickListener(v -> {
-            Intent intent = new Intent(PerfilActivity.this, PlantListActivity.class);
+            Intent intent = new Intent(PerfilActivity.this, JardinActivity.class);
             startActivity(intent);
         });
         initializeNameAndProfile();
@@ -49,7 +49,6 @@ public class PerfilActivity extends AppCompatActivity{
 
         // Crear entradas para el gráfico de barras
         ArrayList<BarEntry> barEntries = new ArrayList<>();
-        barEntries.add(new BarEntry(0, new float[]{2f, 3f, 1f, 4f, 5f}));  // Cada valor representa un color en la barra
 
         // Añadir barras para diferentes días con valores en distintas posiciones (0, 1, 2, 3...)
         barEntries.add(new BarEntry(0, new float[]{2f, 3f, 1f, 4f, 5f}));  // Día 1
