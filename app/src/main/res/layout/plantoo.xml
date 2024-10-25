@@ -44,4 +44,59 @@
         android:text="Perfil"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="95dp"
+        android:layout_gravity="bottom"
+        android:background="?attr/colorPrimary"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/imageButtonLupa"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="@drawable/boton_lupa"
+            android:contentDescription="desc_search_button"/>
+
+        <ImageButton
+            android:id="@+id/imageButtonMaceta"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="@drawable/boton_maceta"
+            android:contentDescription="desc_pot_button"
+            />
+
+        <ImageButton
+            android:id="@+id/imageButtonPlantadex"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="@drawable/boton_plantadex"
+            android:contentDescription="desc_plantadex_button" />
+
+        <ImageButton
+            android:id="@+id/imageButtonUsuario"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="@drawable/boton_usuario"
+            android:contentDescription="desc_user_button"/>
+
+    </LinearLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

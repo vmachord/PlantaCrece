@@ -15,6 +15,8 @@ import android.widget.Toast;
 import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -27,8 +29,29 @@ public class JardinActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plantoo);
 
+        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
+        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
+        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
+
+        imageButtonLupa.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, DiarioActivity.class);
+            startActivity(intent);
+        });
+
+        imageButtonPlantadex.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
+            startActivity(intent);
+        });
+
+        imageButtonUsuario.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
+            startActivity(intent);
+        });
+
         textViewPlantoo = findViewById(R.id.textViewPlantoo);
         Button botonMostrarListado = findViewById(R.id.button);
+
         botonMostrarListado.setOnClickListener(v -> {
             Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
             startActivity(intent);
