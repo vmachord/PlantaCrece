@@ -17,18 +17,22 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import java.util.ArrayList;
+import java.util.List;
 
 public class PerfilActivity extends AppCompatActivity{
 
     private ImageView profileImageView;
     private TextView userNameTextView;
     private BarChart barChart;
+    private List<BarDataSet> dataSets;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        //ESTO QUITAR CUANDO LA BARRA DE BUSQUEDA DE PAU FUNCIONE
         Button botonMostrarListado = findViewById(R.id.buttonPlanta);
         botonMostrarListado.setOnClickListener(v -> {
             Intent intent = new Intent(PerfilActivity.this, PlantListActivity.class);
@@ -47,9 +51,16 @@ public class PerfilActivity extends AppCompatActivity{
         ArrayList<BarEntry> barEntries = new ArrayList<>();
         barEntries.add(new BarEntry(0, new float[]{2f, 3f, 1f, 4f, 5f}));  // Cada valor representa un color en la barra
 
-        BarDataSet barDataSet = new BarDataSet(barEntries, "Progreso Diario");
-        barDataSet.setColors(new int[]{Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN, Color.MAGENTA}); // Colores de la barra
+        // Añadir barras para diferentes días con valores en distintas posiciones (0, 1, 2, 3...)
+        barEntries.add(new BarEntry(0, new float[]{2f, 3f, 1f, 4f, 5f}));  // Día 1
+        barEntries.add(new BarEntry(1, new float[]{3f, 1f, 2f, 7f, 1f}));  // Día 2
+        barEntries.add(new BarEntry(2, new float[]{10f, 3f, 1f, 4f, 5f})); // Día 3
+        barEntries.add(new BarEntry(3, new float[]{2f, 3f, 1f, 4f, 5f}));  // Día 4
 
+        // Añadir los colores al gráfico de barras
+        BarDataSet barDataSet = addColorOnGraph(barEntries);
+
+        // Configurar el BarData y agregarlo al gráfico
         BarData barData = new BarData(barDataSet);
         barChart.setData(barData);
 
@@ -75,6 +86,12 @@ public class PerfilActivity extends AppCompatActivity{
             }
         });
         userNameTextView.setText("Kun Aguero");
+    }
+
+    private  BarDataSet addColorOnGraph(ArrayList<BarEntry> barEntries){
+        BarDataSet barDataSet = new BarDataSet(barEntries, "Progreso Diario");
+        barDataSet.setColors(new int[]{Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN, Color.MAGENTA}); // Colores de la barra
+        return barDataSet;
     }
 
     // Método para cambiar la imagen de perfil
