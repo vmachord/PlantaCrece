@@ -1,7 +1,10 @@
 package com.pim.planta;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.View;
@@ -26,8 +29,13 @@ public class PerfilActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
+        Button botonMostrarListado = findViewById(R.id.buttonPlanta);
+        botonMostrarListado.setOnClickListener(v -> {
+            Intent intent = new Intent(PerfilActivity.this, PlantListActivity.class);
+            startActivity(intent);
+        });
         initializeNameAndProfile();
+        initializeGraph();
 
 
     }
@@ -66,7 +74,7 @@ public class PerfilActivity extends AppCompatActivity{
                 cambiarImagenDePerfil();
             }
         });
-        userNameTextView.setText("Usuario Ejemplo");
+        userNameTextView.setText("Kun Aguero");
     }
 
     // Método para cambiar la imagen de perfil
