@@ -28,6 +28,8 @@ public class DiarioActivity extends AppCompatActivity {
 
     public void setupBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
+        imageButtonLupa.setEnabled(false); // Deshabilita el boton
+        imageButtonLupa.setImageAlpha(128); // Oscurece el boton
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);

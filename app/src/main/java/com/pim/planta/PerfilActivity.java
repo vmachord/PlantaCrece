@@ -1,22 +1,22 @@
 package com.pim.planta;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.Button;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.view.View;
 import android.widget.Toast;
 
-import android.graphics.Color;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +44,8 @@ public class PerfilActivity extends AppCompatActivity{
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
+        imageButtonUsuario.setEnabled(false); // Deshabilita el boton
+        imageButtonUsuario.setImageAlpha(128); // Oscurece el boton
 
         imageButtonLupa.setOnClickListener(v -> {
             Intent intent = new Intent(PerfilActivity.this, DiarioActivity.class);

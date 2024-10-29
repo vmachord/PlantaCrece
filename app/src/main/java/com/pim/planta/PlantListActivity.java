@@ -44,6 +44,8 @@ public class PlantListActivity extends AppCompatActivity {
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
+        imageButtonPlantadex.setEnabled(false); // Deshabilita el boton
+        imageButtonPlantadex.setImageAlpha(128); // Oscurece el boton
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
 
         imageButtonLupa.setOnClickListener(v -> {

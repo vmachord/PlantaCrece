@@ -58,6 +58,8 @@ public class JardinActivity extends AppCompatActivity {
     public void setupBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        imageButtonMaceta.setEnabled(false); // Deshabilita el boton
+        imageButtonMaceta.setImageAlpha(128); // Oscurece el boton
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
 
