@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,26 +25,12 @@ public class JardinActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plantoo);
         setupBottom();
+        textViewPlantoo = findViewById(R.id.textViewPlantoo);
         ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
         imageButtonOjo.setOnClickListener(v -> {
             Intent intent = new Intent(JardinActivity.this, InvernaderoActivity.class);
             startActivity(intent);
         });
-
-        textViewPlantoo = findViewById(R.id.textViewPlantoo);
-        Button botonMostrarListado = findViewById(R.id.button);
-
-        botonMostrarListado.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
-            startActivity(intent);
-        });
-
-        Button botonMostrarPerfil = findViewById(R.id.button2);
-        botonMostrarPerfil.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
-            startActivity(intent);
-        });
-
         if (!hasUsageStatsPermission()) {
             Toast.makeText(this, "Por favor habilita el acceso a estadísticas de uso.", Toast.LENGTH_LONG).show();
             //Redirige al usuario a la configuración de Android para habilitar el acceso a las estadísticas de uso
