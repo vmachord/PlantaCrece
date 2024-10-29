@@ -13,15 +13,14 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/plant_list_recyclerview"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        android:layout_width="414dp"
+        android:layout_height="649dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:id="@+id/bottom_navigation"
         android:layout_width="0dp"
         android:layout_height="95dp"
         android:layout_gravity="bottom"
@@ -30,6 +29,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
+
         <ImageButton
             android:id="@+id/imageButtonLupa"
             android:layout_width="0dp"
@@ -48,7 +48,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:scaleType="centerInside"
             android:src="@drawable/boton_maceta"
-            android:contentDescription="desc_pot_button"/>
+            android:contentDescription="desc_pot_button"
+            />
 
         <ImageButton
             android:id="@+id/imageButtonPlantadex"
@@ -69,5 +70,7 @@
             android:scaleType="centerInside"
             android:src="@drawable/boton_usuario"
             android:contentDescription="desc_user_button"/>
+
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

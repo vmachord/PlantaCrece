@@ -40,7 +40,7 @@ public class SQLite {
             System.out.println("Exception: " + e.getMessage());
         }
     }
-//----------------------------------- Hay que normalizar UML y poner las tablas bien
+    //----------------------------------- Hay que normalizar UML y poner las tablas bien
     public static void createContainer() {
         ResultSet resultSet = null;
         try {
@@ -105,8 +105,6 @@ public class SQLite {
         return statement;
     }
 }
-
-
 
 
 

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class PerfilActivity extends AppCompatActivity{
 
     private ImageView profileImageView;
@@ -31,17 +33,30 @@ public class PerfilActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        initializeNameAndProfile();
+        initializeGraph();
+        setupBottom();
 
-        //ESTO QUITAR CUANDO LA BARRA DE BUSQUEDA DE PAU FUNCIONE
-        Button botonMostrarListado = findViewById(R.id.buttonPlanta);
-        botonMostrarListado.setOnClickListener(v -> {
+    }
+
+    public void setupBottom(){
+        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
+        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
+        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
+
+        imageButtonLupa.setOnClickListener(v -> {
+            Intent intent = new Intent(PerfilActivity.this, DiarioActivity.class);
+            startActivity(intent);
+        });
+        imageButtonPlantadex.setOnClickListener(v -> {
+            Intent intent = new Intent(PerfilActivity.this, PlantListActivity.class);
+            startActivity(intent);
+        });
+        imageButtonMaceta.setOnClickListener(view -> {
             Intent intent = new Intent(PerfilActivity.this, JardinActivity.class);
             startActivity(intent);
         });
-        initializeNameAndProfile();
-        initializeGraph();
-
-
     }
     private void initializeGraph(){
         // Configurar el gráfico de barras

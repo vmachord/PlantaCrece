@@ -25,25 +25,8 @@ public class JardinActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plantoo);
-
+        setupBottom();
         ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
-        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
-        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
-        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
-        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
-
-        imageButtonLupa.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, DiarioActivity.class);
-            startActivity(intent);
-        });
-        imageButtonPlantadex.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
-            startActivity(intent);
-        });
-        imageButtonUsuario.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
-            startActivity(intent);
-        });
         imageButtonOjo.setOnClickListener(v -> {
             Intent intent = new Intent(JardinActivity.this, InvernaderoActivity.class);
             startActivity(intent);
@@ -70,6 +53,26 @@ public class JardinActivity extends AppCompatActivity {
         } else {
             trackAppUsage();
         }
+    }
+
+    public void setupBottom(){
+        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
+        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
+        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
+
+        imageButtonLupa.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, DiarioActivity.class);
+            startActivity(intent);
+        });
+        imageButtonPlantadex.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
+            startActivity(intent);
+        });
+        imageButtonUsuario.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
+            startActivity(intent);
+        });
     }
 
     //Se llama cada vez que la actividad vuelve a ser visible

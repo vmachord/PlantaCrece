@@ -24,30 +24,7 @@ public class PlantListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plantlist);
-
-        ImageButton lupaButton = findViewById(R.id.imageButtonLupa);
-        ImageButton macetaButton = findViewById(R.id.imageButtonMaceta);
-        ImageButton plantadexButton = findViewById(R.id.imageButtonPlantadex);
-        plantadexButton.setEnabled(false); //Boton plantadex deshabilitado al estar en plantadex ya
-        plantadexButton.setImageAlpha(128);
-        ImageButton usuarioButton = findViewById(R.id.imageButtonUsuario);
-        lupaButton.setOnClickListener(v -> {
-            Intent intent = new Intent(PlantListActivity.this, DiarioActivity.class);
-            startActivity(intent);
-        });
-        macetaButton.setOnClickListener(v -> {
-            Intent intent = new Intent(PlantListActivity.this, JardinActivity.class);
-            startActivity(intent);
-        });
-        plantadexButton.setOnClickListener(v -> {
-            Intent intent = new Intent(PlantListActivity.this, PlantListActivity.class);
-            startActivity(intent);
-        });
-        usuarioButton.setOnClickListener(v -> {
-            Intent intent = new Intent(PlantListActivity.this, PerfilActivity.class);
-            startActivity(intent);
-        });//Listeners para los botones de la barra de navegacion inferior
-
+        setupBottom();
         plantListRecyclerView = findViewById(R.id.plant_list_recyclerview);
         plantListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -61,5 +38,25 @@ public class PlantListActivity extends AppCompatActivity {
 
         plantAdapter = new PlantAdapter(plantList);
         plantListRecyclerView.setAdapter(plantAdapter);
+    }
+
+    public void setupBottom(){
+        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
+        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
+        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
+
+        imageButtonLupa.setOnClickListener(v -> {
+            Intent intent = new Intent(PlantListActivity.this, DiarioActivity.class);
+            startActivity(intent);
+        });
+        imageButtonMaceta.setOnClickListener(view -> {
+            Intent intent = new Intent(PlantListActivity.this, JardinActivity.class);
+            startActivity(intent);
+        });
+        imageButtonUsuario.setOnClickListener(v -> {
+            Intent intent = new Intent(PlantListActivity.this, PerfilActivity.class);
+            startActivity(intent);
+        });
     }
 }
