@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/fondo_navidad">
 
     <TextView
         android:id="@+id/textViewPlantoo"
@@ -11,6 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="120dp"
         android:layout_marginEnd="164dp"
+        android:background="@color/white"
+        android:padding="8dp"
         android:text="Hello Plantoo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
@@ -44,6 +47,17 @@
         android:text="Perfil"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button" />
+
+    <ImageButton
+        android:id="@+id/imageButtonOjo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/boton_ojo"
+        android:background="@null"
+        android:scaleType="fitCenter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="desc_eye_button"/>
 
     <LinearLayout
         android:layout_width="0dp"

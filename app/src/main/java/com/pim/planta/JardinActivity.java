@@ -9,26 +9,24 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.Intent;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
 public class JardinActivity extends AppCompatActivity {
     private TextView textViewPlantoo;
+    public static int currentImageIndex = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plantoo);
 
+        ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
@@ -38,14 +36,16 @@ public class JardinActivity extends AppCompatActivity {
             Intent intent = new Intent(JardinActivity.this, DiarioActivity.class);
             startActivity(intent);
         });
-
         imageButtonPlantadex.setOnClickListener(v -> {
             Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
             startActivity(intent);
         });
-
         imageButtonUsuario.setOnClickListener(v -> {
             Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
+            startActivity(intent);
+        });
+        imageButtonOjo.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, InvernaderoActivity.class);
             startActivity(intent);
         });
 
@@ -183,6 +183,7 @@ public class JardinActivity extends AppCompatActivity {
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
         ImageView imageView = findViewById(R.id.imageView);
         imageView.setImageResource(resID);
+        currentImageIndex = imageIndex;
     }
 
 

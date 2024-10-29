@@ -41,6 +41,10 @@
         <activity
             android:name=".DiarioActivity"
             android:exported="true" />
+
+        <activity
+            android:name=".InvernaderoActivity"
+            android:exported="true" />
     </application>
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ManifestOrder,ProtectedPermissions"/>
 </manifest>
