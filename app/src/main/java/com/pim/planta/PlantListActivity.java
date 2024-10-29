@@ -1,14 +1,18 @@
 package com.pim.planta;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.ImageButton;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.os.Bundle;
+
+import com.pim.planta.models.Plant;
+import com.pim.planta.models.PlantAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.pim.planta.models.*;
 
 public class PlantListActivity extends AppCompatActivity {
 
@@ -20,6 +24,29 @@ public class PlantListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plantlist);
+
+        ImageButton lupaButton = findViewById(R.id.imageButtonLupa);
+        ImageButton macetaButton = findViewById(R.id.imageButtonMaceta);
+        ImageButton plantadexButton = findViewById(R.id.imageButtonPlantadex);
+        plantadexButton.setEnabled(false); //Boton plantadex deshabilitado al estar en plantadex ya
+        plantadexButton.setImageAlpha(128);
+        ImageButton usuarioButton = findViewById(R.id.imageButtonUsuario);
+        lupaButton.setOnClickListener(v -> {
+            Intent intent = new Intent(PlantListActivity.this, DiarioActivity.class);
+            startActivity(intent);
+        });
+        macetaButton.setOnClickListener(v -> {
+            Intent intent = new Intent(PlantListActivity.this, JardinActivity.class);
+            startActivity(intent);
+        });
+        plantadexButton.setOnClickListener(v -> {
+            Intent intent = new Intent(PlantListActivity.this, PlantListActivity.class);
+            startActivity(intent);
+        });
+        usuarioButton.setOnClickListener(v -> {
+            Intent intent = new Intent(PlantListActivity.this, PerfilActivity.class);
+            startActivity(intent);
+        });//Listeners para los botones de la barra de navegacion inferior
 
         plantListRecyclerView = findViewById(R.id.plant_list_recyclerview);
         plantListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
