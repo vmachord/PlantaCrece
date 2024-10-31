@@ -1,14 +1,18 @@
 package com.pim.planta;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.ImageButton;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.os.Bundle;
+
+import com.pim.planta.models.Plant;
+import com.pim.planta.models.PlantAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.pim.planta.models.*;
 
 public class PlantListActivity extends AppCompatActivity {
 
@@ -20,7 +24,7 @@ public class PlantListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plantlist);
-
+        setupBottom();
         plantListRecyclerView = findViewById(R.id.plant_list_recyclerview);
         plantListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -34,5 +38,27 @@ public class PlantListActivity extends AppCompatActivity {
 
         plantAdapter = new PlantAdapter(plantList);
         plantListRecyclerView.setAdapter(plantAdapter);
+    }
+
+    public void setupBottom(){
+        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
+        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
+        imageButtonPlantadex.setEnabled(false); // Deshabilita el boton
+        imageButtonPlantadex.setImageAlpha(128); // Oscurece el boton
+        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
+
+        imageButtonLupa.setOnClickListener(v -> {
+            Intent intent = new Intent(PlantListActivity.this, DiarioActivity.class);
+            startActivity(intent);
+        });
+        imageButtonMaceta.setOnClickListener(view -> {
+            Intent intent = new Intent(PlantListActivity.this, JardinActivity.class);
+            startActivity(intent);
+        });
+        imageButtonUsuario.setOnClickListener(v -> {
+            Intent intent = new Intent(PlantListActivity.this, PerfilActivity.class);
+            startActivity(intent);
+        });
     }
 }

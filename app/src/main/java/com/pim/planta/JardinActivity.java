@@ -8,61 +8,29 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.Intent;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
 public class JardinActivity extends AppCompatActivity {
     private TextView textViewPlantoo;
+    public static int currentImageIndex = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plantoo);
-
-        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
-        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
-        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
-        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
-
-        imageButtonLupa.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, DiarioActivity.class);
-            startActivity(intent);
-        });
-
-        imageButtonPlantadex.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
-            startActivity(intent);
-        });
-
-        imageButtonUsuario.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
-            startActivity(intent);
-        });
-
+        setupBottom();
         textViewPlantoo = findViewById(R.id.textViewPlantoo);
-        Button botonMostrarListado = findViewById(R.id.button);
-
-        botonMostrarListado.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
+        ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
+        imageButtonOjo.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, InvernaderoActivity.class);
             startActivity(intent);
         });
-
-        Button botonMostrarPerfil = findViewById(R.id.button2);
-        botonMostrarPerfil.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
-            startActivity(intent);
-        });
-
         if (!hasUsageStatsPermission()) {
             Toast.makeText(this, "Por favor habilita el acceso a estadísticas de uso.", Toast.LENGTH_LONG).show();
             //Redirige al usuario a la configuración de Android para habilitar el acceso a las estadísticas de uso
@@ -70,6 +38,28 @@ public class JardinActivity extends AppCompatActivity {
         } else {
             trackAppUsage();
         }
+    }
+
+    public void setupBottom(){
+        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
+        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        imageButtonMaceta.setEnabled(false); // Deshabilita el boton
+        imageButtonMaceta.setImageAlpha(128); // Oscurece el boton
+        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
+        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
+
+        imageButtonLupa.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, DiarioActivity.class);
+            startActivity(intent);
+        });
+        imageButtonPlantadex.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
+            startActivity(intent);
+        });
+        imageButtonUsuario.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
+            startActivity(intent);
+        });
     }
 
     //Se llama cada vez que la actividad vuelve a ser visible
@@ -183,6 +173,7 @@ public class JardinActivity extends AppCompatActivity {
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
         ImageView imageView = findViewById(R.id.imageView);
         imageView.setImageResource(resID);
+        currentImageIndex = imageIndex;
     }
 
 
