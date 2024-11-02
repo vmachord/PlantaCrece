@@ -7,24 +7,50 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+
 public class DiarioActivity extends AppCompatActivity {
+
+    private int selectedColor = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_diary);  // Asegúrate de que este sea el nombre correcto del layout XML
         setupBottom();
-        // Configurar el CalendarView
+
+        setContentView(R.layout.activity_diary);
+
+        EditText inputText = findViewById(R.id.input_text);
         CalendarView calendarView = findViewById(R.id.calendar_view);
-        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
-            @Override
-            public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
-                // Muestra la fecha seleccionada en un Toast
-                String selectedDate = dayOfMonth + "/" + (month + 1) + "/" + year;
-                Toast.makeText(DiarioActivity.this, "Fecha seleccionada: " + selectedDate, Toast.LENGTH_SHORT).show();
-            }
+        EditText inputAnnotation = findViewById(R.id.input_annotation);
+        LinearLayout colorPicker = findViewById(R.id.color_picker);
+
+        // Al hacer clic en el cuadro de texto inicial, mostrar el calendario, selector de colores y barra de anotación
+        inputText.setOnClickListener(v -> {
+            calendarView.setVisibility(View.VISIBLE);
+            inputAnnotation.setVisibility(View.VISIBLE);
+            colorPicker.setVisibility(View.VISIBLE);
         });
+
+        // Capturar la fecha seleccionada en el calendario
+        calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+            String selectedDate = dayOfMonth + "/" + (month + 1) + "/" + year;
+            Toast.makeText(this, "Fecha seleccionada: " + selectedDate, Toast.LENGTH_SHORT).show();
+        });
+
+
+
+        // Selector de color
+        findViewById(R.id.color1).setOnClickListener(v -> selectedColor = 0xFFFF0000);
+        findViewById(R.id.color2).setOnClickListener(v -> selectedColor = 0xFF00FF00);
+        findViewById(R.id.color3).setOnClickListener(v -> selectedColor = 0xFF0000FF);
+        findViewById(R.id.color4).setOnClickListener(v -> selectedColor = 0xFFFFFF00);
+        findViewById(R.id.color5).setOnClickListener(v -> selectedColor = 0xFFFF00FF);
+
     }
+
 
     public void setupBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
@@ -46,5 +72,9 @@ public class DiarioActivity extends AppCompatActivity {
             Intent intent = new Intent(DiarioActivity.this, PerfilActivity.class);
             startActivity(intent);
         });
+    }
+
+    public void addEmotion(){
+
     }
 }

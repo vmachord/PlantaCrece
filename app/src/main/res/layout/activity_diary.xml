@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -8,10 +9,83 @@
         android:id="@+id/calendar_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Cuadro de texto inicial -->
+    <EditText
+        android:id="@+id/input_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:focusable="false"
+        android:hint="Toca para seleccionar fecha y color"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <EditText
+        android:id="@+id/input_annotation"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="Escribe aquí..."
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/calendar_view" />
+
+    <LinearLayout
+        android:id="@+id/color_picker"
+        android:layout_width="409dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_annotation">
+
+        <!-- 5 Opciones de color -->
+        <View
+            android:id="@+id/color1"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="#FF0000" /> <!-- Rojo -->
+
+        <View
+            android:id="@+id/color2"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="#00FF00" /> <!-- Verde -->
+
+        <View
+            android:id="@+id/color3"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="#0000FF" /> <!-- Azul -->
+
+        <View
+            android:id="@+id/color4"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="#FFFF00" /> <!-- Amarillo -->
+
+        <View
+            android:id="@+id/color5"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="#FF00FF" /> <!-- Morado -->
+    </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="0dp"
@@ -29,9 +103,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="desc_search_button"
             android:scaleType="centerInside"
-            android:src="@drawable/boton_lupa"
-            android:contentDescription="desc_search_button"/>
+            android:src="@drawable/boton_lupa" />
 
         <ImageButton
             android:id="@+id/imageButtonMaceta"
@@ -39,10 +113,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:scaleType="centerInside"
-            android:src="@drawable/boton_maceta"
             android:contentDescription="desc_pot_button"
-            />
+            android:scaleType="centerInside"
+            android:src="@drawable/boton_maceta" />
 
         <ImageButton
             android:id="@+id/imageButtonPlantadex"
@@ -50,9 +123,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="desc_plantadex_button"
             android:scaleType="centerInside"
-            android:src="@drawable/boton_plantadex"
-            android:contentDescription="desc_plantadex_button" />
+            android:src="@drawable/boton_plantadex" />
 
         <ImageButton
             android:id="@+id/imageButtonUsuario"
@@ -60,12 +133,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="desc_user_button"
             android:scaleType="centerInside"
-            android:src="@drawable/boton_usuario"
-            android:contentDescription="desc_user_button"/>
-
+            android:src="@drawable/boton_usuario" />
     </LinearLayout>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
