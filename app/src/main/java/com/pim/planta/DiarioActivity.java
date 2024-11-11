@@ -11,33 +11,37 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.pim.planta.models.Calendar;
+import com.pim.planta.models.CalendarDraw;
+
+import java.util.Date;
+
 public class DiarioActivity extends AppCompatActivity {
 
     private int selectedColor = 0;
 
+    private Calendar calendar;
+
+    private CalendarDraw calendarDraw;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_diary);
         setupBottom();
 
-        setContentView(R.layout.activity_diary);
+        calendarDraw = findViewById(R.id.calendar_draw);
+        calendarDraw.setVisibility(View.VISIBLE);
+
 
         EditText inputText = findViewById(R.id.input_text);
-        CalendarView calendarView = findViewById(R.id.calendar_view);
         EditText inputAnnotation = findViewById(R.id.input_annotation);
         LinearLayout colorPicker = findViewById(R.id.color_picker);
 
         // Al hacer clic en el cuadro de texto inicial, mostrar el calendario, selector de colores y barra de anotación
         inputText.setOnClickListener(v -> {
-            calendarView.setVisibility(View.VISIBLE);
             inputAnnotation.setVisibility(View.VISIBLE);
             colorPicker.setVisibility(View.VISIBLE);
-        });
-
-        // Capturar la fecha seleccionada en el calendario
-        calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
-            String selectedDate = dayOfMonth + "/" + (month + 1) + "/" + year;
-            Toast.makeText(this, "Fecha seleccionada: " + selectedDate, Toast.LENGTH_SHORT).show();
         });
 
 
