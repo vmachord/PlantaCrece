@@ -2,7 +2,15 @@ package com.pim.planta.models;
 
 import java.util.Date;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "calendario")
 public class Calendar {
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
     private Date[] fechas;          // Almacena las fechas
     private String[] anotaciones;    // Almacena anotaciones para cada fecha
     private int emociones;           // Almacena emociones asociadas a la clase, puedes usar otro tipo o estructura si lo necesitas
