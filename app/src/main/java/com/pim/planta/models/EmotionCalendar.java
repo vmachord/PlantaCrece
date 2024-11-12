@@ -1,20 +1,28 @@
 package com.pim.planta.models;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Calendar {
-    private Date[] fechas;          // Almacena las fechas
-    private String[] anotaciones;    // Almacena anotaciones para cada fecha
-    private int emociones;           // Almacena emociones asociadas a la clase, puedes usar otro tipo o estructura si lo necesitas
+public class EmotionCalendar {
+    private Date[] fechas;
+    private String[] anotaciones;
+    private Map<Integer, Integer> emociones;
 
-    // Constructor para inicializar el calendario con fechas, anotaciones y emociones
-    public Calendar(Date[] fechas, String[] anotaciones, int emociones) {
+    public EmotionCalendar(Date[] fechas, String[] anotaciones) {
         this.fechas = fechas;
         this.anotaciones = anotaciones;
-        this.emociones = emociones;
+        this.emociones = new HashMap<>();
     }
 
-    // Getters y setters para cada propiedad
+    public void setEmocion(int day, int emotion) {
+        emociones.put(day, emotion);
+    }
+
+    public int getEmocion(int day) {
+        return emociones.getOrDefault(day, 0);
+    }
+
     public Date[] getFechas() {
         return fechas;
     }
@@ -31,15 +39,6 @@ public class Calendar {
         this.anotaciones = anotaciones;
     }
 
-    public int getEmociones() {
-        return emociones;
-    }
-
-    public void setEmociones(int emociones) {
-        this.emociones = emociones;
-    }
-
-    // Método para añadir una anotación a una fecha específica
     public void agregarAnotacion(Date fecha, String anotacion) {
         for (int i = 0; i < fechas.length; i++) {
             if (fechas[i].equals(fecha)) {
@@ -49,14 +48,12 @@ public class Calendar {
         }
     }
 
-    // Método para obtener anotación de una fecha específica
     public String obtenerAnotacion(Date fecha) {
         for (int i = 0; i < fechas.length; i++) {
             if (fechas[i].equals(fecha)) {
                 return anotaciones[i];
             }
         }
-        return null; // Si no se encuentra la fecha
+        return null;
     }
 }
-

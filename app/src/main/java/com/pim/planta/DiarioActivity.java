@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import com.pim.planta.models.Calendar;
+import com.pim.planta.models.EmotionCalendar;
 import com.pim.planta.models.CalendarDraw;
 
 import java.util.Date;
@@ -20,7 +20,7 @@ public class DiarioActivity extends AppCompatActivity {
 
     private int selectedColor = 0;
 
-    private Calendar calendar;
+    private EmotionCalendar calendar;
 
     private CalendarDraw calendarDraw;
 
