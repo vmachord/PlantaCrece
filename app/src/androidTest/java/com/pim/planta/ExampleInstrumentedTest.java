@@ -97,4 +97,24 @@ public class ExampleInstrumentedTest {
                     .check(matches(isDisplayed()));
         }
     }
+
+    @Test
+    public void invernaderoTest() {
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        assertEquals("com.pim.planta", appContext.getPackageName());
+        try (ActivityScenario<LoginActivity> adminActivityScenario = ActivityScenario.launch(LoginActivity.class)) {
+            onView(withId(R.id.editTextEmail))
+                    .perform(ViewActions.typeText("admin@gmail.com"));
+            onView(withId(R.id.editTextPassword))
+                    .perform(ViewActions.typeText("1234"), ViewActions.closeSoftKeyboard());
+            onView(withId(R.id.buttonLogin))
+                    .perform(ViewActions.click());
+        }
+        try (ActivityScenario<PlantListActivity> adminActivityScenario = ActivityScenario.launch(PlantListActivity.class)) {
+            onView(withId(R.id.imageButtonOjo))
+                    .perform(ViewActions.click());
+            onView(withId(R.id.invernadero_image))
+                    .check(matches(isDisplayed()));
+        }
+    }
 }
