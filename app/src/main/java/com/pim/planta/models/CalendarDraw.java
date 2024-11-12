@@ -1,5 +1,6 @@
 package com.pim.planta.models;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -7,14 +8,18 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
 import java.util.Calendar;
+import java.util.HashMap;
 
 public class CalendarDraw extends View {
 
-    private Paint dayPaint, headerPaint, backGroundPaint, Emotion_1_Paint, Emotion_2_Paint, Emotion_3_Paint, Emotion_4_Paint, Emotion_5_Paint;
+    private Paint dayPaint, headerPaint, backGroundPaint, emotionPaint;
     private int currentMonth, currentYear;
     private Calendar calendar;
-
+    private HashMap<Integer, String> dayEmotions; // Para almacenar emociones/anotaciones por día
 
     public CalendarDraw(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -25,8 +30,8 @@ public class CalendarDraw extends View {
         calendar = Calendar.getInstance();
         currentMonth = calendar.get(Calendar.MONTH);
         currentYear = calendar.get(Calendar.YEAR);
+        dayEmotions = new HashMap<>();
 
-        // Inicializar los Paints
         dayPaint = new Paint();
         dayPaint.setColor(Color.BLACK);
         dayPaint.setTextSize(30);
@@ -41,14 +46,9 @@ public class CalendarDraw extends View {
         backGroundPaint.setColor(Color.WHITE);
         backGroundPaint.setStyle(Paint.Style.FILL);
 
-        Emotion_1_Paint = new Paint();
-        Emotion_1_Paint.setColor(Color.RED);
-        Emotion_1_Paint.setStyle(Paint.Style.FILL);
-
-        Emotion_2_Paint = new Paint();
-        Emotion_3_Paint = new Paint();
-        Emotion_4_Paint = new Paint();
-        Emotion_5_Paint = new Paint();
+        emotionPaint = new Paint();
+        emotionPaint.setColor(Color.RED);
+        emotionPaint.setStyle(Paint.Style.FILL);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class CalendarDraw extends View {
 
         // Dibuja el encabezado del mes
         String monthYearText = String.format("%tB %d", calendar, currentYear);
-        canvas.drawRect(0,0,getWidth(),getHeight(),backGroundPaint);
+        canvas.drawRect(0, 0, getWidth(), getHeight(), backGroundPaint);
         canvas.drawText(monthYearText, getWidth() / 2, 60, headerPaint);
 
         // Dibuja las flechas de cambio de mes
@@ -72,15 +72,26 @@ public class CalendarDraw extends View {
         int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 
         int dayWidth = getWidth() / 7;
-        int dayHeight = getHeight() / 6;
+        int dayHeight = (getHeight() - 100) / 6;
 
         for (int day = 1; day <= daysInMonth; day++) {
             int column = (startDay + day - 1) % 7;
             int row = (startDay + day - 1) / 7;
             float x = column * dayWidth + dayWidth / 2;
             float y = row * dayHeight + dayHeight / 2 + 100;
-            canvas.drawCircle(x, y, (dayWidth/2), Emotion_1_Paint);
-            canvas.drawText(String.valueOf(day), x, y, dayPaint);
+
+            // Dibujar círculo de fondo para el día
+            canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
+
+            // Mostrar el número del día
+            canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
+
+            // Si hay una emoción asociada al día, cambiar el color
+            if (dayEmotions.containsKey(day)) {
+                dayPaint.setColor(Color.GREEN); // Cambia el color para días con emoción
+                canvas.drawText(dayEmotions.get(day), x, y + 10, dayPaint); // Muestra la emoción
+                dayPaint.setColor(Color.BLACK); // Resetea el color para el próximo día
+            }
         }
     }
 
@@ -90,62 +101,54 @@ public class CalendarDraw extends View {
             float x = event.getX();
             float y = event.getY();
 
-            // Centros de los botones
-            float centerX1 = getWidth() / 5;
-            float centerX2 = 4 * getWidth() / 5;
-            float centerY = 60;
+            // Detecta el clic en el calendario
+            int dayWidth = getWidth() / 7;
+            int dayHeight = (getHeight() - 100) / 6;
+            int startY = 100;
 
-            // Define el radio de área alrededor del botón donde se detecta el toque
-            float radius = 50; // Puedes ajustar este valor
+            int column = (int) (x / dayWidth);
+            int row = (int) ((y - startY) / dayHeight);
+            int dayClicked = row * 7 + column + 1 - (calendar.get(Calendar.DAY_OF_WEEK) - 1);
 
-            // Detectar el toque para cambiar de mes
-            if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
-                prevMonth();
-                System.out.println("hoal");
-            } else if (Math.pow(x - centerX2, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
-                nextMonth();
-            } else {
-                // Dimensiones de la cuadrícula del calendario
-                int calendarStartX = 0;
-                int calendarStartY = getHeight() / 5; // Ajustar si es necesario
-                int dayWidth = getWidth() / 7;
-                int dayHeight = (getHeight() - calendarStartY) / 6;
-
-                // Calcular la fila y columna seleccionada
-                int col = (int) ((x - calendarStartX) / dayWidth);
-                int row = (int) ((y - calendarStartY) / dayHeight);
-
-                // Obtener el número de días en el mes actual
-                Calendar calendar = Calendar.getInstance();
-                int currentYear = calendar.get(Calendar.YEAR);
-                int currentMonth = calendar.get(Calendar.MONTH);
-                calendar.set(currentYear, currentMonth, 1);
-                int daysInCurrentMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-
-                // Ignorar clics fuera del área de los días
-                if (col >= 0 && col < 7 && row >= 0 && row < 6) {
-                    int dayClicked = row * 7 + col + 1; // Día relativo en la cuadrícula
-
-                    // Validar que esté dentro del mes actual
-                    if (dayClicked > 0 && dayClicked <= daysInCurrentMonth) {
-                        System.out.println("Día seleccionado: " + dayClicked);
-                    }
-                }
+            if (dayClicked > 0 && dayClicked <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+                showEmotionDialog(dayClicked);
             }
+
             performClick();
             return true;
         }
         return super.onTouchEvent(event);
     }
 
-    @Override
-    public boolean performClick() {
-        // Llama a la superclase para manejar el clic
-        super.performClick();
-        // Aquí puedes añadir lógica adicional si es necesario
-        return true;
+    private void showEmotionDialog(int day) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Seleccione una emoción para el día " + day);
+
+        // Caja de texto para la anotación
+        final EditText input = new EditText(getContext());
+        builder.setView(input);
+
+        // Opciones de emociones (ejemplo)
+        String[] emotions = {"Feliz", "Triste", "Ansioso", "Contento", "Estresado"};
+        builder.setItems(emotions, (dialog, which) -> {
+            String emotion = emotions[which];
+            String annotation = input.getText().toString();
+
+            // Almacena la emoción y la anotación
+            dayEmotions.put(day, emotion + ": " + annotation);
+            invalidate(); // Redibuja el calendario para mostrar la emoción
+            Toast.makeText(getContext(), "Emoción añadida para el día " + day, Toast.LENGTH_SHORT).show();
+        });
+
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
+        builder.show();
     }
 
+    @Override
+    public boolean performClick() {
+        super.performClick();
+        return true;
+    }
 
     private void prevMonth() {
         currentMonth--;
@@ -153,6 +156,8 @@ public class CalendarDraw extends View {
             currentMonth = 11;
             currentYear--;
         }
+        calendar.set(Calendar.MONTH, currentMonth);
+        calendar.set(Calendar.YEAR, currentYear);
         invalidate();
     }
 
@@ -162,6 +167,8 @@ public class CalendarDraw extends View {
             currentMonth = 0;
             currentYear++;
         }
+        calendar.set(Calendar.MONTH, currentMonth);
+        calendar.set(Calendar.YEAR, currentYear);
         invalidate();
     }
 }
