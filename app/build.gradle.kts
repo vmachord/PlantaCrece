@@ -37,6 +37,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.room.common)
+    implementation(libs.room.common.jvm)
     testImplementation(libs.junit)
     testImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
