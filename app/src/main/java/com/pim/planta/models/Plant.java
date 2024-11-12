@@ -1,6 +1,13 @@
 package com.pim.planta.models;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "plants")
 public class Plant {
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
     private String name;
     private int imageResourceId;
     private String xp; //opcional
