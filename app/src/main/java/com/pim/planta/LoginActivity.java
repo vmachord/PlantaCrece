@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +20,14 @@ public class LoginActivity extends AppCompatActivity {
         EditText username = findViewById(R.id.editTextEmail);
         EditText password = findViewById(R.id.editTextPassword);
         Button loginButton = findViewById(R.id.buttonLogin);
-
+        TextView registerText = findViewById(R.id.textViewRegIni);
+        registerText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
         // Configurar la lógica del botón de login
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
