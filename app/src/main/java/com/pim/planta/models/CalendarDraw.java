@@ -60,6 +60,10 @@ public class CalendarDraw extends View {
         canvas.drawRect(0,0,getWidth(),getHeight(),backGroundPaint);
         canvas.drawText(monthYearText, getWidth() / 2, 60, headerPaint);
 
+        // Dibuja las flechas de cambio de mes
+        canvas.drawText("<", getWidth() / 5, 60, headerPaint);
+        canvas.drawText(">", 4 * getWidth() / 5, 60, headerPaint);
+
         // Dibuja los días
         calendar.set(Calendar.MONTH, currentMonth);
         calendar.set(Calendar.YEAR, currentYear);
@@ -85,12 +89,20 @@ public class CalendarDraw extends View {
         if (event.getAction() == MotionEvent.ACTION_UP) {
             float x = event.getX();
             float y = event.getY();
-            int buttonWidth = getWidth() / 3;
+
+            // Centros de los botones
+            float centerX1 = getWidth() / 5;
+            float centerX2 = 4 * getWidth() / 5;
+            float centerY = 60;
+
+            // Define el radio de área alrededor del botón donde se detecta el toque
+            float radius = 50; // Puedes ajustar este valor
 
             // Detectar el toque para cambiar de mes
-            if (x < buttonWidth) {
+            if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
                 prevMonth();
-            } else if (x > 2 * buttonWidth) {
+                System.out.println("hoal");
+            } else if (Math.pow(x - centerX2, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
                 nextMonth();
             } else {
                 // Dimensiones de la cuadrícula del calendario
