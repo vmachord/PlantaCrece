@@ -101,17 +101,37 @@ public class CalendarDraw extends View {
             float x = event.getX();
             float y = event.getY();
 
-            // Detecta el clic en el calendario
+            // Coordenadas y área de las flechas de cambio de mes
+            float centerX1 = getWidth() / 5;
+            float centerX2 = 4 * getWidth() / 5;
+            float centerY = 60;
+            float radius = 50; // Ajustar si es necesario
+
+            // Detectar el toque para cambiar de mes
+            if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
+                prevMonth();
+                return true; // Retornar true para evitar que se continúe procesando el toque
+            } else if (Math.pow(x - centerX2, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
+                nextMonth();
+                return true; // Retornar true para evitar que se continúe procesando el toque
+            }
+
+            // Si el toque no fue en las flechas, entonces verifica el toque en los días
+            int calendarStartY = getHeight() / 5; // Ajustar si es necesario
             int dayWidth = getWidth() / 7;
-            int dayHeight = (getHeight() - 100) / 6;
-            int startY = 100;
+            int dayHeight = (getHeight() - calendarStartY) / 6;
+            calendar.set(Calendar.DAY_OF_MONTH, 1);
+            int startDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+            // Calcular la fila y columna seleccionada
+            int col = (int) (x / dayWidth);
+            int row = (int) ((y - calendarStartY) / dayHeight);
 
-            int column = (int) (x / dayWidth);
-            int row = (int) ((y - startY) / dayHeight);
-            int dayClicked = row * 7 + column + 1 - (calendar.get(Calendar.DAY_OF_WEEK) - 1);
+            if (col >= 0 && col < 7 && row >= 0 && row < 6) {
+                int dayClicked = row * 7 + col + 1 - startDay;
 
-            if (dayClicked > 0 && dayClicked <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
-                showEmotionDialog(dayClicked);
+                if (dayClicked > 0 && dayClicked <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+                    showEmotionDialog(dayClicked);
+                }
             }
 
             performClick();
@@ -119,6 +139,7 @@ public class CalendarDraw extends View {
         }
         return super.onTouchEvent(event);
     }
+
 
     private void showEmotionDialog(int day) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
