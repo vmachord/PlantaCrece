@@ -114,21 +114,6 @@ public class CalendarDraw extends View {
                 showEmotionDialog(dayClicked);
             }
 
-            // Centros de los botones
-            float centerX1 = getWidth() / 5;
-            float centerX2 = 4 * getWidth() / 5;
-            float centerY = 60;
-
-            // Define el radio de área alrededor del botón donde se detecta el toque
-            float radius = 50; // Puedes ajustar este valor
-
-            // Detectar el toque para cambiar de mes
-            if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
-                prevMonth();
-            } else if (Math.pow(x - centerX2, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
-                nextMonth();
-            }
-
             performClick();
             return true;
         }
