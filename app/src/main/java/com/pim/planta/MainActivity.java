@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
             // Crear la base de datos y agregar un usuario en SQLite
             DatabaseHelper dbHelper = new DatabaseHelper(this);
             dbHelper.getWritableDatabase();  // Crea la base de datos si no existe
-            dbHelper.agregarUsuario("Juan", "juan@example.com");
 
             // Agregar una planta usando Room (hilo de fondo)
             new Thread(() -> {
@@ -71,19 +70,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        try {
-            SQLite.createContainer();
-            // Crear instancia de la clase helper
-            DatabaseHelper dbHelper = new DatabaseHelper(this);
-
-            // Abrir la base de datos (esto creará la base de datos si no existe)
-            dbHelper.getWritableDatabase();
-            dbHelper.agregarUsuario("Juan", "juan@example.com");
-
-        } catch (Exception e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
 
     }
 }

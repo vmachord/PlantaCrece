@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,10 +18,20 @@ import java.util.HashMap;
 
 public class CalendarDraw extends View {
 
-    private Paint dayPaint, headerPaint, backGroundPaint, emotionPaint;
+    private Paint dayPaint, headerPaint, backGroundPaint, defaultPaint;
     private int currentMonth, currentYear;
     private Calendar calendar;
-    private HashMap<Integer, String> dayEmotions; // Para almacenar emociones/anotaciones por día
+    private HashMap<Integer, String> dayEmotions; // Para almacenar emociones por día
+    private HashMap<Integer, String> dayAnnotations; // Para almacenar anotaciones por día
+
+    // Colores para emociones
+    private final HashMap<String, Integer> emotionColors = new HashMap<String, Integer>() {{
+        put("Feliz", Color.YELLOW);
+        put("Triste", Color.BLUE);
+        put("Ansioso", Color.RED);
+        put("Contento", Color.GREEN);
+        put("Estresado", Color.MAGENTA);
+    }};
 
     public CalendarDraw(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -31,24 +43,29 @@ public class CalendarDraw extends View {
         currentMonth = calendar.get(Calendar.MONTH);
         currentYear = calendar.get(Calendar.YEAR);
         dayEmotions = new HashMap<>();
+        dayAnnotations = new HashMap<>();
 
+        // Paint para días
         dayPaint = new Paint();
         dayPaint.setColor(Color.BLACK);
         dayPaint.setTextSize(30);
         dayPaint.setTextAlign(Paint.Align.CENTER);
 
+        // Paint para encabezado
         headerPaint = new Paint();
         headerPaint.setColor(Color.BLUE);
         headerPaint.setTextSize(40);
         headerPaint.setTextAlign(Paint.Align.CENTER);
 
+        // Paint para fondo
         backGroundPaint = new Paint();
         backGroundPaint.setColor(Color.WHITE);
         backGroundPaint.setStyle(Paint.Style.FILL);
 
-        emotionPaint = new Paint();
-        emotionPaint.setColor(Color.RED);
-        emotionPaint.setStyle(Paint.Style.FILL);
+        // Paint predeterminado para días sin emoción
+        defaultPaint = new Paint();
+        defaultPaint.setColor(Color.LTGRAY); // Fondo gris predeterminado
+        defaultPaint.setStyle(Paint.Style.FILL);
     }
 
     @Override
@@ -80,18 +97,20 @@ public class CalendarDraw extends View {
             float x = column * dayWidth + dayWidth / 2;
             float y = row * dayHeight + dayHeight / 2 + 100;
 
-            // Dibujar círculo de fondo para el día
-            canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
+            // Establecer el color de fondo según la emoción
+            String emotion = dayEmotions.get(day);
+            Paint paintToUse = defaultPaint; // Color predeterminado gris
+            if (emotion != null && emotionColors.containsKey(emotion)) {
+                paintToUse = new Paint();
+                paintToUse.setColor(emotionColors.get(emotion));
+                paintToUse.setStyle(Paint.Style.FILL);
+            }
+
+            // Dibujar fondo del día
+            canvas.drawCircle(x, y, dayWidth / 3, paintToUse);
 
             // Mostrar el número del día
             canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
-
-            // Si hay una emoción asociada al día, cambiar el color
-            if (dayEmotions.containsKey(day)) {
-                dayPaint.setColor(Color.GREEN); // Cambia el color para días con emoción
-                canvas.drawText(dayEmotions.get(day), x, y + 10, dayPaint); // Muestra la emoción
-                dayPaint.setColor(Color.BLACK); // Resetea el color para el próximo día
-            }
         }
     }
 
@@ -105,24 +124,24 @@ public class CalendarDraw extends View {
             float centerX1 = getWidth() / 5;
             float centerX2 = 4 * getWidth() / 5;
             float centerY = 60;
-            float radius = 50; // Ajustar si es necesario
+            float radius = 50;
 
             // Detectar el toque para cambiar de mes
             if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
                 prevMonth();
-                return true; // Retornar true para evitar que se continúe procesando el toque
+                return true;
             } else if (Math.pow(x - centerX2, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
                 nextMonth();
-                return true; // Retornar true para evitar que se continúe procesando el toque
+                return true;
             }
 
-            // Si el toque no fue en las flechas, entonces verifica el toque en los días
-            int calendarStartY = getHeight() / 5; // Ajustar si es necesario
+            // Detectar el toque en los días del calendario
+            int calendarStartY = getHeight() / 5;
             int dayWidth = getWidth() / 7;
             int dayHeight = (getHeight() - calendarStartY) / 6;
             calendar.set(Calendar.DAY_OF_MONTH, 1);
             int startDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-            // Calcular la fila y columna seleccionada
+
             int col = (int) (x / dayWidth);
             int row = (int) ((y - calendarStartY) / dayHeight);
 
@@ -140,25 +159,33 @@ public class CalendarDraw extends View {
         return super.onTouchEvent(event);
     }
 
-
     private void showEmotionDialog(int day) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Seleccione una emoción para el día " + day);
 
-        // Caja de texto para la anotación
+        // Caja de texto para anotación
         final EditText input = new EditText(getContext());
         builder.setView(input);
 
-        // Opciones de emociones (ejemplo)
+        // Opciones de emociones con colores
         String[] emotions = {"Feliz", "Triste", "Ansioso", "Contento", "Estresado"};
-        builder.setItems(emotions, (dialog, which) -> {
+        SpannableString[] emotionOptions = new SpannableString[emotions.length];
+        for (int i = 0; i < emotions.length; i++) {
+            SpannableString option = new SpannableString(emotions[i]);
+            option.setSpan(new ForegroundColorSpan(emotionColors.get(emotions[i])), 0, option.length(), 0);
+            emotionOptions[i] = option;
+        }
+
+        builder.setItems(emotionOptions, (dialog, which) -> {
             String emotion = emotions[which];
             String annotation = input.getText().toString();
 
-            // Almacena la emoción y la anotación
-            dayEmotions.put(day, emotion + ": " + annotation);
-            invalidate(); // Redibuja el calendario para mostrar la emoción
-            Toast.makeText(getContext(), "Emoción añadida para el día " + day, Toast.LENGTH_SHORT).show();
+            // Almacena emoción y anotación
+            dayEmotions.put(day, emotion);
+            dayAnnotations.put(day, annotation);
+
+            invalidate(); // Redibuja el calendario para mostrar cambios
+            Toast.makeText(getContext(), "Emoción y anotación guardadas para el día " + day, Toast.LENGTH_SHORT).show();
         });
 
         builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
