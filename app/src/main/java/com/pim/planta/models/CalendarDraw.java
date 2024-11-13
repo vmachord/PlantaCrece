@@ -18,11 +18,12 @@ import java.util.HashMap;
 
 public class CalendarDraw extends View {
 
-    private Paint dayPaint, headerPaint, backGroundPaint, defaultPaint;
+    private Paint dayPaint, headerPaint, backGroundPaint, emotionPaint;
     private int currentMonth, currentYear;
     private Calendar calendar;
     private HashMap<Integer, String> dayEmotions; // Para almacenar emociones por día
     private HashMap<Integer, String> dayAnnotations; // Para almacenar anotaciones por día
+    private HashMap<Integer, Integer> dayBackgroundColors; // Para almacenar el color de fondo de cada día según la emoción
 
     // Colores para emociones
     private final HashMap<String, Integer> emotionColors = new HashMap<String, Integer>() {{
@@ -43,29 +44,24 @@ public class CalendarDraw extends View {
         currentMonth = calendar.get(Calendar.MONTH);
         currentYear = calendar.get(Calendar.YEAR);
         dayEmotions = new HashMap<>();
-        dayAnnotations = new HashMap<>();
+        dayBackgroundColors = new HashMap<>();
 
-        // Paint para días
         dayPaint = new Paint();
         dayPaint.setColor(Color.BLACK);
         dayPaint.setTextSize(30);
         dayPaint.setTextAlign(Paint.Align.CENTER);
 
-        // Paint para encabezado
         headerPaint = new Paint();
         headerPaint.setColor(Color.BLUE);
         headerPaint.setTextSize(40);
         headerPaint.setTextAlign(Paint.Align.CENTER);
 
-        // Paint para fondo
         backGroundPaint = new Paint();
-        backGroundPaint.setColor(Color.WHITE);
+        backGroundPaint.setColor(Color.WHITE); // Color gris predeterminado para días sin emoción
         backGroundPaint.setStyle(Paint.Style.FILL);
 
-        // Paint predeterminado para días sin emoción
-        defaultPaint = new Paint();
-        defaultPaint.setColor(Color.LTGRAY); // Fondo gris predeterminado
-        defaultPaint.setStyle(Paint.Style.FILL);
+        emotionPaint = new Paint();
+        emotionPaint.setStyle(Paint.Style.FILL);
     }
 
     @Override
@@ -81,7 +77,7 @@ public class CalendarDraw extends View {
         canvas.drawText("<", getWidth() / 5, 60, headerPaint);
         canvas.drawText(">", 4 * getWidth() / 5, 60, headerPaint);
 
-        // Dibuja los días
+        // Dibuja los días del mes
         calendar.set(Calendar.MONTH, currentMonth);
         calendar.set(Calendar.YEAR, currentYear);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -97,17 +93,15 @@ public class CalendarDraw extends View {
             float x = column * dayWidth + dayWidth / 2;
             float y = row * dayHeight + dayHeight / 2 + 100;
 
-            // Establecer el color de fondo según la emoción
-            String emotion = dayEmotions.get(day);
-            Paint paintToUse = defaultPaint; // Color predeterminado gris
-            if (emotion != null && emotionColors.containsKey(emotion)) {
-                paintToUse = new Paint();
-                paintToUse.setColor(emotionColors.get(emotion));
-                paintToUse.setStyle(Paint.Style.FILL);
+            // Obtener el color según la emoción almacenada para el día, o usar gris predeterminado
+            if (dayBackgroundColors.containsKey(day)) {
+                emotionPaint.setColor(dayBackgroundColors.get(day));
+            } else {
+                emotionPaint.setColor(Color.WHITE);
             }
 
-            // Dibujar fondo del día
-            canvas.drawCircle(x, y, dayWidth / 3, paintToUse);
+            // Dibujar círculo de fondo para el día
+            canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
 
             // Mostrar el número del día
             canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
@@ -170,22 +164,30 @@ public class CalendarDraw extends View {
 
         // Opciones de emociones con colores
         String[] emotions = {"Feliz", "Triste", "Ansioso", "Contento", "Estresado"};
-        final String[] selectedEmotion = new String[1];
+        final String[] selectedEmotion = new String[1]; // Almacena la emoción seleccionada
 
-
-        builder.setSingleChoiceItems(emotions, -1, (dialog, which) -> selectedEmotion[0] = emotions[which]);
+        builder.setSingleChoiceItems(emotions, -1, (dialog, which) -> {
+            selectedEmotion[0] = emotions[which];
+        });
 
         builder.setPositiveButton("Aceptar", (dialog, which) -> {
             if (selectedEmotion[0] != null) {
                 String annotation = input.getText().toString();
                 dayEmotions.put(day, selectedEmotion[0] + ": " + annotation);
-                invalidate();
+
+                // Asigna el color según la emoción seleccionada
+                dayBackgroundColors.put(day, emotionColors.get(selectedEmotion[0]));
+                invalidate(); // Redibuja el calendario para mostrar el color
+
                 Toast.makeText(getContext(), "Emoción y anotación guardadas para el día " + day, Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getContext(), "Seleccione una emoción antes de guardar", Toast.LENGTH_SHORT).show();
             }
         });
 
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
+
+        // Opciones de emociones con color
         SpannableString[] emotionOptions = new SpannableString[emotions.length];
         for (int i = 0; i < emotions.length; i++) {
             SpannableString option = new SpannableString(emotions[i]);
@@ -193,19 +195,6 @@ public class CalendarDraw extends View {
             emotionOptions[i] = option;
         }
 
-        builder.setItems(emotionOptions, (dialog, which) -> {
-            String emotion = emotions[which];
-            String annotation = input.getText().toString();
-
-            // Almacena emoción y anotación
-            dayEmotions.put(day, emotion);
-            dayAnnotations.put(day, annotation);
-
-            invalidate(); // Redibuja el calendario para mostrar cambios
-            Toast.makeText(getContext(), "Emoción y anotación guardadas para el día " + day, Toast.LENGTH_SHORT).show();
-        });
-
-        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
         builder.show();
     }
 
