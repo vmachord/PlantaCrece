@@ -2,25 +2,20 @@ package com.pim.planta;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.CalendarView;
 import android.widget.ImageButton;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 
-import com.pim.planta.models.EmotionCalendar;
+import com.pim.planta.models.Calendar;
 import com.pim.planta.models.CalendarDraw;
-
-import java.util.Date;
 
 public class DiarioActivity extends AppCompatActivity {
 
     private int selectedColor = 0;
 
-    private EmotionCalendar calendar;
+    private Calendar calendar;
 
     private CalendarDraw calendarDraw;
 
@@ -32,19 +27,6 @@ public class DiarioActivity extends AppCompatActivity {
 
         calendarDraw = findViewById(R.id.calendar_draw);
         calendarDraw.setVisibility(View.VISIBLE);
-
-
-        EditText inputText = findViewById(R.id.input_text);
-        EditText inputAnnotation = findViewById(R.id.input_annotation);
-        LinearLayout colorPicker = findViewById(R.id.color_picker);
-
-        // Al hacer clic en el cuadro de texto inicial, mostrar el calendario, selector de colores y barra de anotación
-        inputText.setOnClickListener(v -> {
-            inputAnnotation.setVisibility(View.VISIBLE);
-            colorPicker.setVisibility(View.VISIBLE);
-        });
-
-
 
         // Selector de color
         findViewById(R.id.color1).setOnClickListener(v -> selectedColor = 0xFFFF0000);

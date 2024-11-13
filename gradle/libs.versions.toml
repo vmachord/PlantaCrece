@@ -11,6 +11,7 @@ constraintlayout = "2.1.4"
 mpandroidchart = "v3.1.0"
 roomCommon = "2.6.1"
 roomCommonJvm = "2.7.0-alpha11"
+roomRuntimeAndroid = "2.7.0-alpha11"
 
 
 [libraries]
@@ -24,6 +25,7 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
+room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomRuntimeAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
