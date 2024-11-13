@@ -165,10 +165,27 @@ public class CalendarDraw extends View {
 
         // Caja de texto para anotación
         final EditText input = new EditText(getContext());
+        input.setHint("Escriba una anotación");
         builder.setView(input);
 
         // Opciones de emociones con colores
         String[] emotions = {"Feliz", "Triste", "Ansioso", "Contento", "Estresado"};
+        final String[] selectedEmotion = new String[1];
+
+
+        builder.setSingleChoiceItems(emotions, -1, (dialog, which) -> selectedEmotion[0] = emotions[which]);
+
+        builder.setPositiveButton("Aceptar", (dialog, which) -> {
+            if (selectedEmotion[0] != null) {
+                String annotation = input.getText().toString();
+                dayEmotions.put(day, selectedEmotion[0] + ": " + annotation);
+                invalidate();
+                Toast.makeText(getContext(), "Emoción y anotación guardadas para el día " + day, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Seleccione una emoción antes de guardar", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         SpannableString[] emotionOptions = new SpannableString[emotions.length];
         for (int i = 0; i < emotions.length; i++) {
             SpannableString option = new SpannableString(emotions[i]);
