@@ -21,9 +21,9 @@ public class CalendarDraw extends View {
     private Paint dayPaint, headerPaint, backGroundPaint, emotionPaint;
     private int currentMonth, currentYear;
     private Calendar calendar;
-    private HashMap<Integer, String> dayEmotions; // Para almacenar emociones por día
-    private HashMap<Integer, String> dayAnnotations; // Para almacenar anotaciones por día
-    private HashMap<Integer, Integer> dayBackgroundColors; // Para almacenar el color de fondo de cada día según la emoción
+    private HashMap<String, String> dayEmotions; // Emociones almacenadas por año-mes-día
+    private HashMap<String, String> dayAnnotations; // Anotaciones almacenadas por año-mes-día
+    private HashMap<String, Integer> dayBackgroundColors; // Color de fondo por año-mes-día
 
     // Colores para emociones
     private final HashMap<String, Integer> emotionColors = new HashMap<String, Integer>() {{
@@ -44,6 +44,7 @@ public class CalendarDraw extends View {
         currentMonth = calendar.get(Calendar.MONTH);
         currentYear = calendar.get(Calendar.YEAR);
         dayEmotions = new HashMap<>();
+        dayAnnotations = new HashMap<>();
         dayBackgroundColors = new HashMap<>();
 
         dayPaint = new Paint();
@@ -57,7 +58,7 @@ public class CalendarDraw extends View {
         headerPaint.setTextAlign(Paint.Align.CENTER);
 
         backGroundPaint = new Paint();
-        backGroundPaint.setColor(Color.WHITE); // Color gris predeterminado para días sin emoción
+        backGroundPaint.setColor(Color.WHITE);
         backGroundPaint.setStyle(Paint.Style.FILL);
 
         emotionPaint = new Paint();
@@ -93,9 +94,12 @@ public class CalendarDraw extends View {
             float x = column * dayWidth + dayWidth / 2;
             float y = row * dayHeight + dayHeight / 2 + 100;
 
-            // Obtener el color según la emoción almacenada para el día, o usar gris predeterminado
-            if (dayBackgroundColors.containsKey(day)) {
-                emotionPaint.setColor(dayBackgroundColors.get(day));
+            // Clave para el año-mes-día
+            String key = currentYear + "-" + currentMonth + "-" + day;
+
+            // Obtener el color según la emoción almacenada para el día, o usar blanco si no tiene
+            if (dayBackgroundColors.containsKey(key)) {
+                emotionPaint.setColor(dayBackgroundColors.get(key));
             } else {
                 emotionPaint.setColor(Color.WHITE);
             }
@@ -164,19 +168,21 @@ public class CalendarDraw extends View {
 
         // Opciones de emociones con colores
         String[] emotions = {"Feliz", "Triste", "Ansioso", "Contento", "Estresado"};
-        final String[] selectedEmotion = new String[1]; // Almacena la emoción seleccionada
+        final String[] selectedEmotion = new String[1];
 
-        builder.setSingleChoiceItems(emotions, -1, (dialog, which) -> {
-            selectedEmotion[0] = emotions[which];
-        });
+        builder.setSingleChoiceItems(emotions, -1, (dialog, which) -> selectedEmotion[0] = emotions[which]);
 
         builder.setPositiveButton("Aceptar", (dialog, which) -> {
             if (selectedEmotion[0] != null) {
                 String annotation = input.getText().toString();
-                dayEmotions.put(day, selectedEmotion[0] + ": " + annotation);
+
+                // Clave para almacenar emoción y anotación en formato año-mes-día
+                String key = currentYear + "-" + currentMonth + "-" + day;
+                dayEmotions.put(key, selectedEmotion[0] + ": " + annotation);
 
                 // Asigna el color según la emoción seleccionada
-                dayBackgroundColors.put(day, emotionColors.get(selectedEmotion[0]));
+                dayBackgroundColors.put(key, emotionColors.get(selectedEmotion[0]));
+                dayAnnotations.put(key, annotation); // Guarda la anotación en el día específico
                 invalidate(); // Redibuja el calendario para mostrar el color
 
                 Toast.makeText(getContext(), "Emoción y anotación guardadas para el día " + day, Toast.LENGTH_SHORT).show();
