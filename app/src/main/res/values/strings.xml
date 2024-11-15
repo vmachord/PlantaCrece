@@ -11,4 +11,6 @@
     <string name="bienvenido_a_plantoo">¡Bienvenido a Plantoo!</string>
     <string name="biendenido">¡Biendenido!</string>
     <string name="imagen">Imagen</string>
+    <string name="channel_name">channel</string>
+    <string name="channel_description">teste</string>
 </resources>

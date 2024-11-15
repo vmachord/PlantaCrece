@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "com.pim.planta"
-        minSdk = 25
+        minSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -47,6 +47,7 @@ dependencies {
 
     implementation(libs.mpandroidchart)
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("androidx.work:work-runtime:2.8.0")
 
 }
 

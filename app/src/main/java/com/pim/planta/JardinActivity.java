@@ -1,10 +1,14 @@
 package com.pim.planta;
 
 import android.app.AppOpsManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -14,16 +18,34 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
+import android.Manifest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 public class JardinActivity extends AppCompatActivity {
     private TextView textViewPlantoo;
     public static int currentImageIndex = 1;
+    private int previousImageIndex = -1;
+    private static final String CHANNEL_ID = "default";
+    private static final int NOTIFICATION_PERMISSION_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plantoo);
+
+        WorkRequest notificationWorkRequest =
+                new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
+                        .build();
+
+        WorkManager.getInstance(this).enqueue(notificationWorkRequest);
+
         setupBottom();
         textViewPlantoo = findViewById(R.id.textViewPlantoo);
         ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
@@ -31,12 +53,19 @@ public class JardinActivity extends AppCompatActivity {
             Intent intent = new Intent(JardinActivity.this, InvernaderoActivity.class);
             startActivity(intent);
         });
+        if (Build.VERSION.SDK_INT >= 33) {  // También puedes usar Build.VERSION_CODES.TIRAMISU
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Solicitar el permiso si no ha sido otorgado
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        NOTIFICATION_PERMISSION_CODE);
+            }
+        }
         if (!hasUsageStatsPermission()) {
             Toast.makeText(this, "Por favor habilita el acceso a estadísticas de uso.", Toast.LENGTH_LONG).show();
             //Redirige al usuario a la configuración de Android para habilitar el acceso a las estadísticas de uso
             startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
-        } else {
-            trackAppUsage();
         }
     }
 
@@ -50,6 +79,7 @@ public class JardinActivity extends AppCompatActivity {
 
         imageButtonLupa.setOnClickListener(v -> {
             Intent intent = new Intent(JardinActivity.this, DiarioActivity.class);
+            //sendUsageNotification("¡Felicidades, tu jardin ha crecido!. Estado actual: " + 1);
             startActivity(intent);
         });
         imageButtonPlantadex.setOnClickListener(v -> {
@@ -81,7 +111,6 @@ public class JardinActivity extends AppCompatActivity {
     private void trackAppUsage() {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
         long currentTime = System.currentTimeMillis();
-
         // Obtén el uso de las aplicaciones de los últimos 1 día (86400000 ms)
         List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
                 UsageStatsManager.INTERVAL_DAILY, currentTime - 86400000, currentTime);
@@ -139,6 +168,8 @@ public class JardinActivity extends AppCompatActivity {
                 "Media de uso: " + formatTime(averageUsageTime);
 
         textViewPlantoo.setText(usageSummary);
+        if(previousImageIndex == -1)
+            previousImageIndex = imageIndex;
         setImageBasedOnUsage(imageIndex);
     }
 
@@ -166,6 +197,47 @@ public class JardinActivity extends AppCompatActivity {
             return 1; // más de 5 horas
         }
     }
+    private void createNotificationChannel() {
+        // Verifica si el dispositivo está ejecutando Android Oreo (API 26) o superior
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Define un ID único para el canal
+            String channelId = "usage_channel";
+            CharSequence channelName = "App Usage Alerts"; // Nombre que se mostrará en la configuración
+            String channelDescription = "Canal para alertas de seguimiento del uso de las aplicaciones"; // Descripción opcional
+
+            // Crea el canal con las configuraciones necesarias
+            NotificationChannel channel = new NotificationChannel(
+                    channelId,          // ID del canal
+                    channelName,        // Nombre visible del canal
+                    NotificationManager.IMPORTANCE_DEFAULT // Nivel de importancia
+            );
+
+            // Configura la descripción del canal (opcional)
+            channel.setDescription(channelDescription);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+
+    private void sendUsageNotification(String message) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Configuración para Android O y superior
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();  // Asegúrate de que el canal esté creado antes de enviar la notificación
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "usage_channel")
+                .setSmallIcon(R.drawable.alerta_icon) // Asegúrate de que tienes un icono pequeño válido
+                .setContentTitle("Alerta")
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        // Mostrar la notificación
+        notificationManager.notify(1, builder.build());
+    }
+
 
     // Función para mostrar la imagen según el índice
     private void setImageBasedOnUsage(int imageIndex) {
