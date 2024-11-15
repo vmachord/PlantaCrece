@@ -14,7 +14,6 @@ import androidx.work.WorkerParameters;
 
 import java.util.List;
 
-//tengo que cambiar para que solo mande la notificacion cuando tenga un cambio
 public class NotificationWorker extends Worker {
 
     private static final String CHANNEL_ID = "notification_channel";
