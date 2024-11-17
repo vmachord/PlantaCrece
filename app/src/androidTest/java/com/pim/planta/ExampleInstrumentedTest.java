@@ -5,6 +5,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 import android.content.Context;
+import android.graphics.Color;
 
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.action.ViewActions;
@@ -15,6 +16,7 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static com.pim.planta.CustomMatchers.hasDayColor;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Rule;
@@ -117,4 +119,47 @@ public class ExampleInstrumentedTest {
                     .check(matches(isDisplayed()));
         }
     }
+
+    @Test
+    public void diarioTest() {
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        assertEquals("com.pim.planta", appContext.getPackageName());
+
+        // Inicia sesión
+        try (ActivityScenario<LoginActivity> adminActivityScenario = ActivityScenario.launch(LoginActivity.class)) {
+            onView(withId(R.id.editTextEmail))
+                    .perform(ViewActions.typeText("admin@gmail.com"));
+            onView(withId(R.id.editTextPassword))
+                    .perform(ViewActions.typeText("1234"), ViewActions.closeSoftKeyboard());
+            onView(withId(R.id.buttonLogin))
+                    .perform(ViewActions.click());
+        }
+
+        // Accede a la lista de plantas
+        try (ActivityScenario<PlantListActivity> adminActivityScenario = ActivityScenario.launch(PlantListActivity.class)) {
+            onView(withId(R.id.imageButtonLupa))
+                    .perform(ViewActions.click());
+
+            // Verifica que el calendario esté visible
+            onView(withId(R.id.calendar_draw))
+                    .check(matches(isDisplayed()));
+
+            // Selecciona un día (por ejemplo, el día 15)
+            onView(withId(R.id.calendar_draw))
+                    .perform(ViewActions.click());
+
+            // Luego selecciona el color (por ejemplo, color amarillo)
+            onView(withText("Feliz"))  // Asumiendo que el texto "Feliz" está visible en el diálogo
+                    .perform(ViewActions.click());  // Selecciona la opción "Feliz"
+
+            // Haz clic en el botón "Aceptar" en el diálogo
+            onView(withText("Aceptar"))
+                    .perform(ViewActions.click());  // Acepta la selección
+
+            // Verifica que el día seleccionado tenga el color amarillo (0xFFFFFF00)
+            onView(withId(R.id.calendar_draw))
+                    .check(matches(hasDayColor(13, Color.YELLOW)));  // Verifica que el día 15 tenga el color amarillo
+        }
+    }
+
 }

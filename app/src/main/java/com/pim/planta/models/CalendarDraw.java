@@ -231,4 +231,17 @@ public class CalendarDraw extends View {
         calendar.set(Calendar.YEAR, currentYear);
         invalidate();
     }
+
+    public HashMap<String, Integer> getDayBackgroundColors() {
+        return dayBackgroundColors;
+    }
+
+    public int getCurrentYear() {
+        return currentYear;
+    }
+
+    public int getCurrentMonth() {
+        return currentMonth;
+    }
+
 }
