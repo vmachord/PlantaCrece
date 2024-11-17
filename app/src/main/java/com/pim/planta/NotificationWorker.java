@@ -44,11 +44,14 @@ public class NotificationWorker extends Worker {
             manager.createNotificationChannel(channel);
         }
 
-        // Crear la notificación
+        trackAppUsage();
+    }
+
+    private void sendUsageNotification(String message) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                 .setSmallIcon(R.drawable.alerta_icon) // Icono de la notificación
                 .setContentTitle("Alerta")
-                .setContentText(trackAppUsage())
+                .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManager manager = (NotificationManager) getApplicationContext()
@@ -56,7 +59,8 @@ public class NotificationWorker extends Worker {
         manager.notify(NOTIFICATION_ID, builder.build());
     }
 
-    private String trackAppUsage() {
+
+    private void trackAppUsage() {
         Context context = getApplicationContext();
         UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
         long currentTime = System.currentTimeMillis();
@@ -110,13 +114,11 @@ public class NotificationWorker extends Worker {
         if (imageIndex != previousImageIndex) {
             if (imageIndex > previousImageIndex) {
                 previousImageIndex = imageIndex;
-                return "¡Felicidades, tu jardín ha crecido! Estado actual: " + previousImageIndex;
+                sendUsageNotification("¡Felicidades, tu jardín ha crecido!");
             } else {
                 previousImageIndex = imageIndex;
-                return "¡El uso de las redes está marchitando tu jardín! Estado actual: " + previousImageIndex;
+                sendUsageNotification("¡El uso de las redes está marchitando tu jardín!" );
             }
-        } else {
-            return "No entra al if, imageIndex es igual a previousImageIndex (" + previousImageIndex + ")";
         }
     }
 
