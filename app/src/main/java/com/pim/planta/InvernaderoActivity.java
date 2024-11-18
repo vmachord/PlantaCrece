@@ -36,7 +36,7 @@ public class InvernaderoActivity extends AppCompatActivity {
         sanitizedPlantName = removeAccents(sanitizedPlantName); // Eliminar caracteres acentuados
 
         // Crear el nombre del recurso de la imagen usando el nombre de la planta
-        String imageName = "image_" + sanitizedPlantName;
+        String imageName = "image_" + sanitizedPlantName + JardinActivity.currentImageIndex;;
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
 
         if (resID != 0) {

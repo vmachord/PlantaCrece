@@ -7,6 +7,7 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -170,31 +171,23 @@ public class JardinActivity extends AppCompatActivity {
         textViewPlantoo.setText(usageSummary);
         if(previousImageIndex == -1)
             previousImageIndex = imageIndex;
-        setImageBasedOnUsage(imageIndex);
+        SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
+        String selectedPlant = sharedPreferences.getString("selectedPlant", null);
+        setImageBasedOnUsage(selectedPlant,imageIndex);
     }
 
     // Función para calcular el índice de la imagen según la media de tiempo de uso
     private int getImageBasedOnAverageTime(long averageUsageTime) {
         if (averageUsageTime < 60000) { // menos de 1 minuto
-            return 10;
-        } else if (averageUsageTime < 300000) { // menos de 5 minutos
-            return 9;
-        } else if (averageUsageTime < 900000) { // menos de 15 minutos
-            return 8;
-        } else if (averageUsageTime < 1800000) { // menos de 30 minutos
-            return 7;
-        } else if (averageUsageTime < 3600000) { // menos de 1 hora
-            return 6;
-        } else if (averageUsageTime < 7200000) { // menos de 2 horas
             return 5;
-        } else if (averageUsageTime < 10800000) { // menos de 3 horas
+        } else if (averageUsageTime < 300000) { // menos de 5 minutos
             return 4;
-        } else if (averageUsageTime < 14400000) { // menos de 4 horas
+        } else if (averageUsageTime < 900000) { // menos de 15 minutos
             return 3;
-        } else if (averageUsageTime < 18000000) { // menos de 5 horas
+        } else if (averageUsageTime < 1800000) { // menos de 30 minutos
             return 2;
         } else {
-            return 1; // más de 5 horas
+            return 1; // más de 30 minutos
         }
     }
     private void createNotificationChannel() {
@@ -240,14 +233,47 @@ public class JardinActivity extends AppCompatActivity {
 
 
     // Función para mostrar la imagen según el índice
-    private void setImageBasedOnUsage(int imageIndex) {
+    /*private void setImageBasedOnUsage(int imageIndex) {
         String imageName = "image_" + imageIndex;
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
         ImageView imageView = findViewById(R.id.imageView);
         imageView.setImageResource(resID);
         currentImageIndex = imageIndex;
+    }*/
+
+    private void setImageBasedOnUsage(String plantName, int imageIndex) {
+        // Reemplazar los espacios por guiones bajos y eliminar los acentos
+        String sanitizedPlantName = plantName.replace(" ", "_").toLowerCase();
+        sanitizedPlantName = removeAccents(sanitizedPlantName); // Eliminar caracteres acentuados
+
+        // Crear el nombre del recurso de la imagen usando el nombre de la planta y el índice
+        String imageName = "image_" + sanitizedPlantName + imageIndex;
+        int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
+
+        ImageView imageView = findViewById(R.id.imageView);
+
+        // Verificar si la imagen existe
+        if (resID != 0) {
+            imageView.setImageResource(resID);
+        } else {
+            // Si no existe, usar solo el índice como nombre del recurso
+            String fallbackImageName = "image_" + imageIndex;
+            int fallbackResID = getResources().getIdentifier(fallbackImageName, "drawable", getPackageName());
+            imageView.setImageResource(fallbackResID);
+        }
+
+        // Actualizar el índice de la imagen actual
+        currentImageIndex = imageIndex;
     }
 
+    private String removeAccents(String str) {
+        return str.replaceAll("[áàäâ]", "a")
+                .replaceAll("[éèëê]", "e")
+                .replaceAll("[íìïî]", "i")
+                .replaceAll("[óòöô]", "o")
+                .replaceAll("[úùüû]", "u")
+                .replaceAll("[ç]", "c");
+    }
 
     private String formatTime(long milliseconds) {
         long seconds = (milliseconds / 1000) % 60;
