@@ -1,6 +1,7 @@
 package com.pim.planta;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -37,11 +38,11 @@ public class PlantListActivity extends AppCompatActivity {
 
         plantList = new ArrayList<>();
         // Agrega las plantas a la lista
-        plantList.add(new Plant("Rosa", R.drawable.rosa, null, null, "Perfecta para regalo entre enamorados"));
-        plantList.add(new Plant("Margarita", R.drawable.margarita, null, null, "Simple y bonita"));
-        plantList.add(new Plant("Girasol", R.drawable.girasol, null, null, "Persiguiendo la estrella mas grande"));
-        plantList.add(new Plant("Tulipan", R.drawable.tulipan, null, null, "De diversos y vivos colores"));
-        plantList.add(new Plant("Diente de león", R.drawable.diente_de_leon, null, null, "Una metamorfosis unica"));
+        plantList.add(new Plant("Rosa", R.drawable.image_rosa, null, null, "Perfecta para regalo entre enamorados"));
+        plantList.add(new Plant("Margarita", R.drawable.image_margarita, null, null, "Simple y bonita"));
+        plantList.add(new Plant("Girasol", R.drawable.image_girasol, null, null, "Persiguiendo la estrella mas grande"));
+        plantList.add(new Plant("Tulipan", R.drawable.image_tulipan, null, null, "De diversos y vivos colores"));
+        plantList.add(new Plant("Diente de león", R.drawable.image_diente_de_leon, null, null, "Una metamorfosis unica"));
 
         //plantAdapter = new PlantAdapter(plantList);
         plantAdapter = new PlantAdapter(plantList);
@@ -49,9 +50,14 @@ public class PlantListActivity extends AppCompatActivity {
         plantAdapter.setOnItemClickListener(new PlantAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Plant plant) {
-                // Actualiza el TextView con el nombre de la planta seleccionada
                 plantaElegidaTextView.setText("Planta Elegida: " + plant.getName());
                 imageView6.setVisibility(View.VISIBLE);
+
+                SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("selectedPlant", plant.getName());
+                editor.apply();
+
             }
         });
     }
