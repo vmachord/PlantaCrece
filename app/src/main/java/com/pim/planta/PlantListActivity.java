@@ -3,14 +3,15 @@ package com.pim.planta;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
-
+import android.widget.TextView;
+import android.widget.ImageView;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.PlantAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,12 @@ public class PlantListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plantlist);
         setupBottom();
+
+        // Referencia al TextView donde se mostrará la planta elegida
+        final TextView plantaElegidaTextView = findViewById(R.id.textView3);
+        final ImageView imageView6 = findViewById(R.id.imageView6);
+        imageView6.setVisibility(View.INVISIBLE);
+
         plantListRecyclerView = findViewById(R.id.plant_list_recyclerview);
         plantListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -36,8 +43,17 @@ public class PlantListActivity extends AppCompatActivity {
         plantList.add(new Plant("Tulipan", R.drawable.tulipan, null, null, "De diversos y vivos colores"));
         plantList.add(new Plant("Diente de león", R.drawable.diente_de_leon, null, null, "Una metamorfosis unica"));
 
+        //plantAdapter = new PlantAdapter(plantList);
         plantAdapter = new PlantAdapter(plantList);
         plantListRecyclerView.setAdapter(plantAdapter);
+        plantAdapter.setOnItemClickListener(new PlantAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Plant plant) {
+                // Actualiza el TextView con el nombre de la planta seleccionada
+                plantaElegidaTextView.setText("Planta Elegida: " + plant.getName());
+                imageView6.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     public void setupBottom(){

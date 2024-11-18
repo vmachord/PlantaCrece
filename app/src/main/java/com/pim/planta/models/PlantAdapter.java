@@ -16,6 +16,7 @@ import java.util.List;
 public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHolder> {
 
     private List<Plant> plantList;
+    private OnItemClickListener onItemClickListener;
 
     public PlantAdapter(List<Plant> plantList) {
         this.plantList = plantList;
@@ -34,6 +35,12 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
         holder.plantNameTextView.setText(plant.getName());
         holder.plantImageView.setImageResource(plant.getImageResourceId());
         holder.plantDescriptionTextView.setText(plant.getDescription());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(plant); // Llamar a la función de la actividad
+            }
+        });
     }
 
     @Override
@@ -52,5 +59,14 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
             plantImageView = itemView.findViewById(R.id.plant_imageview);
             plantDescriptionTextView = itemView.findViewById(R.id.plant_description_textview);
         }
+    }
+    // Interface para el manejo de clic
+    public interface OnItemClickListener {
+        void onItemClick(Plant plant);
+    }
+
+    // Método para configurar el listener
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.onItemClickListener = listener;
     }
 }
