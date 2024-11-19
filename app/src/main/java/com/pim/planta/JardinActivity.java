@@ -173,7 +173,8 @@ public class JardinActivity extends AppCompatActivity {
             previousImageIndex = imageIndex;
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
         String selectedPlant = sharedPreferences.getString("selectedPlant", null);
-        setImageBasedOnUsage(selectedPlant,imageIndex);
+        //setImageBasedOnUsage(selectedPlant,imageIndex);
+        setImageBasedOnUsage(imageIndex);
     }
 
     // Función para calcular el índice de la imagen según la media de tiempo de uso
@@ -233,14 +234,14 @@ public class JardinActivity extends AppCompatActivity {
 
 
     // Función para mostrar la imagen según el índice
-    /*private void setImageBasedOnUsage(int imageIndex) {
+    private void setImageBasedOnUsage(int imageIndex) {
         String imageName = "image_" + imageIndex;
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
         ImageView imageView = findViewById(R.id.imageView);
         imageView.setImageResource(resID);
         currentImageIndex = imageIndex;
-    }*/
-
+    }
+/*
     private void setImageBasedOnUsage(String plantName, int imageIndex) {
         // Reemplazar los espacios por guiones bajos y eliminar los acentos
         String sanitizedPlantName = plantName.replace(" ", "_").toLowerCase();
@@ -264,7 +265,7 @@ public class JardinActivity extends AppCompatActivity {
 
         // Actualizar el índice de la imagen actual
         currentImageIndex = imageIndex;
-    }
+    }*/
 
     private String removeAccents(String str) {
         return str.replaceAll("[áàäâ]", "a")
