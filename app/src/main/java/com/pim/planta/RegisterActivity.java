@@ -8,10 +8,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.pim.planta.db.DAO;
+import com.pim.planta.models.User;
+
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText, userEditText;
     private Button registerButton;
+    private User nuevoUsuario;
+    private DAO dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +43,10 @@ public class RegisterActivity extends AppCompatActivity {
                 return; // Salir del método si el email es inválido
             }
 
-            // Aquí iría la lógica para registrar al usuario
+            nuevoUsuario = new User(user, email, password);
+            dao.commit(() -> {
+                        dao.insert(nuevoUsuario);
+                    });
 
             Toast.makeText(RegisterActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(RegisterActivity.this, JardinActivity.class);

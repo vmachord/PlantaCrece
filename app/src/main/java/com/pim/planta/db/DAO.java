@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.pim.planta.models.EntradaDiario;
@@ -15,6 +16,10 @@ import java.util.List;
 
 @Dao
 public interface DAO {
+    @Transaction
+    default void commit(Runnable operations) {
+        operations.run();
+    }
 
     @Insert
     void insert(Plant planta);
