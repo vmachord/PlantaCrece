@@ -40,11 +40,15 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.room.common)
     implementation(libs.room.runtime.android)
+    implementation(libs.room.common.jvm)
+    implementation("androidx.room:room-runtime:2.5.0")
+    implementation(libs.databinding.adapters)
+    annotationProcessor("androidx.room:room-compiler:2.5.0")
+
     testImplementation(libs.junit)
     testImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
 
     implementation(libs.mpandroidchart)
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")

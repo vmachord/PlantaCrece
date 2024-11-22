@@ -2,6 +2,7 @@ package com.pim.planta;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -12,12 +13,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.pim.planta.db.DatabaseHelper;
-import com.pim.planta.db.SQLite;
-
-import com.pim.planta.db.DatabasePlantoo;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,28 +37,15 @@ public class MainActivity extends AppCompatActivity {
         Button buttonLogin = findViewById(R.id.buttonEmpezar);
 
 
-        try {
-            // Inicializar Room para manejar la base de datos
-            plantaRepo = new PlantRepository(this);
+        plantaRepo = new PlantRepository(this);
 
-            // Crear la base de datos y agregar un usuario en SQLite
-            DatabaseHelper dbHelper = new DatabaseHelper(this);
-            dbHelper.getWritableDatabase();  // Crea la base de datos si no existe
+        Plant planta = new Plant("Cactus", 100, "100", "100", "Planta de prueba");
+        plantaRepo.getPlantaDAO().insert(planta);
 
-            // Agregar una planta usando Room (hilo de fondo)
-            new Thread(() -> {
-                Plant planta = new Plant("Cactus", 100, "100", "100", "Planta de prueba");
-                try {
-                    plantaRepo.getPlantaDAO().insert(planta);
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Planta agregada", Toast.LENGTH_SHORT).show());
-                } catch (Exception e) {
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error al agregar planta", Toast.LENGTH_SHORT).show());
-                }
-            }).start();
+        List<Plant> plantas = plantaRepo.getPlantaDAO().getAllPlantas();
 
-        } catch (Exception e) {
-            // Manejo de errores
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        for (Plant p : plantas) {
+            Log.d("MainActivity", "Planta: " + p.getName() + ", ID: " + p.getId());
         }
 
         // Escuchamos el evento de clic
