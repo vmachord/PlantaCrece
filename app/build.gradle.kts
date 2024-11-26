@@ -56,3 +56,6 @@ dependencies {
 
 }
 
+jacoco {
+    toolVersion = "0.8.10" // Usa la última versión compatible
+}
