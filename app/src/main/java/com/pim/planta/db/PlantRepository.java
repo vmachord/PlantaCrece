@@ -4,12 +4,12 @@ import android.content.Context;
 import androidx.room.Room;
 
 public class PlantRepository {
-    //ESTE ARCHIVO SUS SI ES NECESARIO
     private DAO dao;
     private DatabasePlantoo db;
 
     public PlantRepository(Context context) {
-        DatabasePlantoo db = Room.databaseBuilder(context.getApplicationContext(),
+        // Inicialización de la base de datos
+        db = Room.databaseBuilder(context.getApplicationContext(),
                         DatabasePlantoo.class, "plant_database")
                 .fallbackToDestructiveMigration()
                 .build();
@@ -17,6 +17,7 @@ public class PlantRepository {
     }
 
     public DAO getPlantaDAO() {
-        return db.DAO();
+        return dao;
     }
 }
+

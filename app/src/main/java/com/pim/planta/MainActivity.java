@@ -1,11 +1,10 @@
 package com.pim.planta;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+import android.content.Intent;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
+import com.pim.planta.db.DatabaseExecutor;
 
 import java.util.List;
 
@@ -36,17 +36,19 @@ public class MainActivity extends AppCompatActivity {
 
         Button buttonLogin = findViewById(R.id.buttonEmpezar);
 
-
         plantaRepo = new PlantRepository(this);
 
-        Plant planta = new Plant("Cactus", 100, "100", "100", "Planta de prueba");
-        plantaRepo.getPlantaDAO().insert(planta);
+        // Inserción en un hilo secundario
+        DatabaseExecutor.execute(() -> {
+            Plant nuevaPlanta = new Plant("Cactus", 100, "100", "100", "Planta de prueba");
+            plantaRepo.getPlantaDAO().insert(nuevaPlanta);
 
-        List<Plant> plantas = plantaRepo.getPlantaDAO().getAllPlantas();
-
-        for (Plant p : plantas) {
-            Log.d("MainActivity", "Planta: " + p.getName() + ", ID: " + p.getId());
-        }
+            // Recuperar datos en un hilo secundario
+            List<Plant> plantas = plantaRepo.getPlantaDAO().getAllPlantas();
+            for (Plant p : plantas) {
+                Log.d("MainActivity", "Planta: " + p.getName() + ", ID: " + p.getId());
+            }
+        });
 
         // Escuchamos el evento de clic
         buttonLogin.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +58,5 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
     }
 }
