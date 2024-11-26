@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
 import com.pim.planta.db.DatabaseExecutor;
+import com.pim.planta.models.User;
 
 import java.util.List;
 
@@ -37,18 +38,6 @@ public class MainActivity extends AppCompatActivity {
         Button buttonLogin = findViewById(R.id.buttonEmpezar);
 
         plantaRepo = new PlantRepository(this);
-
-        // Inserción en un hilo secundario
-        DatabaseExecutor.execute(() -> {
-            Plant nuevaPlanta = new Plant("Cactus", 100, "100", "100", "Planta de prueba");
-            plantaRepo.getPlantaDAO().insert(nuevaPlanta);
-
-            // Recuperar datos en un hilo secundario
-            List<Plant> plantas = plantaRepo.getPlantaDAO().getAllPlantas();
-            for (Plant p : plantas) {
-                Log.d("MainActivity", "Planta: " + p.getName() + ", ID: " + p.getId());
-            }
-        });
 
         // Escuchamos el evento de clic
         buttonLogin.setOnClickListener(new View.OnClickListener() {
