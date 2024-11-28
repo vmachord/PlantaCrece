@@ -66,4 +66,6 @@ public interface DAO {
     User getUsuarioById(int id);
     @Query("SELECT * FROM calendar WHERE id = :id")
     Calendar getCalendarioById(int id);
+    @Query("SELECT * FROM users WHERE email = :email")
+    User getUserByEmail(String email);
 }

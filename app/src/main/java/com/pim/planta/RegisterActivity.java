@@ -2,6 +2,7 @@ package com.pim.planta;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -9,14 +10,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.pim.planta.db.DAO;
+import com.pim.planta.db.DatabaseExecutor;
+import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.User;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText, userEditText;
     private Button registerButton;
-    private User nuevoUsuario;
-    private DAO dao;
+    private User newUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +45,8 @@ public class RegisterActivity extends AppCompatActivity {
                 return; // Salir del método si el email es inválido
             }
 
-            nuevoUsuario = new User(user, email, password);
-            dao.commit(() -> {
-                        dao.insert(nuevoUsuario);
-                    });
+            newUser = new User(user, email, password);
+            registerEmail(newUser);
 
             Toast.makeText(RegisterActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(RegisterActivity.this, JardinActivity.class);
@@ -57,5 +57,13 @@ public class RegisterActivity extends AppCompatActivity {
     private boolean isValidEmail(String email) {
         // Puedes usar una expresión regular más compleja para validar el email
         return email.contains("@") && email.contains(".");
+    }
+
+    private void registerEmail(User user){
+        PlantRepository plantRepo = PlantRepository.getInstance(this);
+
+        DatabaseExecutor.execute(() -> {
+            plantRepo.getPlantaDAO().insert(user);
+        });
     }
 }

@@ -16,6 +16,9 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.pim.planta.db.DatabaseExecutor;
+import com.pim.planta.db.PlantRepository;
+import com.pim.planta.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,27 +42,7 @@ public class PerfilActivity extends AppCompatActivity{
 
     }
 
-    public void setupBottom(){
-        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
-        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
-        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
-        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
-        imageButtonUsuario.setEnabled(false); // Deshabilita el boton
-        imageButtonUsuario.setImageAlpha(128); // Oscurece el boton
 
-        imageButtonLupa.setOnClickListener(v -> {
-            Intent intent = new Intent(PerfilActivity.this, DiarioActivity.class);
-            startActivity(intent);
-        });
-        imageButtonPlantadex.setOnClickListener(v -> {
-            Intent intent = new Intent(PerfilActivity.this, PlantListActivity.class);
-            startActivity(intent);
-        });
-        imageButtonMaceta.setOnClickListener(view -> {
-            Intent intent = new Intent(PerfilActivity.this, JardinActivity.class);
-            startActivity(intent);
-        });
-    }
     private void initializeGraph(){
         // Configurar el gráfico de barras
         barChart = findViewById(R.id.bar_chart);
@@ -101,6 +84,15 @@ public class PerfilActivity extends AppCompatActivity{
                 cambiarImagenDePerfil();
             }
         });
+        /*
+        PlantRepository plantRepo = PlantRepository.getInstance(this);
+
+        DatabaseExecutor.execute(() -> {
+            User userLogged = plantRepo.getPlantaDAO().getUserByEmail(email);
+            boolean isValid = userLogged != null && userLogged.getPassword().equals(pass);
+            callback.onResult(isValid); // Llama al callback con el resultado
+        });
+        */
         userNameTextView.setText("Kun Aguero");
     }
 
@@ -122,6 +114,26 @@ public class PerfilActivity extends AppCompatActivity{
         profileImageView.setImageResource(R.drawable.default_profile);
     }
 
-    // Si usas un Intent para seleccionar la imagen, puedes sobrescribir onActivityResult aquí.
+    public void setupBottom(){
+        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
+        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
+        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
+        imageButtonUsuario.setEnabled(false); // Deshabilita el boton
+        imageButtonUsuario.setImageAlpha(128); // Oscurece el boton
+
+        imageButtonLupa.setOnClickListener(v -> {
+            Intent intent = new Intent(PerfilActivity.this, DiarioActivity.class);
+            startActivity(intent);
+        });
+        imageButtonPlantadex.setOnClickListener(v -> {
+            Intent intent = new Intent(PerfilActivity.this, PlantListActivity.class);
+            startActivity(intent);
+        });
+        imageButtonMaceta.setOnClickListener(view -> {
+            Intent intent = new Intent(PerfilActivity.this, JardinActivity.class);
+            startActivity(intent);
+        });
+    }
 }
 

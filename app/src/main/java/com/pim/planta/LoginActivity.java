@@ -18,7 +18,7 @@ import com.pim.planta.models.User;
 import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
-
+    public User UserConnected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login); // Tu archivo XML del login
 
         // Obtener referencia a los elementos del layout
-        EditText username = findViewById(R.id.editTextEmail);
+        EditText elemail = findViewById(R.id.editTextEmail);
         EditText password = findViewById(R.id.editTextPassword);
         Button loginButton = findViewById(R.id.buttonLogin);
         TextView registerText = findViewById(R.id.textViewRegIni);
@@ -43,27 +43,37 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String user = username.getText().toString();
+                String email = elemail.getText().toString();
                 String pass = password.getText().toString();
 
-                if (validateCredentials(user, pass)) {
-                    Intent intent = new Intent(LoginActivity.this, JardinActivity.class);
-                    startActivity(intent);
-                    finish(); // Finaliza la LoginActivity para que no vuelva a ella al pulsar back
-                } else {
-                    Toast.makeText(LoginActivity.this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
-                }
+
+
+
+                validateCredentials(email, pass, isValid -> {
+                    if (isValid) {
+                        Intent intent = new Intent(LoginActivity.this, JardinActivity.class);
+                        startActivity(intent);
+                        finish(); // Finaliza la LoginActivity para que no vuelva a ella al pulsar back
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
+
+                    }
+                });
             }
         });
     }
 
-    private boolean validateCredentials(String user, String pass) {
+    private void validateCredentials(String email, String pass, ValidateCallback callback) {
         PlantRepository plantRepo = PlantRepository.getInstance(this);
-        DatabaseExecutor.execute(() -> {
-            User pruebna = plantRepo.getPlantaDAO().getUsuarioById(1);
-            Log.d("LoginActivity", pruebna.getUsername());
-        });
 
-        return user.equals("admin@gmail.com") && pass.equals("1234");
+        DatabaseExecutor.execute(() -> {
+            User userLogged = plantRepo.getPlantaDAO().getUserByEmail(email);
+            boolean isValid = userLogged != null && userLogged.getPassword().equals(pass);
+            callback.onResult(isValid); // Llama al callback con el resultado
+        });
+    }
+
+    public interface ValidateCallback {
+        void onResult(boolean isValid);
     }
 }

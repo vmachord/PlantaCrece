@@ -11,12 +11,12 @@ public class User {
 
     private String username;
     private String password;
-    private String correo;
+    private String email;
 
-    public User(String username, String password, String correo) {
+    public User(String username, String email, String password) {
         this.username = username;
+        this.email = email;
         this.password = password;
-        this.correo = correo;
     }
 
     public int getId() {
@@ -43,11 +43,11 @@ public class User {
         this.password = password;
     }
 
-    public String getCorreo(){
-        return correo;
+    public String getEmail(){
+        return email;
     }
 
-    public void setCorreo(String correo){
-        this.correo = correo;
+    public void setEmail(String email){
+        this.email = email;
     }
 }
