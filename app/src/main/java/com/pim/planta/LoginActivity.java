@@ -11,8 +11,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.User;
+
+import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -56,8 +59,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean validateCredentials(String user, String pass) {
         PlantRepository plantRepo = PlantRepository.getInstance(this);
-        User pruebna = plantRepo.getPlantaDAO().getUsuarioById(1);
-        Log.d("LoginActivity", pruebna.getUsername());
+        DatabaseExecutor.execute(() -> {
+            User pruebna = plantRepo.getPlantaDAO().getUsuarioById(1);
+            Log.d("LoginActivity", pruebna.getUsername());
+        });
 
         return user.equals("admin@gmail.com") && pass.equals("1234");
     }
