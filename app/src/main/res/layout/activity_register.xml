@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@drawable/background_gradient"
     tools:context=".MainActivity">
 
     <EditText
@@ -13,37 +13,60 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="100dp"
         android:autofillHints=""
+        android:background="@drawable/rounded_edittext"
         android:hint="Usuario"
+        android:inputType="text"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:textColor="#2E2E2E"
+        android:textColorHint="#083c24"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView4"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="168dp" />
 
     <TextView
-        android:id="@+id/textViewWelcome"
-        android:layout_width="173dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="60dp"
-        android:text="¡Bienvenido!"
-        android:textColor="@android:color/black"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.525"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:id="@+id/terms_conditions"
+        android:layout_width="161dp"
+        android:layout_height="49dp"
+        android:lineBreakStyle="normal"
+        android:paintFlags="underline"
+        android:text="Terms &amp; Conditions"
+
+        android:textAlignment="textStart"
+        android:textColor="#083c24"
+        android:textIsSelectable="true"
+        android:textStyle="italic"
+        app:layout_constraintStart_toEndOf="@+id/checkBox"
+        tools:layout_editor_absoluteY="359dp" />
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="I agree to the "
+        android:textColor="#083c24"
+        app:layout_constraintTop_toBottomOf="@+id/editTextPassword"
+        tools:layout_editor_absoluteX="32dp" />
 
     <EditText
         android:id="@+id/editTextEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:autofillHints=""
+        android:background="@drawable/rounded_edittext"
         android:hint="@string/correo_electro_nico"
         android:inputType="textEmailAddress"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:textColor="#2E2E2E"
+        android:textColorHint="#083c24"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextUser"
@@ -54,13 +77,34 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:autofillHints=""
+        android:background="@drawable/rounded_edittext"
         android:hint="@string/contrasen_a"
         android:inputType="textPassword"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:textColor="#2E2E2E"
+        android:textColorHint="#083c24"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/editTextEmail" />
+        app:layout_constraintTop_toBottomOf="@id/editTextEmail"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/textViewWelcome"
+        android:layout_width="229dp"
+        android:layout_height="34dp"
+        android:layout_marginTop="56dp"
+        android:text="Create an account"
+        android:textColor="#083c24"
+        android:textSize="27sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <!-- Botón para el inicio de sesión -->
 
@@ -70,21 +114,56 @@
         android:id="@+id/buttonRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="96dp"
-        android:text="Registrarse"
+        android:layout_marginTop="252dp"
+        android:backgroundTint="#083c24"
+        android:text="Register"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/editTextPassword" />
 
-    <ImageView
-        android:id="@+id/imageView4"
-        android:layout_width="353dp"
-        android:layout_height="176dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="24dp"
-        android:contentDescription="@string/imagen"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewWelcome"
-        app:srcCompat="@drawable/plantoo" />
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Already have one?"
+        android:textColor="#083c24"
+        tools:layout_editor_absoluteX="111dp"
+        tools:layout_editor_absoluteY="108dp" />
+
+    <TextView
+        android:id="@+id/Login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Log in"
+        android:textColor="#083c24"
+        app:layout_constraintStart_toEndOf="@+id/textView2"
+        tools:layout_editor_absoluteY="108dp" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="___________________"
+        android:textColor="#083c24"
+        tools:layout_editor_absoluteX="22dp"
+        tools:layout_editor_absoluteY="454dp" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="___________________"
+        android:textColor="#083c24"
+        tools:layout_editor_absoluteX="263dp"
+        tools:layout_editor_absoluteY="454dp" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="or register with"
+        android:textColor="#083c24"
+        tools:layout_editor_absoluteX="158dp"
+        tools:layout_editor_absoluteY="461dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
