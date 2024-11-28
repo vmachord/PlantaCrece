@@ -47,7 +47,7 @@ public class JardinActivity extends AppCompatActivity {
 
         WorkManager.getInstance(this).enqueue(notificationWorkRequest);
 
-        setupBottom();
+        setUpBottom();
         textViewPlantoo = findViewById(R.id.textViewPlantoo);
         ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
         imageButtonOjo.setOnClickListener(v -> {
@@ -70,7 +70,7 @@ public class JardinActivity extends AppCompatActivity {
         }
     }
 
-    public void setupBottom(){
+    public void setUpBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
         imageButtonMaceta.setEnabled(false); // Deshabilita el boton

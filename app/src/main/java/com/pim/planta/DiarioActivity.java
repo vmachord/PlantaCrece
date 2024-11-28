@@ -23,7 +23,7 @@ public class DiarioActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary);
-        setupBottom();
+        setUpBottom();
 
         calendarDraw = findViewById(R.id.calendar_draw);
         calendarDraw.setVisibility(View.VISIBLE);
@@ -38,7 +38,7 @@ public class DiarioActivity extends AppCompatActivity {
     }
 
 
-    public void setupBottom(){
+    public void setUpBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         imageButtonLupa.setEnabled(false); // Deshabilita el boton
         imageButtonLupa.setImageAlpha(128); // Oscurece el boton

@@ -44,12 +44,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Poblar la base de datos en caso de que no lo este
         DatabaseExecutor.execute(() -> {
-            if (plantaRepo.getPlantaDAO().getAllUsuarios() == null){
+            if (plantaRepo.getPlantaDAO().getAllUsuarios().isEmpty()){
                 User user_prueba = new User ("elCigala", "1234", "admin@gmail.com");
                 plantaRepo.getPlantaDAO().insert(user_prueba);
             }
 
-            if (plantaRepo.getPlantaDAO().getAllPlantas() == null){
+            if (plantaRepo.getPlantaDAO().getAllPlantas().isEmpty()){
                 Plant nuevaPlanta1 = new Plant("Rosa", 100, "100", "100", "Perfecta para regalo entre enamorados");
                 Plant nuevaPlanta2 = new Plant("Margarita", 100, "100", "100", "Simple y bonita, como tu <3");
                 Plant nuevaPlanta3 = new Plant("Girasol", 100, "100", "100", "Persiguiendo la estrella más grande");
@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        // Escuchamos el evento de clic
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

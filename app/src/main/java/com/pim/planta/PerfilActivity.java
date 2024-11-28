@@ -19,6 +19,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.User;
+import com.pim.planta.models.UserLogged;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +39,7 @@ public class PerfilActivity extends AppCompatActivity{
         setContentView(R.layout.activity_profile);
         initializeNameAndProfile();
         initializeGraph();
-        setupBottom();
-
+        setUpBottom();
     }
 
 
@@ -84,16 +84,7 @@ public class PerfilActivity extends AppCompatActivity{
                 cambiarImagenDePerfil();
             }
         });
-        /*
-        PlantRepository plantRepo = PlantRepository.getInstance(this);
-
-        DatabaseExecutor.execute(() -> {
-            User userLogged = plantRepo.getPlantaDAO().getUserByEmail(email);
-            boolean isValid = userLogged != null && userLogged.getPassword().equals(pass);
-            callback.onResult(isValid); // Llama al callback con el resultado
-        });
-        */
-        userNameTextView.setText("Kun Aguero");
+        userNameTextView.setText(UserLogged.getInstance().getCurrentUser().getUsername());
     }
 
     private  BarDataSet addColorOnGraph(ArrayList<BarEntry> barEntries){
@@ -114,7 +105,7 @@ public class PerfilActivity extends AppCompatActivity{
         profileImageView.setImageResource(R.drawable.default_profile);
     }
 
-    public void setupBottom(){
+    public void setUpBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
