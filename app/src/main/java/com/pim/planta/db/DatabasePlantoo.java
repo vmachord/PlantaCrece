@@ -10,7 +10,7 @@ import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
 import com.pim.planta.models.Converters;
 
-@Database(entities = {Plant.class, User.class, Calendar.class, DiaryEntry.class}, version = 2)
+@Database(entities = {Plant.class, User.class, Calendar.class, DiaryEntry.class}, version = 3)
 @TypeConverters({Converters.class})
 public abstract class DatabasePlantoo extends RoomDatabase {
     public abstract DAO DAO();

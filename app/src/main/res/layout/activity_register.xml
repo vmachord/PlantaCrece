@@ -34,7 +34,7 @@
         android:layout_height="49dp"
         android:layout_marginTop="32dp"
         android:lineBreakStyle="normal"
-
+        android:clickable="true"
         android:text="Terms &amp; Conditions"
         android:textAlignment="textStart"
         android:textColor="#083c24"
