@@ -79,7 +79,7 @@ public class JardinActivity extends AppCompatActivity {
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
 
         imageButtonLupa.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, DiarioActivity.class);
+            Intent intent = new Intent(JardinActivity.this, DiaryActivity.class);
             //sendUsageNotification("¡Felicidades, tu jardin ha crecido!. Estado actual: " + 1);
             startActivity(intent);
         });

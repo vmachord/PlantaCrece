@@ -3,8 +3,8 @@ package com.pim.planta.models;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "entradas_diarios")
-public class EntradaDiario {
+@Entity(tableName = "diary-entries")
+public class DiaryEntry {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
@@ -12,7 +12,7 @@ public class EntradaDiario {
     private String anotacion;
     private int emocion;
 
-    public EntradaDiario(String anotacion, int emocion){
+    public DiaryEntry(String anotacion, int emocion){
         this.anotacion = anotacion;
         this.emocion = emocion;
     }

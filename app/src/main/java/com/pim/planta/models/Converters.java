@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class Convertidores {
+public class Converters {
 
     @TypeConverter
     public static String fromListToString(List<String> list) {

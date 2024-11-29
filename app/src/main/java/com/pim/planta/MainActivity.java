@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
         Button buttonLogin = findViewById(R.id.buttonEmpezar);
 
         plantaRepo = new PlantRepository(this);

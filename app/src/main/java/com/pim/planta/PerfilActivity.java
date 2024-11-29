@@ -16,9 +16,6 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.pim.planta.db.DatabaseExecutor;
-import com.pim.planta.db.PlantRepository;
-import com.pim.planta.models.User;
 import com.pim.planta.models.UserLogged;
 
 import java.util.ArrayList;
@@ -114,7 +111,7 @@ public class PerfilActivity extends AppCompatActivity{
         imageButtonUsuario.setImageAlpha(128); // Oscurece el boton
 
         imageButtonLupa.setOnClickListener(v -> {
-            Intent intent = new Intent(PerfilActivity.this, DiarioActivity.class);
+            Intent intent = new Intent(PerfilActivity.this, DiaryActivity.class);
             startActivity(intent);
         });
         imageButtonPlantadex.setOnClickListener(v -> {

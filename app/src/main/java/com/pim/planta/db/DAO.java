@@ -7,7 +7,7 @@ import androidx.room.Query;
 import androidx.room.Transaction;
 import androidx.room.Update;
 
-import com.pim.planta.models.EntradaDiario;
+import com.pim.planta.models.DiaryEntry;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
 import com.pim.planta.models.Calendar;
@@ -24,7 +24,7 @@ public interface DAO {
     @Insert
     void insert(Plant planta);
     @Insert
-    void insert(EntradaDiario entrada);
+    void insert(DiaryEntry entrada);
     @Insert
     void insert(User usuario);
     @Insert
@@ -33,7 +33,7 @@ public interface DAO {
     @Update
     void update(Plant planta);
     @Update
-    void update(EntradaDiario entrada);
+    void update(DiaryEntry entrada);
     @Update
     void update(User usuario);
     @Update
@@ -42,7 +42,7 @@ public interface DAO {
     @Delete
     void delete(Plant planta);
     @Delete
-    void delete(EntradaDiario entrada);
+    void delete(DiaryEntry entrada);
     @Delete
     void delete(User usuario);
     @Delete
@@ -50,22 +50,22 @@ public interface DAO {
 
     @Query("SELECT * FROM plants")
     List<Plant> getAllPlantas();
-    @Query("SELECT * FROM entradas_diarios")
-    List<EntradaDiario> getAllEntradas();
+    @Query("SELECT * FROM `diary-entries`")
+    List<DiaryEntry> getAllEntries();
     @Query("SELECT * FROM users")
     List<User> getAllUsuarios();
 
     @Query("SELECT * FROM calendar")
-    List<Calendar> getAllCalendario();
+    List<Calendar> getAllCalendar();
 
     @Query("SELECT * FROM plants WHERE id = :id")
     Plant getPlantaById(int id);
-    @Query("SELECT * FROM entradas_diarios WHERE id = :id")
-    EntradaDiario getEntradaById(int id);
+    @Query("SELECT * FROM `diary-entries` WHERE id = :id")
+    DiaryEntry getEntradaById(int id);
     @Query("SELECT * FROM users WHERE id = :id")
     User getUsuarioById(int id);
     @Query("SELECT * FROM calendar WHERE id = :id")
-    Calendar getCalendarioById(int id);
+    Calendar getCalendarById(int id);
     @Query("SELECT * FROM users WHERE email = :email")
     User getUserByEmail(String email);
 }

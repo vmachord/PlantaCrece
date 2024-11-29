@@ -71,7 +71,7 @@ public class PlantListActivity extends AppCompatActivity {
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
 
         imageButtonLupa.setOnClickListener(v -> {
-            Intent intent = new Intent(PlantListActivity.this, DiarioActivity.class);
+            Intent intent = new Intent(PlantListActivity.this, DiaryActivity.class);
             startActivity(intent);
         });
         imageButtonMaceta.setOnClickListener(view -> {

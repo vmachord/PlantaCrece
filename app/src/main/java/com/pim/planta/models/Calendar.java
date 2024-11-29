@@ -1,24 +1,20 @@
 package com.pim.planta.models;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import androidx.databinding.adapters.Converters;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import androidx.room.TypeConverter;
 import androidx.room.TypeConverters;
-import com.pim.planta.models.Convertidores;
 
 @Entity(tableName = "calendar")
 public class Calendar {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
-    @TypeConverters(Convertidores.class)
+    @TypeConverters(Converters.class)
     private List<Date> fechas;
-    @TypeConverters(Convertidores.class)
+    @TypeConverters(Converters.class)
     private List<String> anotaciones;
     private int emociones;           // Almacena emociones asociadas a la clase, puedes usar otro tipo o estructura si lo necesitas
 
