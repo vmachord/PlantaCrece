@@ -9,13 +9,15 @@ public class Plant {
     private int id;
 
     private String name;
+    private String basePath;
     private int imageResourceId;
-    private String xp; //opcional
-    private String xpMax; //opcional
+    private int xp; //opcional
+    private int xpMax; //opcional
     private String description; //opcional
 
-    public Plant(String name, int imageResourceId, String xp, String xpMax, String description) {
+    public Plant(String name, String basePath, int imageResourceId, int xp, int xpMax, String description) {
         this.name = name;
+        this.basePath = basePath;
         this.imageResourceId = imageResourceId;
         this.xp = xp;
         this.xpMax = xpMax;
@@ -27,15 +29,17 @@ public class Plant {
         return name;
     }
 
+    public String getBasePath() { return basePath; }
+
     public int getImageResourceId() {
         return imageResourceId;
     }
 
-    public String getXp() {
+    public int getXp() {
         return xp;
     }
 
-    public String getXpMax() {return xpMax;}
+    public int getXpMax() {return xpMax;}
 
     public String getDescription() {
         return description;
