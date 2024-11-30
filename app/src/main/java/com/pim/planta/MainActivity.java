@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         // Poblar la base de datos en caso de que no lo este
         DatabaseExecutor.execute(() -> {
             if (plantaRepo.getPlantaDAO().getAllUsuarios().isEmpty()){
-                User user_prueba = new User ("elCigala", "1234", "admin@gmail.com");
+                User user_prueba = new User ("elCigala", "admin@gmail.com", "1234");
                 plantaRepo.getPlantaDAO().insert(user_prueba);
             }
 

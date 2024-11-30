@@ -62,6 +62,8 @@ public interface DAO {
     Plant getPlantaById(int id);
     @Query("SELECT * FROM `diary-entries` WHERE id = :id")
     DiaryEntry getEntradaById(int id);
+    @Query("SELECT * FROM `diary-entries` WHERE user_id = :id")
+    List<DiaryEntry> getEntradasByUserId(int id);
     @Query("SELECT * FROM users WHERE id = :id")
     User getUsuarioById(int id);
     @Query("SELECT * FROM calendar WHERE id = :id")
