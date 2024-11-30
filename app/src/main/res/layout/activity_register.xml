@@ -34,12 +34,12 @@
         android:layout_height="49dp"
         android:layout_marginTop="32dp"
         android:lineBreakStyle="normal"
-
+        android:clickable="true"
         android:text="Terms &amp; Conditions"
         android:textAlignment="textStart"
-        android:textColor="#083c24"
+
         android:textIsSelectable="true"
-        android:textStyle="italic"
+        android:textColor="@android:color/holo_blue_light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/checkBox"
