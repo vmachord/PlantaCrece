@@ -29,11 +29,13 @@ import java.util.stream.Collectors;
 
 public class CalendarDraw extends View {
 
-    private Paint dayPaint, headerPaint, backGroundPaint, emotionPaint;
+    private Paint dayPaint, headerPaint, backGroundPaint, emotionPaint, buttonPaint;
     private int currentMonth, currentYear;
 
     // Almacena el color de fondo para cada día
     private HashMap<Long, Integer> dayBackgroundColors = new HashMap<>();
+    private String currentPerspective;
+
 
 
     private List<DiaryEntry> diaryEntries;
@@ -72,24 +74,30 @@ public class CalendarDraw extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        // Fondo del calendario
         canvas.drawColor(Color.LTGRAY);
-
-        // Dibuja los encabezados del calendario
         drawMonthHeader(canvas);
-
-        // Dibuja los días con colores basados en las emociones
         drawDays(canvas);
+        //drawButtonChangePerspective(canvas);
     }
-    //AÑADIR FLECHAS PARA MOVERTE ENTRE MESES
     private void drawMonthHeader(Canvas canvas) {
         // Dibuja el encabezado (mes y año)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault());
         String monthYear = LocalDate.of(currentYear, currentMonth, 1).format(formatter);
 
         canvas.drawText(monthYear, getWidth() / 2, 50, headerPaint);
+
+        // Coordenadas para las flechas de cambio de mes
+        float centerX1 = getWidth() / 5;
+        float centerX2 = 4 * getWidth() / 5;
+        float centerY = 60;
+        float textSize = 50;
+
+        headerPaint.setTextSize(textSize);
+
+        canvas.drawText("<", centerX1 - textSize / 2, centerY + textSize / 2, headerPaint);
+        canvas.drawText(">", centerX2 - textSize / 2, centerY + textSize / 2, headerPaint);
     }
+
 
     private void drawDays(Canvas canvas) {
         int dayWidth = getWidth() / 7;
@@ -124,8 +132,9 @@ public class CalendarDraw extends View {
             int day = getDayOfMonthFromMillis(dateInMillis);
 
             //Logica de los dias
-            int column = (day - 1) % 7;
-            int row = (day - 1) / 7;
+            int column = (startColumn + day - 1) % 7;
+            int row = (startColumn + day - 1) / 7;
+
             float x = column * dayWidth + dayWidth / 2;
             float y = row * dayHeight + dayHeight / 2 + 100;
 
@@ -135,6 +144,42 @@ public class CalendarDraw extends View {
             canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
         }
     }
+
+    private void drawButtonChangePerspective(Canvas canvas) {
+        // Establecer el tamaño y el color del botón
+        float buttonRadius = 80; // Radio del botón
+        float buttonMargin = 40; // Margen desde el borde
+        float buttonX = getWidth() - buttonRadius - buttonMargin; // Posición X (esquina derecha)
+        float buttonY = getHeight() - buttonRadius - buttonMargin; // Posición Y (esquina inferior)
+
+        // Dibujar el fondo del botón (círculo)
+        buttonPaint.setColor(Color.BLUE); // Cambia el color del botón
+        canvas.drawCircle(buttonX, buttonY, buttonRadius, buttonPaint);
+
+        // Dibujar el texto del botón
+        String buttonText = "MES"; // Texto que cambia según la perspectiva actual
+        buttonPaint.setColor(Color.WHITE); // Color del texto
+        buttonPaint.setTextSize(30); // Tamaño del texto
+        float textWidth = buttonPaint.measureText(buttonText);
+        float textX = buttonX - textWidth / 2;
+        float textY = buttonY + 10; // Ajuste vertical para centrar el texto
+        canvas.drawText(buttonText, textX, textY, buttonPaint);
+    }
+
+    // Método para obtener el texto del botón según la perspectiva actual
+    private String getCurrentPerspectiveText() {
+        switch (currentPerspective) {
+            case "MONTH_VIEW":
+                return "Mes";
+            case "WEEK_VIEW":
+                return "Semana";
+            case "DAY_VIEW":
+                return "Día";
+            default:
+                return "Mes";
+        }
+    }
+
 
     private List<DiaryEntry> getEntriesForCurrentMonth() {
         // Devuelve solo las entradas del mes y año actuales
@@ -176,7 +221,12 @@ public class CalendarDraw extends View {
             float centerY = 60;
             float radius = 50;
 
+            Log.d("onTouch", "HA TOCADO CALENDARIO");
+
+
+
             if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
+                Log.d("onTouch", "HA TOCADO FLECHA IZQUIERDA");
                 prevMonth();
                 return true;
             } else if (Math.pow(x - centerX2, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
@@ -243,33 +293,26 @@ public class CalendarDraw extends View {
     }
 
     public int getDayFromCoordinates(float x, float y) {
-        int calendarStartY = getHeight() / 5; // Supongamos que el calendario comienza en esta posición
-        int dayWidth = getWidth() / 7; // Ancho de cada celda
-        int dayHeight = (getHeight() - calendarStartY) / 6; // Altura de cada celda
+        int calendarStartY = getHeight() / 5;
+        int dayWidth = getWidth() / 7;
+        int dayHeight = (getHeight() - calendarStartY) / 6;
 
-        // Obtener el día de la semana en que empieza el mes (1 = Lunes, 7 = Domingo)
         LocalDate firstDayOfMonth = LocalDate.of(currentYear, currentMonth, 1);
         int startDayOfWeek = firstDayOfMonth.getDayOfWeek().getValue(); // Lunes=1, Domingo=7
 
-        // Ajustamos el inicio de la semana para que el domingo esté en la columna 6
         int startColumn = (startDayOfWeek == 7) ? 6 : startDayOfWeek - 1; // El domingo debe caer en columna 6
 
-        // Calcular la columna y la fila donde se encuentra el toque
         int col = (int) (x / dayWidth); // Columna que toca (0-6)
         int row = (int) ((y - calendarStartY) / dayHeight); // Fila que toca (0-5)
 
-        // Validar que el toque está dentro de las celdas del calendario
         if (col >= 0 && col < 7 && row >= 0 && row < 6) {
-            // El cálculo del día toma en cuenta el desplazamiento de la columna inicial
-            int dayClicked = row * 7 + col + 1 - startColumn; // Ajustar según el día de inicio de la semana
+            int dayClicked = row * 7 + col + 1 - startColumn;
 
-            // Validar que el día clicado es válido (dentro del rango del mes)
             if (dayClicked > 0 && dayClicked <= firstDayOfMonth.lengthOfMonth()) {
-                return dayClicked; // Devuelve el día del mes
+                return dayClicked;
             }
         }
-
-        return -1; // Si no se clicó en un día válido
+        return -1;
     }
 
 

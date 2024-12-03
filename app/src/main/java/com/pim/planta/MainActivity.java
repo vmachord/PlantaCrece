@@ -5,6 +5,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     private PlantRepository plantaRepo;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
         Button buttonLogin = findViewById(R.id.buttonEmpezar);
 
         plantaRepo = new PlantRepository(this);
+
+
+
 
 
         // Poblar la base de datos en caso de que no lo este

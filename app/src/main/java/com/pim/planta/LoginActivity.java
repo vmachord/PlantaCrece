@@ -41,6 +41,10 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        //QUITAR ESTO EN LA ENTREGA FINAL
+        elemail.setText("admin@gmail.com");
+        password.setText("1234");
+
 
         // Configurar la lógica del botón de login
         loginButton.setOnClickListener(new View.OnClickListener() {
