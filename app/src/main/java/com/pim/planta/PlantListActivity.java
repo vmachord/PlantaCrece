@@ -3,17 +3,21 @@ package com.pim.planta;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.ImageView;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.pim.planta.db.DAO;
+import com.pim.planta.db.DatabaseExecutor;
+import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.PlantAdapter;
-import java.util.ArrayList;
+
 import java.util.List;
 
 public class PlantListActivity extends AppCompatActivity {
@@ -24,6 +28,13 @@ public class PlantListActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        PlantRepository repository = PlantRepository.getInstance(this);
+        DAO dao = repository.getPlantaDAO();
+
+        DatabaseExecutor.execute(() -> {
+            plantList = dao.getAllPlantas();
+        });
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plantlist);
         setupBottom();
@@ -36,15 +47,7 @@ public class PlantListActivity extends AppCompatActivity {
         plantListRecyclerView = findViewById(R.id.plant_list_recyclerview);
         plantListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        plantList = new ArrayList<>();
-        // Agrega las plantas a la lista
-        plantList.add(new Plant("Rosa", R.drawable.image_rosa, null, null, "Perfecta para regalo entre enamorados"));
-        plantList.add(new Plant("Margarita", R.drawable.image_margarita, null, null, "Simple y bonita"));
-        plantList.add(new Plant("Girasol", R.drawable.image_girasol, null, null, "Persiguiendo la estrella mas grande"));
-        plantList.add(new Plant("Tulipan", R.drawable.image_tulipan, null, null, "De diversos y vivos colores"));
-        plantList.add(new Plant("Diente de león", R.drawable.image_diente_de_leon, null, null, "Una metamorfosis unica"));
 
-        //plantAdapter = new PlantAdapter(plantList);
         plantAdapter = new PlantAdapter(plantList);
         plantListRecyclerView.setAdapter(plantAdapter);
         plantAdapter.setOnItemClickListener(new PlantAdapter.OnItemClickListener() {
