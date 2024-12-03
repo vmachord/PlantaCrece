@@ -2,19 +2,21 @@ package com.pim.planta;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.pim.planta.db.DAO;
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
+import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
+import com.pim.planta.models.UserPlantRelation;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -58,6 +60,12 @@ public class RegisterActivity extends AppCompatActivity {
 
             newUser = new User(user, email, password);
             registerEmail(newUser);
+            PlantRepository plantRepo = PlantRepository.getInstance(this);
+            DAO dao = plantRepo.getPlantaDAO();
+            for (Plant plant : dao.getAllPlantas()) {
+                UserPlantRelation relation = new UserPlantRelation(newUser.getId(), plant.getId()); // growCount is initialized to 0 by default
+                dao.insertUserPlantRelation(relation);
+            }
 
             Toast.makeText(RegisterActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(RegisterActivity.this, JardinActivity.class);

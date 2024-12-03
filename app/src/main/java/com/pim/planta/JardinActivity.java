@@ -1,5 +1,6 @@
 package com.pim.planta;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -25,8 +26,16 @@ import androidx.core.content.ContextCompat;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
-import android.Manifest;
+
+import com.pim.planta.db.DAO;
+import com.pim.planta.db.PlantRepository;
+import com.pim.planta.models.Plant;
+import com.pim.planta.models.UserLogged;
+import com.pim.planta.models.UserPlantRelation;
+
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class JardinActivity extends AppCompatActivity {
@@ -40,6 +49,8 @@ public class JardinActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plantoo);
+        PlantRepository plantaRepo = PlantRepository.getInstance(this);
+        DAO dao = plantaRepo.getPlantaDAO();
 
         WorkRequest notificationWorkRequest =
                 new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
@@ -68,6 +79,15 @@ public class JardinActivity extends AppCompatActivity {
             //Redirige al usuario a la configuración de Android para habilitar el acceso a las estadísticas de uso
             startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
         }
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            if (dao.getUserPlantRelations(UserLogged.getInstance().getCurrentUser().getId()).isEmpty()) {
+                for (Plant plant : plantaRepo.getPlantaDAO().getAllPlantas()) {
+                    UserPlantRelation relation = new UserPlantRelation(UserLogged.getInstance().getCurrentUser().getId(), plant.getId()); // growCount is initialized to 0 by default
+                    dao.insertUserPlantRelation(relation);
+                }
+            }
+        });
     }
 
     public void setUpBottom(){
