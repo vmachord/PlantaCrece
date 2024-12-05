@@ -1,0 +1,326 @@
+{
+  "name": "inicio",
+  "version": 33,
+  "source-key": {
+    "type": "figma",
+    "file": "k2PLtRMdXkNqETXLcKyjX5",
+    "node": "37:12",
+    "version": "2158566391319863736",
+    "component-id": "4e7d6fda8cbf777d5e60b401f644f955459b0e34"
+  },
+  "default": "Inicio",
+  "documentation": "Página principal",
+  "design": {
+    "atoms": [
+      {
+        "type": "group",
+        "id": "top_level",
+        "root": "true"
+      },
+      {
+        "type": "image",
+        "id": "mesh-gradient (1) 1"
+      },
+      {
+        "type": "group",
+        "id": "Group 6"
+      },
+      {
+        "type": "text",
+        "id": "plantoo"
+      },
+      {
+        "type": "text",
+        "id": "Cultivate your time, harvest your well-being"
+      },
+      {
+        "type": "group",
+        "id": "boton"
+      },
+      {
+        "type": "vector",
+        "id": "Rectangle 2"
+      },
+      {
+        "type": "vector",
+        "id": "Rectangle 17"
+      },
+      {
+        "type": "text",
+        "id": "button"
+      }
+    ],
+    "modes": {
+      "Inicio": {
+        "rules": [
+          {
+            "id": "top_level",
+            "drop-shadow": {
+              "color": {
+                "alpha": 0.24705882352941178,
+                "hue": 0.0,
+                "saturation": 0.0,
+                "value": 0.0
+              },
+              "blur": 4.0,
+              "offset-x": 0.0,
+              "offset-y": 4.0,
+              "spread": 0.0,
+              "blend-mode": "normal"
+            },
+            "stroke-width": 1.0,
+            "stroke-color": {
+              "alpha": 1.0,
+              "hue": 0.0,
+              "saturation": 0.0,
+              "value": 0.0
+            },
+            "is-structured": false,
+            "children": [
+              "mesh-gradient (1) 1",
+              "Group 6",
+              "plantoo",
+              "Cultivate your time, harvest your well-being",
+              "boton"
+            ]
+          },
+          {
+            "id": "mesh-gradient (1) 1",
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": 428.0
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": 926.0
+              }
+            },
+            "image-content": "mesh_gradient_1_1.png",
+            "scale": "cover"
+          },
+          {
+            "id": "Group 6",
+            "presence": false,
+            "drop-shadow": {
+              "color": {
+                "alpha": 0.24705882352941178,
+                "hue": 0.0,
+                "saturation": 0.0,
+                "value": 0.0
+              },
+              "blur": 8.0,
+              "offset-x": 0.0,
+              "offset-y": 4.0,
+              "spread": 0.0,
+              "blend-mode": "normal"
+            },
+            "alignment": {
+              "horizontal": {
+                "attachment": "start",
+                "offset": 21.0
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": 399.0
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": 181.0
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": 191.0
+              }
+            },
+            "is-structured": false,
+            "children": [
+              "Rectangle 2",
+              "Rectangle 17"
+            ],
+            "clip-content": false
+          },
+          {
+            "id": "plantoo",
+            "alignment": {
+              "horizontal": {
+                "attachment": "center",
+                "offset": 0.0
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": 340.0
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": 334.0
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": 80.0
+              }
+            },
+            "color": {
+              "alpha": 1.0,
+              "hue": 154.61538461538458,
+              "saturation": 0.7500000000000001,
+              "value": 0.8156862745098039
+            },
+            "text-content": "plantoo",
+            "overflow": "visible",
+            "max-lines": -1,
+            "text-align": "left",
+            "text-size": 96.0,
+            "line-height": 0.5208333206176757,
+            "typeface": "Fredoka"
+          },
+          {
+            "id": "Cultivate your time, harvest your well-being",
+            "alignment": {
+              "horizontal": {
+                "attachment": "center",
+                "offset": -0.5
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": 440.0
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": 263.0
+              },
+              "height-constraints": {
+                "sizing-mode": "shrink"
+              }
+            },
+            "color": {
+              "alpha": 1.0,
+              "hue": 151.63636363636363,
+              "saturation": 0.8870967741935485,
+              "value": 0.24313725490196078
+            },
+            "text-content": "Cultivate your time, harvest your well-being",
+            "overflow": "visible",
+            "max-lines": -1,
+            "text-size": 18.0,
+            "line-height": 1.2349999745686848,
+            "typeface": "Aventa"
+          },
+          {
+            "id": "boton",
+            "padding": {
+              "left": 16.0,
+              "top": 8.0,
+              "right": 16.0,
+              "bottom": 8.0
+            },
+            "border-radius": 24.0,
+            "alignment": {
+              "horizontal": {
+                "attachment": "start",
+                "offset": 152.0
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": 560.0
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": 124.0
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": 45.0
+              }
+            },
+            "arrangement": "row",
+            "children": [
+              "button"
+            ],
+            "item-spacing": 10.0,
+            "background-color": {
+              "alpha": 1.0,
+              "hue": 151.63636363636363,
+              "saturation": 0.8870967741935485,
+              "value": 0.24313725490196078
+            },
+            "clip-content": false
+          },
+          {
+            "id": "Rectangle 2",
+            "border-radius": 15.0,
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": 181.0
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": 191.0
+              }
+            }
+          },
+          {
+            "id": "Rectangle 17",
+            "border-radius": 10.0,
+            "alignment": {
+              "horizontal": {
+                "attachment": "start",
+                "offset": 113.0
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": 54.0
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": 10.0
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": 69.0
+              }
+            }
+          },
+          {
+            "id": "button",
+            "color": {
+              "alpha": 1.0,
+              "hue": 0.0,
+              "saturation": 0.0,
+              "value": 1.0
+            },
+            "text-content": "Get Started",
+            "overflow": "visible",
+            "text-align-vertical": "center",
+            "text-size": 16.0,
+            "line-height": 0.875,
+            "typeface": "Aventa"
+          }
+        ]
+      }
+    }
+  },
+  "previews": [
+    {
+      "design": "Inicio",
+      "size": {
+        "width": 428.0,
+        "height": 926.0
+      }
+    }
+  ],
+  "adin-component-search-paths": [],
+  "image-search-paths": [],
+  "vector-search-paths": []
+}
