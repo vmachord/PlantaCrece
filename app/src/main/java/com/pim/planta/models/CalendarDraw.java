@@ -15,15 +15,23 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -87,16 +95,28 @@ public class CalendarDraw extends View {
         canvas.drawText(monthYear, getWidth() / 2, 50, headerPaint);
 
         // Coordenadas para las flechas de cambio de mes
-        float centerX1 = getWidth() / 5;
-        float centerX2 = 4 * getWidth() / 5;
+        float centerX1 = getWidth() / 5;   // Izquierda
+        float centerX2 = 4 * getWidth() / 5; // Derecha
         float centerY = 60;
         float textSize = 50;
+        float radius = 50;
 
+        // Cambiar tamaño del texto para flechas
         headerPaint.setTextSize(textSize);
 
+        // Dibuja las flechas
         canvas.drawText("<", centerX1 - textSize / 2, centerY + textSize / 2, headerPaint);
         canvas.drawText(">", centerX2 - textSize / 2, centerY + textSize / 2, headerPaint);
+
+        // Añade círculos para mostrar las hitboxes de las flechas
+        Paint hitboxPaint = new Paint();
+        hitboxPaint.setColor(Color.argb(100, 255, 0, 0)); // Color rojo translúcido
+        hitboxPaint.setStyle(Paint.Style.FILL);
+
+        canvas.drawCircle(centerX1, centerY, radius, hitboxPaint); // Círculo izquierdo
+        canvas.drawCircle(centerX2, centerY, radius, hitboxPaint); // Círculo derecho
     }
+
 
 
     private void drawDays(Canvas canvas) {
@@ -109,7 +129,6 @@ public class CalendarDraw extends View {
         int startDayOfWeek = firstDayOfMonth.getDayOfWeek().getValue();
         int startColumn = (startDayOfWeek == 7) ? 6 : startDayOfWeek - 1;
 
-        List<DiaryEntry> monthEntries = getEntriesForCurrentMonth();
 
         // Recorre el mes entero para dibujarlo
         for (int day = 1; day <= daysInMonth; day++) {
@@ -126,22 +145,25 @@ public class CalendarDraw extends View {
             canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
         }
 
-        //Dibuja las entradas del diario encima del calendario vacio
-        for (DiaryEntry entry : monthEntries) {
-            long dateInMillis = normalizeToStartOfDay(entry.getDate());
-            int day = getDayOfMonthFromMillis(dateInMillis);
+        List<DiaryEntry> monthEntries = getEntriesForCurrentMonth();
+        if (!monthEntries.isEmpty()){
+            //Dibuja las entradas del diario encima del calendario vacio
+            for (DiaryEntry entry : monthEntries) {
+                long dateInMillis = normalizeToStartOfDay(entry.getDate());
+                int day = getDayOfMonthFromMillis(dateInMillis);
 
-            //Logica de los dias
-            int column = (startColumn + day - 1) % 7;
-            int row = (startColumn + day - 1) / 7;
+                //Logica de los dias
+                int column = (startColumn + day - 1) % 7;
+                int row = (startColumn + day - 1) / 7;
 
-            float x = column * dayWidth + dayWidth / 2;
-            float y = row * dayHeight + dayHeight / 2 + 100;
+                float x = column * dayWidth + dayWidth / 2;
+                float y = row * dayHeight + dayHeight / 2 + 100;
 
-            // Dibujar el día con el color correspondiente a la emoción
-            emotionPaint.setColor(getColorForEmotion(entry.emotionToString()));
-            canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
-            canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
+                // Dibujar el día con el color correspondiente a la emoción
+                emotionPaint.setColor(getColorForEmotion(entry.emotionToString()));
+                canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
+                canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
+            }
         }
     }
 
@@ -180,9 +202,13 @@ public class CalendarDraw extends View {
         }
     }
 
-
+    // Devuelve solo las entradas del mes y año actuales
     private List<DiaryEntry> getEntriesForCurrentMonth() {
-        // Devuelve solo las entradas del mes y año actuales
+
+        List<DiaryEntry> prueba = new ArrayList<>();
+        if (diaryEntries == null || diaryEntries.isEmpty()) {
+            return prueba; // Devolver lista vacía si no hay entradas
+        }
         return diaryEntries.stream()
                 .filter(entry -> isInCurrentMonth(entry.getDate()))
                 .collect(Collectors.toList());
@@ -209,34 +235,6 @@ public class CalendarDraw extends View {
     }
 
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            float x = event.getX();
-            float y = event.getY();
-
-            // Posiciones cambio de mes
-            float centerX1 = getWidth() / 5;
-            float centerX2 = 4 * getWidth() / 5;
-            float centerY = 60;
-            float radius = 50;
-
-            Log.d("onTouch", "HA TOCADO CALENDARIO");
-
-
-
-            if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
-                Log.d("onTouch", "HA TOCADO FLECHA IZQUIERDA");
-                prevMonth();
-                return true;
-            } else if (Math.pow(x - centerX2, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
-                nextMonth();
-                return true;
-            }
-        }
-        return super.onTouchEvent(event);
-    }
-
     public void showEmotionDialog(long dateInMillis, OnDiaryEntryListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Seleccione una emoción para el día " +
@@ -258,7 +256,7 @@ public class CalendarDraw extends View {
                 String annotation = input.getText().toString().trim();
                 if (!annotation.isEmpty()) {
                     User user = UserLogged.getInstance().getCurrentUser();
-                    DiaryEntry entry = new DiaryEntry(annotation, selectedEmotionId[0], user.getId(), dateInMillis);
+                    DiaryEntry entry = new DiaryEntry(annotation, selectedEmotionId[0]+1, user.getId(), dateInMillis);
 
                     // Llamar al listener para devolver el DiaryEntry
                     listener.onDiaryEntryCreated(entry);
@@ -322,19 +320,19 @@ public class CalendarDraw extends View {
         invalidate(); // Redibuja el calendario con la nueva información
     }
 
-    private void prevMonth() {
+    public void prevMonth() {
         currentMonth--;
-        if (currentMonth < 0) {
-            currentMonth = 11;
+        if (currentMonth < 1) {
+            currentMonth = 12;
             currentYear--;
         }
         invalidate();
     }
 
-    private void nextMonth() {
+    public void nextMonth() {
         currentMonth++;
-        if (currentMonth > 11) {
-            currentMonth = 0;
+        if (currentMonth > 12) {
+            currentMonth = 1;
             currentYear++;
         }
         invalidate();

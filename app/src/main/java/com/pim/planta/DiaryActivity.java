@@ -55,6 +55,25 @@ public class DiaryActivity extends AppCompatActivity  {
 
         calendarDraw.setOnTouchListener((view, motionEvent) -> {
             if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                float x = motionEvent.getX();
+                float y = motionEvent.getY();
+                // Posiciones de los botones de cambio de mes
+                float centerX1 = calendarDraw.getHeight() / 5;
+                float centerX2 = 4 * calendarDraw.getWidth() / 5;
+                float centerY = 60;
+                float radius = 50;
+
+                // Comprobación de toque dentro de las hitboxes
+                if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
+                    Log.d("onTouch", "HA TOCADO FLECHA IZQUIERDA");
+                    calendarDraw.prevMonth();
+                    return true;
+                } else if (Math.pow(x - centerX2, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
+                    Log.d("onTouch", "HA TOCADO FLECHA DERECHA");
+                    calendarDraw.nextMonth();
+                    return true;
+                }
+
                 // Detectar si se tocó un día específico
                 int dayClicked = calendarDraw.getDayFromCoordinates(motionEvent.getX(), motionEvent.getY());
                 if (dayClicked != -1) {
