@@ -1,0 +1,6 @@
+{
+    "target": "Inicio",
+    "package": "com.pim.planta.inicio",
+    "generateImplementation": true,
+    "generatePreviews": true
+}
