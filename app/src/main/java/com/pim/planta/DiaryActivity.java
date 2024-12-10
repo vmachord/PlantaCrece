@@ -5,22 +5,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.view.View;
-import android.widget.Toast;
-
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
-import com.pim.planta.models.Calendar;
 import com.pim.planta.models.CalendarDraw;
 import com.pim.planta.models.DiaryEntry;
-import com.pim.planta.models.Plant;
+import com.pim.planta.models.OnDiaryEntryListener;
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserLogged;
-import com.pim.planta.models.OnDiaryEntryListener;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
