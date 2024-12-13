@@ -2,7 +2,6 @@ package com.pim.planta;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,8 +14,6 @@ import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserLogged;
-
-import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
     private PlantRepository plantRepo;
@@ -32,7 +29,7 @@ public class LoginActivity extends AppCompatActivity {
         EditText elemail = findViewById(R.id.editTextEmail);
         EditText password = findViewById(R.id.editTextPassword);
         Button loginButton = findViewById(R.id.buttonLogin);
-        TextView registerText = findViewById(R.id.textViewRegIni);
+        TextView registerText = findViewById(R.id.textViewToRegister);
         registerText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

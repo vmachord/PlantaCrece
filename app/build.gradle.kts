@@ -3,9 +3,6 @@ plugins {
     id("jacoco")
     //id ("com.android.application")
     id("com.google.relay") version "0.3.12"
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose.compiler)
-
 }
 
 android {
@@ -43,9 +40,6 @@ android {
         kotlinCompilerExtensionVersion = "1.5.6"
 
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildToolsVersion = "35.0.0"
 
 
@@ -62,8 +56,6 @@ dependencies {
     implementation(libs.room.common.jvm)
     implementation("androidx.room:room-runtime:2.5.0")
     implementation(libs.databinding.adapters)
-    implementation(libs.core.ktx)
-    implementation(libs.material3.android)
     annotationProcessor("androidx.room:room-compiler:2.5.0")
 
     testImplementation(libs.junit)

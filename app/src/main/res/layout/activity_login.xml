@@ -5,37 +5,75 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient"
+    android:background="@color/light_green"
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/textViewWelcome"
-        android:layout_width="173dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="60dp"
-        android:text="¡Bienvenido!"
+        android:id="@+id/textViewLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/aventa"
+        android:lineHeight="14px"
+        android:text="Log into your account"
         android:textColor="@android:color/black"
-        android:textSize="24sp"
+        android:textColor="@color/dark_green"
+        android:textSize="32sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.275" />
+
+
+    <TextView
+        android:id="@+id/textViewNoAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/aventa"
+        android:lineHeight="14px"
+        android:text="Don't have an account yet?"
+        android:textColor="@android:color/black"
+        android:textColor="@color/dark_green"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.308"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewLogin" />
+
+    <TextView
+        android:id="@+id/textViewToRegister"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/aventa"
+        android:lineHeight="14px"
+        android:text="Create one"
+        android:textColor="@color/dark_green"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.525"
+        app:layout_constraintHorizontal_bias="0.781"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewLogin" />
 
     <EditText
         android:id="@+id/editTextEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="160dp"
         android:autofillHints=""
-        android:hint="@string/correo_electro_nico"
+        android:hint="Email"
+        android:textColorHint="@color/dark_green"
+        android:fontFamily="@font/aventa"
         android:inputType="textEmailAddress"
+        android:background="@drawable/rounded_edittext"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView4"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.447" />
 
     <EditText
         android:id="@+id/editTextPassword"
@@ -44,8 +82,11 @@
         android:layout_marginHorizontal="32dp"
         android:layout_marginTop="16dp"
         android:autofillHints=""
-        android:hint="@string/contrasen_a"
+        android:hint="@string/password"
+        android:textColorHint="@color/dark_green"
+        android:fontFamily="@font/aventa"
         android:inputType="textPassword"
+        android:background="@drawable/rounded_edittext"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/editTextEmail" />
@@ -59,7 +100,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="96dp"
-        android:text="@string/iniciar_sesio_n"
+        android:text="Log in"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/dark_green"
+        android:fontFamily="@font/aventa"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/editTextPassword" />
@@ -69,43 +114,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/olvidaste_tu_contrasen_a"
-        android:textColor="@android:color/holo_blue_light"
+        android:text="Forgot your password?"
+        android:fontFamily="@font/aventa"
+        android:textColor="@color/dark_green"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/buttonLogin" />
-
-    <ImageView
-        android:id="@+id/imageView4"
-        android:layout_width="353dp"
-        android:layout_height="176dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="24dp"
-        android:contentDescription="@string/imagen"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewWelcome"
-        app:srcCompat="@drawable/plantoo" />
-
-    <TextView
-        android:id="@+id/textViewReg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
-        android:text="¿No estas registrado?"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextPassword" />
-
-    <TextView
-        android:id="@+id/textViewRegIni"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="24dp"
-        android:text="Registrate"
-        android:textColor="@android:color/holo_blue_light"
-        app:layout_constraintStart_toEndOf="@+id/textViewReg"
-        app:layout_constraintTop_toBottomOf="@+id/editTextPassword" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
