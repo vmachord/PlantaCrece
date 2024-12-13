@@ -15,7 +15,6 @@
         android:fontFamily="@font/aventa"
         android:lineHeight="14px"
         android:text="Log into your account"
-        android:textColor="@android:color/black"
         android:textColor="@color/dark_green"
         android:textSize="32sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -34,7 +33,6 @@
         android:fontFamily="@font/aventa"
         android:lineHeight="14px"
         android:text="Don't have an account yet?"
-        android:textColor="@android:color/black"
         android:textColor="@color/dark_green"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -64,36 +62,39 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
         android:autofillHints=""
-        android:hint="Email"
-        android:textColorHint="@color/dark_green"
-        android:fontFamily="@font/aventa"
-        android:inputType="textEmailAddress"
         android:background="@drawable/rounded_edittext"
+        android:fontFamily="@font/aventa"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:textColorHint="@color/dark_green"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.593"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.447" />
+        app:layout_constraintVertical_bias="0.417" />
+
+    <!-- Botón para el inicio de sesión -->
+
+    <!-- Texto para restablecer la contraseña -->
 
     <EditText
         android:id="@+id/editTextPassword"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="36dp"
         android:autofillHints=""
-        android:hint="@string/password"
-        android:textColorHint="@color/dark_green"
-        android:fontFamily="@font/aventa"
-        android:inputType="textPassword"
         android:background="@drawable/rounded_edittext"
+        android:fontFamily="@font/aventa"
+        android:hint="@string/password"
+        android:inputType="textPassword"
+        android:textColorHint="@color/dark_green"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/editTextEmail" />
-
-    <!-- Botón para el inicio de sesión -->
-
-    <!-- Texto para restablecer la contraseña -->
 
     <Button
         android:id="@+id/buttonLogin"
@@ -104,6 +105,7 @@
         android:textColor="@android:color/white"
         android:backgroundTint="@color/dark_green"
         android:fontFamily="@font/aventa"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
