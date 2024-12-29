@@ -84,54 +84,55 @@
 
 
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="95dp"
-        android:layout_gravity="bottom"
-        android:background="?attr/colorPrimary"
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:gravity="center"
+        android:background="@color/white"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent">
 
+        <!-- Lupa Button -->
         <ImageButton
             android:id="@+id/imageButtonLupa"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="desc_search_button"
-            android:scaleType="centerInside"
-            android:src="@drawable/boton_lupa" />
+            android:background="@android:color/transparent"
+            android:contentDescription="Lupa"
+            android:src="@drawable/ic_home" />
 
+        <!-- Garden Button -->
         <ImageButton
             android:id="@+id/imageButtonMaceta"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="desc_pot_button"
-            android:scaleType="centerInside"
-            android:src="@drawable/boton_maceta" />
+            android:background="@android:color/transparent"
+            android:contentDescription="Garden"
+            android:src="@drawable/ic_tulip" />
 
+        <!-- Plantdex Button -->
         <ImageButton
             android:id="@+id/imageButtonPlantadex"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="desc_plantadex_button"
-            android:scaleType="centerInside"
-            android:src="@drawable/boton_plantadex" />
+            android:background="@android:color/transparent"
+            android:contentDescription="Plantdex"
+            android:src="@drawable/ic_plantdex" />
 
+        <!-- Profile Button -->
         <ImageButton
             android:id="@+id/imageButtonUsuario"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="desc_user_button"
-            android:scaleType="centerInside"
-            android:src="@drawable/boton_usuario" />
+            android:background="@android:color/transparent"
+            android:contentDescription="Profile"
+            android:src="@drawable/ic_profile" />
+
     </LinearLayout>
 
 

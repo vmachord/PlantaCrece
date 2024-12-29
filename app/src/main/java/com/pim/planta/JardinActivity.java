@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -27,11 +28,13 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.pim.planta.db.DAO;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.UserLogged;
 import com.pim.planta.models.UserPlantRelation;
+import com.pim.planta.R;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -39,7 +42,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class JardinActivity extends AppCompatActivity {
-    private TextView textViewPlantoo;
+
     public static int currentImageIndex = 1;
     private int previousImageIndex = -1;
     private static final String CHANNEL_ID = "default";
@@ -59,7 +62,7 @@ public class JardinActivity extends AppCompatActivity {
         WorkManager.getInstance(this).enqueue(notificationWorkRequest);
 
         setUpBottom();
-        textViewPlantoo = findViewById(R.id.textViewPlantoo);
+
         ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
         imageButtonOjo.setOnClickListener(v -> {
             Intent intent = new Intent(JardinActivity.this, InvernaderoActivity.class);
@@ -112,6 +115,9 @@ public class JardinActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
+
+
+
 
     //Se llama cada vez que la actividad vuelve a ser visible
     @Override
@@ -179,7 +185,7 @@ public class JardinActivity extends AppCompatActivity {
         // Mostrar la imagen adecuada según la media
         int imageIndex = getImageBasedOnAverageTime(averageUsageTime);
 
-        // Actualiza el TextView con los tiempos de uso de cada aplicación
+        /* Actualiza el TextView con los tiempos de uso de cada aplicación
         String usageSummary = "Tiempo de uso:\n" +
                 "Instagram: " + formatTime(instagramUsageTime) + "\n" +
                 "TikTok: " + formatTime(tiktokUsageTime) + "\n" +
@@ -197,7 +203,7 @@ public class JardinActivity extends AppCompatActivity {
             selectedPlant = "rosa";
         }
         setImageBasedOnUsage(selectedPlant,imageIndex);
-        //setImageBasedOnUsage(imageIndex);
+        //setImageBasedOnUsage(imageIndex);*/
     }
 
     // Función para calcular el índice de la imagen según la media de tiempo de uso
@@ -274,7 +280,7 @@ public class JardinActivity extends AppCompatActivity {
         String imageName = "image_" + sanitizedPlantName + imageIndex;
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
 
-        ImageView imageView = findViewById(R.id.imageView);
+        ImageView imageView = findViewById(R.id.plant_image);
 
         // Verificar si la imagen existe
         if (resID != 0) {
@@ -299,10 +305,10 @@ public class JardinActivity extends AppCompatActivity {
                 .replaceAll("[ç]", "c");
     }
 
-    private String formatTime(long milliseconds) {
+    /*private String formatTime(long milliseconds) {
         long seconds = (milliseconds / 1000) % 60;
         long minutes = (milliseconds / (1000 * 60)) % 60;
         long hours = (milliseconds / (1000 * 60 * 60)) % 24;
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
-    }
+    }*/
 }
