@@ -57,6 +57,8 @@ public class PerfilActivity extends AppCompatActivity{
     public static int currentImageIndex = 1;
     private int previousImageIndex = -1;
     private TextView textViewPlantoo;
+    private TextView textViewText;
+    private TextView textViewText2;
 
     private long instagramUsageTime = 0;
     private long tiktokUsageTime = 0;
@@ -73,6 +75,11 @@ public class PerfilActivity extends AppCompatActivity{
         setUpBottom();
         textViewPlantoo = findViewById(R.id.textView4);
         trackAppUsage();
+        textViewText = findViewById(R.id.textView8);
+        textViewText.setText("Bloomed on 14th November 2024");
+        textViewText2 = findViewById(R.id.textView9);
+        textViewText2.setText("Scientific plant name: Tulipa\n Nicname: Nacho de Tulipán.");
+
     }
 
     private void initializeGraph() {
@@ -122,7 +129,7 @@ public class PerfilActivity extends AppCompatActivity{
         }
 
         // Crear el conjunto de datos para las barras apiladas
-        BarDataSet barDataSet = new BarDataSet(barEntries, "Uso Apps");
+        BarDataSet barDataSet = new BarDataSet(barEntries, "");
         barDataSet.setStackLabels(new String[]{"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"});
         barDataSet.setColors(new int[]{
                 Color.parseColor("#1B5E20"),  // Instagram

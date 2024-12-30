@@ -9,11 +9,10 @@
 
     <FrameLayout
         android:layout_width="405dp"
-        android:layout_height="627dp"
-        android:layout_marginTop="192dp"
+        android:layout_height="618dp"
+        android:layout_marginTop="252dp"
         android:layout_marginEnd="4dp"
         android:background="@drawable/round_border_top"
-        android:elevation="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -22,19 +21,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:layout_marginTop="20dp"
             android:layout_marginStart="24dp"
+            android:layout_marginTop="20dp"
             android:layout_marginBottom="16dp"
-            android:text="Time use"
-            android:fontFamily="@font/relay_fredoka_medium" />
+            android:fontFamily="@font/relay_fredoka_medium"
+            android:text="Time use" />
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="287dp"
-            android:layout_marginTop="46dp"
-            android:background="@drawable/rounded_background"
             android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp">
+            android:layout_marginTop="46dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/rounded_background">
 
             <com.github.mikephil.charting.charts.BarChart
                 android:id="@+id/bar_chart"
@@ -47,8 +46,8 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="219dp"
-            android:layout_marginTop="360dp"
             android:layout_marginStart="24dp"
+            android:layout_marginTop="360dp"
             android:layout_marginEnd="24dp"
             android:background="@drawable/rounded_background">
 
@@ -56,11 +55,11 @@
                 android:id="@+id/textView4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView"
-                android:layout_marginTop="16dp"
                 android:layout_marginLeft="80dp"
-                android:textSize="18sp"
-            android:fontFamily="@font/relay_kumbh_sans_regular"/>
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/relay_kumbh_sans_regular"
+                android:text="TextView"
+                android:textSize="18sp" />
         </FrameLayout>
     </FrameLayout>
 
@@ -68,16 +67,15 @@
         android:id="@+id/user_name"
         android:layout_width="288dp"
         android:layout_height="100dp"
-        android:layout_marginStart="44dp"
-        android:layout_marginTop="92dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="88dp"
+        android:fontFamily="@font/relay_kumbh_sans_medium"
         android:gravity="center"
         android:text="NOMBRE DE USUARIO"
-        android:textSize="24sp"
         android:textColor="@android:color/holo_green_dark"
+        android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:fontFamily="@font/relay_kumbh_sans_medium"/>
-
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/profile_image"
@@ -85,7 +83,7 @@
         android:layout_height="100dp"
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="168dp"
+        android:layout_marginEnd="160dp"
         android:background="@drawable/circle_border"
         android:clipToOutline="true"
         android:scaleType="centerCrop"
@@ -144,5 +142,27 @@
             android:src="@drawable/ic_profile" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="88dp"
+        android:layout_marginTop="80dp"
+        android:fontFamily="@font/relay_kumbh_sans_medium"
+        android:text="TextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/user_name" />
+
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="108dp"
+        android:layout_marginTop="28dp"
+        android:fontFamily="@font/relay_kumbh_sans_regular"
+        android:text="TextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
