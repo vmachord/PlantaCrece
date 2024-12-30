@@ -5,26 +5,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/home_screen"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient">
 
-    <!-- Content Area -->
-    <LinearLayout
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content_area"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:background="@color/white"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/background_plantoo"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Header with Plant Name and Level -->
+
         <LinearLayout
+            android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/plant_name"
@@ -42,68 +44,94 @@
                 android:background="@color/black" />
         </LinearLayout>
 
-        <!-- Interaction Icons -->
+
         <LinearLayout
+            android:id="@+id/linearLayout3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="16dp"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="parent">
 
-            <!-- Botón Gesture -->
-            <ImageButton
-                android:id="@+id/icon_gesture"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="Gesture Icon"
-                android:src="@drawable/ic_gesture" />
-
-            <!-- Botón Water -->
-            <ImageButton
-                android:id="@+id/icon_water"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="24dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="Water Icon"
-                android:src="@drawable/ic_water" />
-
-            <!-- Botón Ojo -->
-            <ImageButton
-                android:id="@+id/imageButtonOjo"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="24dp"
-                android:background="@null"
-                android:contentDescription="desc_eye_button"
-                android:scaleType="fitCenter"
-                android:src="@drawable/boton_ojo" />
 
         </LinearLayout>
 
-        <!-- Plant Image -->
+
         <ImageView
             android:id="@+id/plant_image"
-            android:layout_width="274dp"
-            android:layout_height="372dp"
+            android:layout_width="187dp"
+            android:layout_height="304dp"
             android:layout_gravity="center"
+            android:layout_marginBottom="80dp"
             android:contentDescription="Plant Image"
-            android:src="@drawable/tulipan" />
+            android:src="@drawable/tulipan"
+            app:layout_constraintBottom_toTopOf="@+id/btn_my_cares"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.415"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
 
-        <!-- My Cares Button -->
         <Button
             android:id="@+id/btn_my_cares"
             android:layout_width="265dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="24dp"
             android:backgroundTint="#083c24"
             android:text="My cares"
-            android:textColor="#FEFEFE" />
-    </LinearLayout>
+            android:textColor="#FEFEFE"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/linearLayout2"
+            app:layout_constraintVertical_bias="0.949" />
 
-    <!-- Bottom Navigation replaced by ImageButtons -->
+        <ImageButton
+            android:id="@+id/icon_gesture"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Gesture Icon"
+            android:src="@drawable/ic_gesture"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.33"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+            app:layout_constraintVertical_bias="0.059" />
+
+        <ImageButton
+            android:id="@+id/icon_water"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Water Icon"
+            android:src="@drawable/ic_water"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+            app:layout_constraintVertical_bias="0.059" />
+
+        <ImageButton
+            android:id="@+id/imageButtonOjo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@null"
+            android:contentDescription="Eye Button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/boton_ojo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.672"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+            app:layout_constraintVertical_bias="0.059" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
@@ -114,7 +142,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Lupa Button -->
+
         <ImageButton
             android:id="@+id/imageButtonLupa"
             android:layout_width="0dp"
@@ -124,7 +152,7 @@
             android:contentDescription="Lupa"
             android:src="@drawable/ic_home" />
 
-        <!-- Garden Button -->
+
         <ImageButton
             android:id="@+id/imageButtonMaceta"
             android:layout_width="0dp"
@@ -134,7 +162,7 @@
             android:contentDescription="Garden"
             android:src="@drawable/ic_tulip" />
 
-        <!-- Plantdex Button -->
+
         <ImageButton
             android:id="@+id/imageButtonPlantadex"
             android:layout_width="0dp"
@@ -144,7 +172,7 @@
             android:contentDescription="Plantdex"
             android:src="@drawable/ic_plantdex" />
 
-        <!-- Profile Button -->
+
         <ImageButton
             android:id="@+id/imageButtonUsuario"
             android:layout_width="0dp"

@@ -185,7 +185,7 @@ public class JardinActivity extends AppCompatActivity {
         // Mostrar la imagen adecuada según la media
         int imageIndex = getImageBasedOnAverageTime(averageUsageTime);
 
-        /* Actualiza el TextView con los tiempos de uso de cada aplicación
+        //Actualiza el TextView con los tiempos de uso de cada aplicación
         String usageSummary = "Tiempo de uso:\n" +
                 "Instagram: " + formatTime(instagramUsageTime) + "\n" +
                 "TikTok: " + formatTime(tiktokUsageTime) + "\n" +
@@ -194,7 +194,7 @@ public class JardinActivity extends AppCompatActivity {
                 "Facebook: " + formatTime(facebookUsageTime) + "\n" +
                 "Media de uso: " + formatTime(averageUsageTime);
 
-        textViewPlantoo.setText(usageSummary);
+
         if(previousImageIndex == -1)
             previousImageIndex = imageIndex;
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
@@ -203,7 +203,7 @@ public class JardinActivity extends AppCompatActivity {
             selectedPlant = "rosa";
         }
         setImageBasedOnUsage(selectedPlant,imageIndex);
-        //setImageBasedOnUsage(imageIndex);*/
+        //setImageBasedOnUsage(imageIndex);
     }
 
     // Función para calcular el índice de la imagen según la media de tiempo de uso
@@ -261,15 +261,15 @@ public class JardinActivity extends AppCompatActivity {
         notificationManager.notify(1, builder.build());
     }
 
-/*
+
     // Función para mostrar la imagen según el índice
     private void setImageBasedOnUsage(int imageIndex) {
         String imageName = "image_" + imageIndex;
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
-        ImageView imageView = findViewById(R.id.imageView);
+        ImageView imageView = findViewById(R.id.plant_image);
         imageView.setImageResource(resID);
         currentImageIndex = imageIndex;
-    }*/
+    }
 
     private void setImageBasedOnUsage(String plantName, int imageIndex) {
         // Reemplazar los espacios por guiones bajos y eliminar los acentos
@@ -305,10 +305,10 @@ public class JardinActivity extends AppCompatActivity {
                 .replaceAll("[ç]", "c");
     }
 
-    /*private String formatTime(long milliseconds) {
+    private String formatTime(long milliseconds) {
         long seconds = (milliseconds / 1000) % 60;
         long minutes = (milliseconds / (1000 * 60)) % 60;
         long hours = (milliseconds / (1000 * 60 * 60)) % 24;
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
-    }*/
+    }
 }
