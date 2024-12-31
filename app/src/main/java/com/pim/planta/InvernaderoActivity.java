@@ -29,14 +29,14 @@ public class InvernaderoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invernadero);
-        imageView2 = findViewById(R.id.imageView2);
+        imageView2 = findViewById(R.id.plantoo);
 
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
         String selectedPlant = sharedPreferences.getString("selectedPlant", null);
 
         PlantRepository repository = PlantRepository.getInstance(this);
         DAO dao = repository.getPlantaDAO();
-        setText(selectedPlant, dao);
+        //setText(selectedPlant, dao);
 
         ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
         imageButtonOjo.setOnClickListener(v -> {
@@ -44,8 +44,8 @@ public class InvernaderoActivity extends AppCompatActivity {
             startActivity(intent); // Volver a pantalla anterior
         });
 
-        Button Mas1 = findViewById(R.id.buttonMas1);
-        Mas1.setOnClickListener(v -> {
+       // Button Mas1 = findViewById(R.id.buttonMas1);
+      /*  Mas1.setOnClickListener(v -> {
             incrementGrowCountInBackground(UserLogged.getInstance().getCurrentUser().getId(), selectedPlant, dao);
             try {
                 sleep(100);
@@ -64,9 +64,9 @@ public class InvernaderoActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
             setText(selectedPlant, dao);
-        });
+        });    */
     }
-    private void setText(String selectedPlant, DAO dao){
+    /*private void setText(String selectedPlant, DAO dao){
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             int userId = UserLogged.getInstance().getCurrentUser().getId(); // Get the logged-in user's ID
@@ -86,7 +86,7 @@ public class InvernaderoActivity extends AppCompatActivity {
                 }
             });
         });
-    }
+    }*/
     private static void incrementGrowCountInBackground(final int userId, final String plantName, final DAO dao) {
         new AsyncTask<Void, Void, Void>() {
             @Override
