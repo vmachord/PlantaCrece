@@ -13,6 +13,7 @@ roomCommon = "2.6.1"
 roomCommonJvm = "2.7.0-alpha11"
 roomRuntimeAndroid = "2.7.0-alpha11"
 databindingAdapters = "8.7.2"
+places = "4.1.0"
 
 
 [libraries]
@@ -28,6 +29,7 @@ room-common = { group = "androidx.room", name = "room-common", version.ref = "ro
 room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
 room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomRuntimeAndroid" }
 databinding-adapters = { group = "androidx.databinding", name = "databinding-adapters", version.ref = "databindingAdapters" }
+places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -10,6 +10,8 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
@@ -18,6 +20,8 @@ import com.pim.planta.models.DiaryEntry;
 import com.pim.planta.models.OnDiaryEntryListener;
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserLogged;
+import com.pim.planta.models.YearAdapter;
+import com.pim.planta.models.YearSelectorButton;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -36,6 +40,8 @@ public class DiaryActivity extends AppCompatActivity  {
 
     private Date date;
 
+    private YearSelectorButton yearSelectorButton;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +51,22 @@ public class DiaryActivity extends AppCompatActivity  {
 
         calendarDraw = findViewById(R.id.calendar_draw);
         calendarDraw.setVisibility(View.VISIBLE);
+
+        yearSelectorButton = findViewById(R.id.year_selector_button);
+        yearSelectorButton.setCalendarDraw(calendarDraw);
+        yearSelectorButton.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                RecyclerView yearRecyclerView = yearSelectorButton.yearRecyclerView;
+                YearAdapter yearAdapter = new YearAdapter(yearSelectorButton.getCurrentYear(), yearSelectorButton::onYearSelected, yearSelectorButton.getMinimumYear());
+                yearRecyclerView.setAdapter(yearAdapter);
+                yearRecyclerView.setLayoutManager(new LinearLayoutManager(DiaryActivity.this, LinearLayoutManager.HORIZONTAL, false));
+
+                yearRecyclerView.setVisibility(View.VISIBLE);
+
+                yearSelectorButton.removeOnLayoutChangeListener(this);
+            }
+        });
 
         plantRepo = PlantRepository.getInstance(this);
 
