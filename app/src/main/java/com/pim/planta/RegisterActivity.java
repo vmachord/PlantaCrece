@@ -23,6 +23,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText emailEditText, passwordEditText, userEditText;
     private Button registerButton;
     private User newUser;
+    private TextView logInText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +34,15 @@ public class RegisterActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.editTextEmail);
         passwordEditText = findViewById(R.id.editTextPassword);
         registerButton = findViewById(R.id.buttonRegister);
+        logInText = findViewById(R.id.textViewToLogIn);
+
+        logInText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
 
         TextView termsConditions = findViewById(R.id.terms_conditions);
         termsConditions.setOnClickListener(new View.OnClickListener() {
@@ -59,7 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
 
             newUser = new User(user, email, password);
-            registerEmail(newUser);
+            registerUser(newUser);
             PlantRepository plantRepo = PlantRepository.getInstance(this);
             DAO dao = plantRepo.getPlantaDAO();
             for (Plant plant : dao.getAllPlantas()) {
@@ -115,13 +125,11 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private boolean isValidEmail(String email) {
-        // Puedes usar una expresión regular más compleja para validar el email
         return email.contains("@") && email.contains(".");
     }
 
-    private void registerEmail(User user){
+    private void registerUser(User user){
         PlantRepository plantRepo = PlantRepository.getInstance(this);
-
         DatabaseExecutor.execute(() -> {
             plantRepo.getPlantaDAO().insert(user);
         });

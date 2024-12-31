@@ -36,7 +36,7 @@
         android:textColor="@color/dark_green"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.308"
+        app:layout_constraintHorizontal_bias="0.275"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewLogin" />
 
@@ -44,6 +44,7 @@
         android:id="@+id/textViewToRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="16dp"
         android:fontFamily="@font/aventa"
         android:lineHeight="14px"
@@ -51,9 +52,7 @@
         android:textColor="@color/dark_green"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.781"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textViewNoAccount"
         app:layout_constraintTop_toBottomOf="@+id/textViewLogin" />
 
     <EditText
@@ -100,11 +99,11 @@
         android:id="@+id/buttonLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="96dp"
-        android:text="Log in"
-        android:textColor="@android:color/white"
+        android:layout_marginTop="43dp"
         android:backgroundTint="@color/dark_green"
         android:fontFamily="@font/aventa"
+        android:text="Log in"
+        android:textColor="@android:color/white"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
