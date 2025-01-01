@@ -6,17 +6,16 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
+import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
+
+import com.pim.planta.R;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -24,55 +23,56 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class CalendarDraw extends View {
 
-    private Paint dayPaint, headerPaint, backGroundPaint, emotionPaint, buttonPaint;
+    private Paint dayPaint, headerPaint, backGroundPaint, underlinePaint;
     private int currentMonth, currentYear;
+    private Typeface customFont, customFontBold;
 
     // Almacena el color de fondo para cada día
     private HashMap<Long, Integer> dayBackgroundColors = new HashMap<>();
     private String currentPerspective;
 
-
-
     private List<DiaryEntry> diaryEntries;
-
 
     public CalendarDraw(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
+        currentYear = LocalDate.now().getYear();
     }
 
     private void init() {
         dayBackgroundColors = new HashMap<>();
+        customFont = ResourcesCompat.getFont(getContext(), R.font.aventa);
+        customFontBold = Typeface.create(customFont, Typeface.BOLD);
 
         dayPaint = new Paint();
-        dayPaint.setColor(Color.BLACK);
-        dayPaint.setTextSize(30);
+        dayPaint.setColor(Color.parseColor("#073E24"));;
+        dayPaint.setTextSize(46);
         dayPaint.setTextAlign(Paint.Align.CENTER);
+        dayPaint.setTypeface(customFont);
+
+        underlinePaint = new Paint();
+        underlinePaint.setColor(Color.parseColor("#35D18F"));
+        underlinePaint.setStrokeWidth(5f);
 
         headerPaint = new Paint();
-        headerPaint.setColor(Color.BLUE);
-        headerPaint.setTextSize(40);
+        headerPaint.setColor(Color.parseColor("#073E24"));
+        headerPaint.setTextSize(48);
         headerPaint.setTextAlign(Paint.Align.CENTER);
+        headerPaint.setTypeface(customFontBold);
 
         backGroundPaint = new Paint();
         backGroundPaint.setColor(Color.WHITE);
         backGroundPaint.setStyle(Paint.Style.FILL);
 
-        emotionPaint = new Paint();
-        emotionPaint.setStyle(Paint.Style.FILL);
+        //emotionPaint = new Paint();
+        //emotionPaint.setStyle(Paint.Style.FILL);
 
         LocalDate today = LocalDate.now();
         currentMonth = today.getMonthValue(); // Mes actual (1-12)
@@ -82,39 +82,25 @@ public class CalendarDraw extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawColor(Color.LTGRAY);
+        float cornerRadius = getWidth() * 0.05f;
+        RectF calendarBounds = new RectF(0, 0, getWidth(), getHeight());
+        canvas.drawRoundRect(calendarBounds, cornerRadius, cornerRadius, backGroundPaint);
+        canvas.clipRect(calendarBounds);
         drawMonthHeader(canvas);
         drawDays(canvas);
+        invalidate();
         //drawButtonChangePerspective(canvas);
     }
     private void drawMonthHeader(Canvas canvas) {
-        // Dibuja el encabezado (mes y año)
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault());
-        String monthYear = LocalDate.of(currentYear, currentMonth, 1).format(formatter);
+        // Dibuja el encabezado (solo mes)
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM", Locale.ENGLISH);
+        String monthName = LocalDate.of(currentYear, currentMonth, 1).format(formatter);
 
-        canvas.drawText(monthYear, getWidth() / 2, 50, headerPaint);
+        // Convert month name to uppercase
+        String monthNameUppercase = monthName.toUpperCase();
 
-        // Coordenadas para las flechas de cambio de mes
-        float centerX1 = getWidth() / 5;   // Izquierda
-        float centerX2 = 4 * getWidth() / 5; // Derecha
-        float centerY = 60;
-        float textSize = 50;
-        float radius = 50;
-
-        // Cambiar tamaño del texto para flechas
-        headerPaint.setTextSize(textSize);
-
-        // Dibuja las flechas
-        canvas.drawText("<", centerX1 - textSize / 2, centerY + textSize / 2, headerPaint);
-        canvas.drawText(">", centerX2 - textSize / 2, centerY + textSize / 2, headerPaint);
-
-        // Añade círculos para mostrar las hitboxes de las flechas
-        Paint hitboxPaint = new Paint();
-        hitboxPaint.setColor(Color.argb(100, 255, 0, 0)); // Color rojo translúcido
-        hitboxPaint.setStyle(Paint.Style.FILL);
-
-        canvas.drawCircle(centerX1, centerY, radius, hitboxPaint); // Círculo izquierdo
-        canvas.drawCircle(centerX2, centerY, radius, hitboxPaint); // Círculo derecho
+        // Add margin to the top
+        canvas.drawText(monthNameUppercase, getWidth() / 2, 100, headerPaint);
     }
 
 
@@ -140,8 +126,8 @@ public class CalendarDraw extends View {
             float x = column * dayWidth + dayWidth / 2; // Coordenada X (centro de la celda)
             float y = row * dayHeight + dayHeight / 2 + 100; // Coordenada Y (centro de la celda)
 
-            emotionPaint.setColor(Color.WHITE);
-            canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
+            //emotionPaint.setColor(Color.WHITE);
+            //canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
             canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
         }
 
@@ -160,14 +146,18 @@ public class CalendarDraw extends View {
                 float y = row * dayHeight + dayHeight / 2 + 100;
 
                 // Dibujar el día con el color correspondiente a la emoción
-                emotionPaint.setColor(getColorForEmotion(entry.emotionToString()));
-                canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
+                //emotionPaint.setColor(getColorForEmotion(entry.emotionToString()));
+                //canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
                 canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
+                float lineStartX = x - dayWidth / 4;
+                float lineEndX = x + dayWidth / 4;
+                float lineY = y + 20;
+                canvas.drawLine(lineStartX, lineY, lineEndX, lineY, underlinePaint);
             }
         }
     }
 
-    private void drawButtonChangePerspective(Canvas canvas) {
+    /*private void drawButtonChangePerspective(Canvas canvas) {
         // Establecer el tamaño y el color del botón
         float buttonRadius = 80; // Radio del botón
         float buttonMargin = 40; // Margen desde el borde
@@ -186,7 +176,7 @@ public class CalendarDraw extends View {
         float textX = buttonX - textWidth / 2;
         float textY = buttonY + 10; // Ajuste vertical para centrar el texto
         canvas.drawText(buttonText, textX, textY, buttonPaint);
-    }
+    }*/
 
     // Método para obtener el texto del botón según la perspectiva actual
     private String getCurrentPerspectiveText() {
@@ -344,6 +334,10 @@ public class CalendarDraw extends View {
 
     public int getCurrentYear() {
         return currentYear;
+    }
+
+    public void setCurrentYear(int currentYear) {
+        this.currentYear = currentYear;
     }
 
     public int getCurrentMonth() {

@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.room.common.jvm)
     implementation("androidx.room:room-runtime:2.5.0")
     implementation(libs.databinding.adapters)
+    implementation(libs.places)
     annotationProcessor("androidx.room:room-compiler:2.5.0")
 
     testImplementation(libs.junit)
