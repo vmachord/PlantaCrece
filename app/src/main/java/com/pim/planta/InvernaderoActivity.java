@@ -30,13 +30,16 @@ import java.util.concurrent.Executors;
 
 public class InvernaderoActivity extends AppCompatActivity {
     private ImageView imageView2;
-    private static int[] IMAGES = {
+    /*private static int[] IMAGES = {
             R.drawable.image_rosa,
             R.drawable.image_girasol,
             R.drawable.image_diente_de_leon,
             R.drawable.image_margarita,
             R.drawable.image_tulipan
-    };
+    };*/
+
+    private static int[] IMAGES = {};
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +59,7 @@ public class InvernaderoActivity extends AppCompatActivity {
             startActivity(intent); // Volver a pantalla anterior
         });
 
-        Button Mas1 = findViewById(R.id.buttonMas1);
+      /*  Button Mas1 = findViewById(R.id.buttonMas1);
         Mas1.setOnClickListener(v -> {
             incrementGrowCountInBackground(UserLogged.getInstance().getCurrentUser().getId(), selectedPlant, dao);
             try {
@@ -76,18 +79,20 @@ public class InvernaderoActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
             setText(selectedPlant, dao);
-        });
+        });  */
+        setImage(dao);
         ImageView imageView9 = findViewById(R.id.imageView9);
         ImageView imageView = findViewById(R.id.imageView);
         ImageView imageView2 = findViewById(R.id.imageView2);
         ImageView imageView10 = findViewById(R.id.imageView10);
+        ImageView imageView11 = findViewById(R.id.imageView11);
         //setImage(dao);
         // Establecer un OnClickListener para la imagen
         imageView9.setOnClickListener(v -> showImagePickerDialog("imageView9"));
         imageView.setOnClickListener(v -> showImagePickerDialog("imageView"));
         imageView2.setOnClickListener(v -> showImagePickerDialog("imageView2"));
         imageView10.setOnClickListener(v -> showImagePickerDialog("imageView10"));
-
+        imageView11.setOnClickListener(v -> showImagePickerDialog("imageView11"));
     }
     private void setText(String selectedPlant, DAO dao){
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -143,32 +148,48 @@ public class InvernaderoActivity extends AppCompatActivity {
         dialog.show();
     }
 
-
-
-    private void setImage( DAO dao){
+    private void setImage(DAO dao) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
-            int userId = UserLogged.getInstance().getCurrentUser().getId(); // Obtener el ID del usuario logueado
+            int userId = UserLogged.getInstance().getCurrentUser().getId();
             List<UserPlantRelation> relations = dao.getUserPlantRelations(userId);
 
-            // Crear una lista para almacenar los IDs de imágenes
-            List<Integer> imageList = new ArrayList<>();
+            // Lista dinámica para almacenar las imágenes de plantas con growCount > 0
+            List<Integer> filteredImages = new ArrayList<>();
 
-            // Iterar sobre las relaciones de plantas
             for (UserPlantRelation relation : relations) {
+                Plant plant = dao.getPlantaById(relation.plantId);
+
+                // Verifica si el growCount es mayor que 0
                 if (relation.growCount > 0) {
-                    // Obtener la planta usando el ID de planta
-                    Plant plant = dao.getPlantaById(relation.plantId);
-                    int plantImageId = plant.getImageResourceId(); // Obtener el ID de la imagen basado en la planta
-                  //  Toast.makeText(InvernaderoActivity.this, "Imagen seleccionada: " + plantImageId, Toast.LENGTH_SHORT).show();
-                    imageList.add(plantImageId);
+                    // Agrega la imagen correspondiente al arreglo filtrado
+                    switch (plant.getName()) {
+                        case "Rosa":
+                            filteredImages.add(R.drawable.image_rosa);
+                            break;
+                        case "Girasol":
+                            filteredImages.add(R.drawable.image_girasol);
+                            break;
+                        case "Diente de León":
+                            filteredImages.add(R.drawable.image_diente_de_leon);
+                            break;
+                        case "Margarita":
+                            filteredImages.add(R.drawable.image_margarita);
+                            break;
+                        case "Tulipan":
+                            filteredImages.add(R.drawable.image_tulipan);
+                            break;
+                    }
                 }
             }
 
-            // Convertir la lista de imágenes a un arreglo para asignarlo a IMAGES
-           // IMAGES = new int[imageList.size()];
-            for (int i = 0; i < imageList.size(); i++) {
-               // IMAGES[i] = imageList.get(i);
+            int[] resultImages = new int[filteredImages.size()];
+            for (int i = 0; i < filteredImages.size(); i++) {
+                resultImages[i] = filteredImages.get(i);
+            }
+
+            synchronized (IMAGES) {
+                IMAGES = resultImages;
             }
         });
     }
@@ -230,7 +251,7 @@ public class InvernaderoActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
 
-        String[] imageViewIds = {"imageView9", "imageView", "imageView2", "imageView10"};
+        String[] imageViewIds = {"imageView9", "imageView", "imageView2", "imageView10","imageView11"};
         for (String imageViewId : imageViewIds) {
             int selectedImageId = sharedPreferences.getInt(imageViewId, -1);
             if (selectedImageId != -1) {
