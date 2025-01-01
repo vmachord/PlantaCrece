@@ -313,18 +313,17 @@ public class CalendarDraw extends View {
     public void prevMonth() {
         currentMonth--;
         if (currentMonth < 1) {
-            currentMonth = 12;
-            currentYear--;
+            currentMonth = 1;
         }
         invalidate();
     }
 
     public void nextMonth() {
         currentMonth++;
-        if (currentMonth > 12) {
-            currentMonth = 1;
-            currentYear++;
-        }
+        if (currentMonth > 12)
+            currentMonth = 12;
+        if (currentMonth > LocalDate.now().getMonthValue() && currentYear == LocalDate.now().getYear())
+            currentMonth = LocalDate.now().getMonthValue();
         invalidate();
     }
 
@@ -342,5 +341,9 @@ public class CalendarDraw extends View {
 
     public int getCurrentMonth() {
         return currentMonth;
+    }
+
+    public void setCurrentMonth(int monthValue) {
+        this.currentMonth = monthValue;
     }
 }

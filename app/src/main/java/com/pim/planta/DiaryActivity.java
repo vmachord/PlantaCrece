@@ -3,7 +3,6 @@ package com.pim.planta;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -42,6 +41,8 @@ public class DiaryActivity extends AppCompatActivity  {
 
     private YearSelectorButton yearSelectorButton;
 
+    private ImageButton previousMonthButton, nextMonthButton;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +52,17 @@ public class DiaryActivity extends AppCompatActivity  {
 
         calendarDraw = findViewById(R.id.calendar_draw);
         calendarDraw.setVisibility(View.VISIBLE);
+
+        previousMonthButton = findViewById(R.id.previousMonthButton);
+        previousMonthButton.setOnClickListener(v -> calendarDraw.prevMonth());
+        nextMonthButton = findViewById(R.id.nextMonthButton);
+        nextMonthButton.setOnClickListener(v -> calendarDraw.nextMonth());
+        previousMonthButton.setOnClickListener(v -> {
+            calendarDraw.prevMonth();
+        });
+        nextMonthButton.setOnClickListener(v -> {
+            calendarDraw.nextMonth();
+        });
 
         yearSelectorButton = findViewById(R.id.year_selector_button);
         yearSelectorButton.setCalendarDraw(calendarDraw);
@@ -83,7 +95,7 @@ public class DiaryActivity extends AppCompatActivity  {
                 float radius = 50;
 
                 // Comprobación de toque dentro de las hitboxes
-                if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
+                /*if (Math.pow(x - centerX1, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2)) {
                     Log.d("onTouch", "HA TOCADO FLECHA IZQUIERDA");
                     calendarDraw.prevMonth();
                     return true;
@@ -91,7 +103,7 @@ public class DiaryActivity extends AppCompatActivity  {
                     Log.d("onTouch", "HA TOCADO FLECHA DERECHA");
                     calendarDraw.nextMonth();
                     return true;
-                }
+                }*/
 
                 // Detectar si se tocó un día específico
                 int dayClicked = calendarDraw.getDayFromCoordinates(motionEvent.getX(), motionEvent.getY());

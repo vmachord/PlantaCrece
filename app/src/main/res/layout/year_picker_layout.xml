@@ -10,5 +10,5 @@
         android:orientation="horizontal"
         android:layout_gravity="center"
         android:background="@drawable/year_item_background"
-        android:paddingHorizontal="30dp" />
+        android:paddingHorizontal="25dp" />
 </FrameLayout>

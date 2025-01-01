@@ -1,5 +1,7 @@
 package com.pim.planta.models;
 
+import android.graphics.Color;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,8 +37,18 @@ public class YearAdapter extends RecyclerView.Adapter<YearAdapter.YearViewHolder
     @Override
     public void onBindViewHolder(@NonNull YearViewHolder holder, int position) {
         if (getItemViewType(position) == YEAR_VIEW_TYPE) {
-            int year = minimumYear + position - 2; // Adjust for empty spaces
-            holder.yearTextView.setText(String.valueOf(year));}
+            int year = minimumYear + position - 4; // Adjust for empty spaces
+            holder.yearTextView.setText(String.valueOf(year));
+            if (year == currentYear) {
+                // Selected year
+                holder.yearTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24); // Larger text size
+                holder.yearTextView.setTextColor(Color.WHITE); // White text color
+            } else {
+                // Other years
+                holder.yearTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16); // Smaller text size
+                holder.yearTextView.setTextColor(Color.LTGRAY); // Light gray text color
+            }
+        }
         else {
             // Handle empty spaces (e.g., make the TextView invisible)
             holder.yearTextView.setVisibility(View.INVISIBLE);
@@ -54,11 +66,11 @@ public class YearAdapter extends RecyclerView.Adapter<YearAdapter.YearViewHolder
     }
     @Override
     public int getItemCount() {
-        return (currentYear - minimumYear + 1) + 4; // Total items including 4 empty spaces
+        return (currentYear - minimumYear + 1) + 8; // Total items including 4 empty spaces
     }
     @Override
     public int getItemViewType(int position) {
-        if (position < 2 || position >= getItemCount() - 2) { // Check for 2 empty spaces on each side
+        if (position < 4 || position >= getItemCount() - 4) { // Check for 2 empty spaces on each side
             return EMPTY_VIEW_TYPE; // Empty space view type
         } else {
             return YEAR_VIEW_TYPE; // Year view type
@@ -67,6 +79,7 @@ public class YearAdapter extends RecyclerView.Adapter<YearAdapter.YearViewHolder
 
     public void setCurrentYear(int currentYear) {
         this.currentYear = currentYear;
+        notifyDataSetChanged();
     }
 
     static class YearViewHolder extends RecyclerView.ViewHolder {

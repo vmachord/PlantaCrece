@@ -1,7 +1,9 @@
 package com.pim.planta.models;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -56,7 +58,7 @@ public class YearSelectorButton extends FrameLayout {
 
         // Calculate holder width after RecyclerView layout
         yearRecyclerView.post(() -> {
-            YearAdapter.YearViewHolder viewHolder = (YearAdapter.YearViewHolder) yearRecyclerView.findViewHolderForAdapterPosition(2); // Changed to 2 to account for empty spaces
+            YearAdapter.YearViewHolder viewHolder = (YearAdapter.YearViewHolder) yearRecyclerView.findViewHolderForAdapterPosition(4); // Changed to 4 to account for empty spaces
             if (viewHolder != null) {
                 holderWidth = viewHolder.itemView.getWidth(); // Store holder width
                 yearAdapter.setHolderWidth(holderWidth); // Pass holderWidth to YearAdapter
@@ -64,10 +66,10 @@ public class YearSelectorButton extends FrameLayout {
                 // Smooth scroll to the current year to ensure it's centered
                 LinearLayoutManager layoutManager = (LinearLayoutManager) yearRecyclerView.getLayoutManager();
                 if (layoutManager != null) {
-                    int initialPosition = currentYear - minimumYear + 2; // +2 for 2 empty spaces before years
+                    int initialPosition = currentYear - minimumYear + 4; // +4 for 4 empty spaces before years
                     int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
                     int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
-                    int visibleItemCount = lastVisibleItemPosition - firstVisibleItemPosition + 1;
+                    int visibleItemCount = lastVisibleItemPosition - firstVisibleItemPosition + 3;
                     int offset = (yearRecyclerView.getWidth() - holderWidth * visibleItemCount) / 2;
                     layoutManager.scrollToPositionWithOffset(initialPosition, offset);
                 }
@@ -82,7 +84,7 @@ public class YearSelectorButton extends FrameLayout {
                     View centerView = snapHelper.findSnapView(yearRecyclerView.getLayoutManager());
                     if (centerView != null) {
                         int position = yearRecyclerView.getLayoutManager().getPosition(centerView);
-                        int selectedYear = minimumYear + position - 2; // Adjust for empty spaces
+                        int selectedYear = minimumYear + position - 4; // Adjust for empty spaces
                         onYearSelected(selectedYear);
                     }
                 }
@@ -102,9 +104,9 @@ public class YearSelectorButton extends FrameLayout {
                 // Allow snapping to first and last items
                 if (targetPosition == RecyclerView.NO_POSITION) {
                     if (velocityX > 0) {
-                        targetPosition = yearAdapter.getItemCount() - 3; // Snap to last year (2024)
+                        targetPosition = yearAdapter.getItemCount() - 5; // Snap to last year (2024)
                     } else if (velocityX < 0) {
-                        targetPosition = 2; // Snap to first year (2010)
+                        targetPosition = 4; // Snap to first year (2010)
                     }
                 }
 
@@ -122,7 +124,7 @@ public class YearSelectorButton extends FrameLayout {
 
         if (centerView != null) {
             int centerPosition = yearRecyclerView.getLayoutManager().getPosition(centerView);
-            int centeredYear = minimumYear + centerPosition - 2; // Adjust for empty spaces
+            int centeredYear = minimumYear + centerPosition - 4; // Adjust for empty spaces
 
             // Only trigger the callback if the clicked year is the centered year
             if (year == centeredYear) {
@@ -138,8 +140,27 @@ public class YearSelectorButton extends FrameLayout {
                     calendarDraw.invalidate(); // Invalidate CalendarDraw to redraw
                     calendarDraw.requestLayout(); // Request layout to ensure redraw
                 }
+
+                // Update the views directly
+                for (int i = 0; i < yearAdapter.getItemCount(); i++) {
+                    YearAdapter.YearViewHolder viewHolder = (YearAdapter.YearViewHolder) yearRecyclerView.findViewHolderForAdapterPosition(i);
+                    if (viewHolder != null) {
+                        int yearInView = minimumYear + i - 4; // Adjust for empty spaces
+                        if (yearInView == year) {
+                            // Selected year
+                            viewHolder.yearTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24); // Larger text size
+                            viewHolder.yearTextView.setTextColor(Color.WHITE); // White text color
+                        } else if (yearInView >= minimumYear && yearInView <= LocalDate.now().getYear()) { // Check if year is within visible range
+                            // Other years
+                            viewHolder.yearTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16); // Smaller text size
+                            viewHolder.yearTextView.setTextColor(Color.LTGRAY); // Light gray text color
+                        }
+                    }
+                }
             }
         }
+        if (currentYear==LocalDate.now().getYear() && calendarDraw.getCurrentMonth()>LocalDate.now().getMonthValue())
+            calendarDraw.setCurrentMonth(LocalDate.now().getMonthValue());
     }
 
     public int getCurrentYear() {
@@ -152,7 +173,7 @@ public class YearSelectorButton extends FrameLayout {
         yearAdapter.notifyDataSetChanged();
 
         // Scroll to the selected year
-        int position = currentYear - minimumYear + 2; // Adjust for centering
+        int position = currentYear - minimumYear + 4; // Adjust for centering
         yearRecyclerView.smoothScrollToPosition(position);
     }
 
