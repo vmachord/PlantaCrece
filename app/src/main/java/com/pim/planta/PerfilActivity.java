@@ -23,7 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.Canvas;
 
+import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.buffer.BarBuffer;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
@@ -85,76 +87,81 @@ public class PerfilActivity extends AppCompatActivity{
     private void initializeGraph() {
         barChart = findViewById(R.id.bar_chart);
 
-        // Obtener los tiempos de uso por día desde SharedPreferences
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
 
-        // Usamos los datos de uso de cada red social para cada día de la semana
-        float[][] appUsagePerDay = new float[7][5];  // 7 días de la semana, 5 aplicaciones
+        float[][] appUsagePerDay = new float[7][5]; // 7 días de la semana, 5 aplicaciones
 
-        // Los días de la semana en orden clásico (fijo)
         String[] daysOfWeek = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
-        // Obtener el día actual
         Calendar calendar = Calendar.getInstance();
-        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);  // Domingo = 1, Lunes = 2, ..., Sábado = 7
+        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK); // Domingo = 1, Lunes = 2, ..., Sábado = 7
 
-        // Cargar los datos de uso para cada aplicación y cada día de la semana
         for (int i = 0; i < 7; i++) {
             String day = daysOfWeek[i];
-
-            if (i == currentDayOfWeek - 2) {  // Restamos 2 para alinear el día de la semana con el índice
-                appUsagePerDay[i][0] = prefs.getLong(day + "_Instagram", 0) / 60f;
-                appUsagePerDay[i][1] = prefs.getLong(day + "_TikTok", 0) / 60f;
-                appUsagePerDay[i][2] = prefs.getLong(day + "_YouTube", 0) / 60f;
-                appUsagePerDay[i][3] = prefs.getLong(day + "_Twitter", 0) / 60f;
-                appUsagePerDay[i][4] = prefs.getLong(day + "_Facebook", 0) / 60f;
-            } else {
-                appUsagePerDay[i][0] = 0;
-                appUsagePerDay[i][1] = 0;
-                appUsagePerDay[i][2] = 0;
-                appUsagePerDay[i][3] = 0;
-                appUsagePerDay[i][4] = 0;
+            for (int j = 0; j < 5; j++) { // Recorrer las 5 aplicaciones
+                String appKey = day + "_" + (j == 0 ? "Instagram" : j == 1 ? "TikTok" : j == 2 ? "YouTube" : j == 3 ? "Twitter" : "Facebook");
+                appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 60f;
             }
         }
 
+        // Crear las entradas del gráfico
         ArrayList<BarEntry> barEntries = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
-            barEntries.add(new BarEntry(i, new float[]{
-                    appUsagePerDay[i][0],  // Instagram
-                    appUsagePerDay[i][1],  // TikTok
-                    appUsagePerDay[i][2],  // YouTube
-                    appUsagePerDay[i][3],  // Twitter
-                    appUsagePerDay[i][4]   // Facebook
-            }));
+            barEntries.add(new BarEntry(i, appUsagePerDay[i]));
         }
 
-        // Crear el conjunto de datos para las barras apiladas
         BarDataSet barDataSet = new BarDataSet(barEntries, "");
-        barDataSet.setStackLabels(new String[]{"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"});
+        barDataSet.setStackLabels(new String[]{"Insta", "TikTok", "YouTube", "Twitter", "Face"});
+
+        // Usar diferentes tonos de verde para las aplicaciones
         barDataSet.setColors(new int[]{
-                Color.parseColor("#1B5E20"),  // Instagram
-                Color.parseColor("#388E3C"),  // TikTok
-                Color.parseColor("#66BB6A"),  // YouTube
-                Color.parseColor("#81C784"),  // Twitter
-                Color.parseColor("#A5D6A7")   // Facebook
+                Color.parseColor("#1B5E20"), // Instagram - Verde oscuro
+                Color.parseColor("#2E7D32"), // TikTok - Verde medio oscuro
+                Color.parseColor("#388E3C"), // YouTube - Verde medio
+                Color.parseColor("#66BB6A"), // Twitter - Verde claro
+                Color.parseColor("#A5D6A7")  // Facebook - Verde muy claro
         });
 
+        // Configurar los datos del gráfico
         BarData barData = new BarData(barDataSet);
         barData.setBarWidth(0.5f);
         barChart.setData(barData);
 
+        // Configuración del eje X
         XAxis xAxis = barChart.getXAxis();
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));  // Usar los días fijos
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextSize(12f);
+        xAxis.setTextColor(Color.BLACK);
         xAxis.setGranularity(1f);
+        xAxis.setDrawGridLines(false);
 
-        barChart.getAxisLeft().setAxisMinimum(0f);
+        // Configuración del eje Y izquierdo
+        YAxis leftAxis = barChart.getAxisLeft();
+        leftAxis.setAxisMinimum(0f);
+        leftAxis.setTextSize(12f);
+        leftAxis.setTextColor(Color.BLACK);
+
+        // Deshabilitar el eje Y derecho
         barChart.getAxisRight().setEnabled(false);
-        barChart.getDescription().setEnabled(false);
-        barChart.setFitBars(true);
 
+        // Configuración de la leyenda
+        Legend legend = barChart.getLegend();
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM); // Posición en la parte inferior
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER); // Centrada horizontalmente
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL); // Orientación horizontal
+        legend.setDrawInside(false); // Evitar que se superponga con el gráfico
+        legend.setTextSize(12f);
+        legend.setTextColor(Color.BLACK);
+
+        // Animaciones
+        barChart.animateY(1000, Easing.EaseInOutCubic);
+
+        // Ajustar barras al gráfico
+        barChart.setFitBars(true);
         barChart.invalidate();
     }
+
 
 /*
 * private void initializeGraph() {
@@ -301,17 +308,42 @@ public class PerfilActivity extends AppCompatActivity{
             }
         }
 
-        // Guardar el tiempo de uso en SharedPreferences para cada red social
+        // Guardar el tiempo de uso solo si ha sido mayor que cero
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
         // Usamos el día de la semana como clave para guardar los datos (por ejemplo: "Mon", "Tue")
         String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
-        editor.putLong(today + "_Instagram", instagramUsageTimeToday);
-        editor.putLong(today + "_TikTok", tiktokUsageTimeToday);
-        editor.putLong(today + "_YouTube", youtubeUsageTimeToday);
-        editor.putLong(today + "_Twitter", twitterUsageTimeToday);
-        editor.putLong(today + "_Facebook", facebookUsageTimeToday);
+
+        if (instagramUsageTimeToday > 0) {
+            editor.putLong(today + "_Instagram", instagramUsageTimeToday);
+        } else {
+            editor.putLong(today + "_Instagram", 0);
+        }
+
+        if (tiktokUsageTimeToday > 0) {
+            editor.putLong(today + "_TikTok", tiktokUsageTimeToday);
+        } else {
+            editor.putLong(today + "_TikTok", 0);
+        }
+
+        if (youtubeUsageTimeToday > 0) {
+            editor.putLong(today + "_YouTube", youtubeUsageTimeToday);
+        } else {
+            editor.putLong(today + "_YouTube", 0);
+        }
+
+        if (twitterUsageTimeToday > 0) {
+            editor.putLong(today + "_Twitter", twitterUsageTimeToday);
+        } else {
+            editor.putLong(today + "_Twitter", 0);
+        }
+
+        if (facebookUsageTimeToday > 0) {
+            editor.putLong(today + "_Facebook", facebookUsageTimeToday);
+        } else {
+            editor.putLong(today + "_Facebook", 0);
+        }
 
         editor.apply();
 
