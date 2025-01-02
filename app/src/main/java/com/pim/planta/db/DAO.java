@@ -70,6 +70,8 @@ public interface DAO {
     DiaryEntry getEntradaById(int id);
     @Query("SELECT * FROM `diary-entries` WHERE user_id = :id")
     List<DiaryEntry> getEntradasByUserId(int id);
+    @Query("SELECT * FROM `diary-entries` WHERE user_id = :userId AND date = :date")
+    DiaryEntry getEntradaByUserIdAndDate(int userId, long date);
     @Query("SELECT * FROM users WHERE id = :id")
     User getUsuarioById(int id);
     @Query("SELECT * FROM calendar WHERE id = :id")

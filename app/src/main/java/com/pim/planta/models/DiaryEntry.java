@@ -3,21 +3,21 @@ package com.pim.planta.models;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import java.util.Date;
-
 @Entity(tableName = "diary-entries")
 public class DiaryEntry {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
 
+    private String highlight;
     private String annotation;
     private int emotion;
     private int user_id;
 
     private long date;
 
-    public DiaryEntry(String annotation, int emotion, int user_id, long date){
+    public DiaryEntry(String highlight, String annotation, int emotion, int user_id, long date){
+        this.highlight = highlight;
         this.annotation = annotation;
         this.emotion = emotion;
         this.user_id = user_id;
@@ -64,20 +64,32 @@ public class DiaryEntry {
         this.emotion = emocion;
     }
 
+    public String getHighlight(){ return highlight; }
+
+    public void setHighlight(String highlight){ this.highlight = highlight; }
+
     public String emotionToString() {
         switch (this.emotion) {
             case 1:
-                return "Feliz";
+                return "Excited";
             case 2:
-                return "Triste";
+                return "Happy";
             case 3:
-                return "Ansioso";
+                return "Neutral";
             case 4:
-                return "Contento";
+                return "Sad";
             case 5:
-                return "Estresado";
+                return "Very sad";
             default:
-                return "Sin emoción";
+                return "No emotion";
         }
+    }
+
+    public int getUserId() {
+        return user_id;
+    }
+
+    public void setAnnotation(String annotation) {
+        this.annotation = annotation;
     }
 }

@@ -99,20 +99,25 @@ public final class DAO_Impl implements DAO {
     this.__insertionAdapterOfDiaryEntry = new EntityInsertionAdapter<DiaryEntry>(__db) {
       @Override
       public String createQuery() {
-        return "INSERT OR ABORT INTO `diary-entries` (`id`,`annotation`,`emotion`,`user_id`,`date`) VALUES (nullif(?, 0),?,?,?,?)";
+        return "INSERT OR ABORT INTO `diary-entries` (`id`,`highlight`,`annotation`,`emotion`,`user_id`,`date`) VALUES (nullif(?, 0),?,?,?,?,?)";
       }
 
       @Override
       public void bind(SupportSQLiteStatement stmt, DiaryEntry value) {
         stmt.bindLong(1, value.getId());
-        if (value.getAnnotation() == null) {
+        if (value.getHighlight() == null) {
           stmt.bindNull(2);
         } else {
-          stmt.bindString(2, value.getAnnotation());
+          stmt.bindString(2, value.getHighlight());
         }
-        stmt.bindLong(3, value.getEmotion());
-        stmt.bindLong(4, value.getUser_id());
-        stmt.bindLong(5, value.getDate());
+        if (value.getAnnotation() == null) {
+          stmt.bindNull(3);
+        } else {
+          stmt.bindString(3, value.getAnnotation());
+        }
+        stmt.bindLong(4, value.getEmotion());
+        stmt.bindLong(5, value.getUser_id());
+        stmt.bindLong(6, value.getDate());
       }
     };
     this.__insertionAdapterOfUser = new EntityInsertionAdapter<User>(__db) {
@@ -280,21 +285,26 @@ public final class DAO_Impl implements DAO {
     this.__updateAdapterOfDiaryEntry = new EntityDeletionOrUpdateAdapter<DiaryEntry>(__db) {
       @Override
       public String createQuery() {
-        return "UPDATE OR ABORT `diary-entries` SET `id` = ?,`annotation` = ?,`emotion` = ?,`user_id` = ?,`date` = ? WHERE `id` = ?";
+        return "UPDATE OR ABORT `diary-entries` SET `id` = ?,`highlight` = ?,`annotation` = ?,`emotion` = ?,`user_id` = ?,`date` = ? WHERE `id` = ?";
       }
 
       @Override
       public void bind(SupportSQLiteStatement stmt, DiaryEntry value) {
         stmt.bindLong(1, value.getId());
-        if (value.getAnnotation() == null) {
+        if (value.getHighlight() == null) {
           stmt.bindNull(2);
         } else {
-          stmt.bindString(2, value.getAnnotation());
+          stmt.bindString(2, value.getHighlight());
         }
-        stmt.bindLong(3, value.getEmotion());
-        stmt.bindLong(4, value.getUser_id());
-        stmt.bindLong(5, value.getDate());
-        stmt.bindLong(6, value.getId());
+        if (value.getAnnotation() == null) {
+          stmt.bindNull(3);
+        } else {
+          stmt.bindString(3, value.getAnnotation());
+        }
+        stmt.bindLong(4, value.getEmotion());
+        stmt.bindLong(5, value.getUser_id());
+        stmt.bindLong(6, value.getDate());
+        stmt.bindLong(7, value.getId());
       }
     };
     this.__updateAdapterOfUser = new EntityDeletionOrUpdateAdapter<User>(__db) {
@@ -681,6 +691,7 @@ public final class DAO_Impl implements DAO {
     final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
     try {
       final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+      final int _cursorIndexOfHighlight = CursorUtil.getColumnIndexOrThrow(_cursor, "highlight");
       final int _cursorIndexOfAnnotation = CursorUtil.getColumnIndexOrThrow(_cursor, "annotation");
       final int _cursorIndexOfEmotion = CursorUtil.getColumnIndexOrThrow(_cursor, "emotion");
       final int _cursorIndexOfUserId = CursorUtil.getColumnIndexOrThrow(_cursor, "user_id");
@@ -688,6 +699,12 @@ public final class DAO_Impl implements DAO {
       final List<DiaryEntry> _result = new ArrayList<DiaryEntry>(_cursor.getCount());
       while(_cursor.moveToNext()) {
         final DiaryEntry _item;
+        final String _tmpHighlight;
+        if (_cursor.isNull(_cursorIndexOfHighlight)) {
+          _tmpHighlight = null;
+        } else {
+          _tmpHighlight = _cursor.getString(_cursorIndexOfHighlight);
+        }
         final String _tmpAnnotation;
         if (_cursor.isNull(_cursorIndexOfAnnotation)) {
           _tmpAnnotation = null;
@@ -700,7 +717,7 @@ public final class DAO_Impl implements DAO {
         _tmpUser_id = _cursor.getInt(_cursorIndexOfUserId);
         final long _tmpDate;
         _tmpDate = _cursor.getLong(_cursorIndexOfDate);
-        _item = new DiaryEntry(_tmpAnnotation,_tmpEmotion,_tmpUser_id,_tmpDate);
+        _item = new DiaryEntry(_tmpHighlight,_tmpAnnotation,_tmpEmotion,_tmpUser_id,_tmpDate);
         final int _tmpId;
         _tmpId = _cursor.getInt(_cursorIndexOfId);
         _item.setId(_tmpId);
@@ -929,12 +946,19 @@ public final class DAO_Impl implements DAO {
     final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
     try {
       final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+      final int _cursorIndexOfHighlight = CursorUtil.getColumnIndexOrThrow(_cursor, "highlight");
       final int _cursorIndexOfAnnotation = CursorUtil.getColumnIndexOrThrow(_cursor, "annotation");
       final int _cursorIndexOfEmotion = CursorUtil.getColumnIndexOrThrow(_cursor, "emotion");
       final int _cursorIndexOfUserId = CursorUtil.getColumnIndexOrThrow(_cursor, "user_id");
       final int _cursorIndexOfDate = CursorUtil.getColumnIndexOrThrow(_cursor, "date");
       final DiaryEntry _result;
       if(_cursor.moveToFirst()) {
+        final String _tmpHighlight;
+        if (_cursor.isNull(_cursorIndexOfHighlight)) {
+          _tmpHighlight = null;
+        } else {
+          _tmpHighlight = _cursor.getString(_cursorIndexOfHighlight);
+        }
         final String _tmpAnnotation;
         if (_cursor.isNull(_cursorIndexOfAnnotation)) {
           _tmpAnnotation = null;
@@ -947,7 +971,7 @@ public final class DAO_Impl implements DAO {
         _tmpUser_id = _cursor.getInt(_cursorIndexOfUserId);
         final long _tmpDate;
         _tmpDate = _cursor.getLong(_cursorIndexOfDate);
-        _result = new DiaryEntry(_tmpAnnotation,_tmpEmotion,_tmpUser_id,_tmpDate);
+        _result = new DiaryEntry(_tmpHighlight,_tmpAnnotation,_tmpEmotion,_tmpUser_id,_tmpDate);
         final int _tmpId;
         _tmpId = _cursor.getInt(_cursorIndexOfId);
         _result.setId(_tmpId);
@@ -971,6 +995,7 @@ public final class DAO_Impl implements DAO {
     final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
     try {
       final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+      final int _cursorIndexOfHighlight = CursorUtil.getColumnIndexOrThrow(_cursor, "highlight");
       final int _cursorIndexOfAnnotation = CursorUtil.getColumnIndexOrThrow(_cursor, "annotation");
       final int _cursorIndexOfEmotion = CursorUtil.getColumnIndexOrThrow(_cursor, "emotion");
       final int _cursorIndexOfUserId = CursorUtil.getColumnIndexOrThrow(_cursor, "user_id");
@@ -978,6 +1003,12 @@ public final class DAO_Impl implements DAO {
       final List<DiaryEntry> _result = new ArrayList<DiaryEntry>(_cursor.getCount());
       while(_cursor.moveToNext()) {
         final DiaryEntry _item;
+        final String _tmpHighlight;
+        if (_cursor.isNull(_cursorIndexOfHighlight)) {
+          _tmpHighlight = null;
+        } else {
+          _tmpHighlight = _cursor.getString(_cursorIndexOfHighlight);
+        }
         final String _tmpAnnotation;
         if (_cursor.isNull(_cursorIndexOfAnnotation)) {
           _tmpAnnotation = null;
@@ -990,11 +1021,62 @@ public final class DAO_Impl implements DAO {
         _tmpUser_id = _cursor.getInt(_cursorIndexOfUserId);
         final long _tmpDate;
         _tmpDate = _cursor.getLong(_cursorIndexOfDate);
-        _item = new DiaryEntry(_tmpAnnotation,_tmpEmotion,_tmpUser_id,_tmpDate);
+        _item = new DiaryEntry(_tmpHighlight,_tmpAnnotation,_tmpEmotion,_tmpUser_id,_tmpDate);
         final int _tmpId;
         _tmpId = _cursor.getInt(_cursorIndexOfId);
         _item.setId(_tmpId);
         _result.add(_item);
+      }
+      return _result;
+    } finally {
+      _cursor.close();
+      _statement.release();
+    }
+  }
+
+  @Override
+  public DiaryEntry getEntradaByUserIdAndDate(final int userId, final long date) {
+    final String _sql = "SELECT * FROM `diary-entries` WHERE user_id = ? AND date = ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
+    int _argIndex = 1;
+    _statement.bindLong(_argIndex, userId);
+    _argIndex = 2;
+    _statement.bindLong(_argIndex, date);
+    __db.assertNotSuspendingTransaction();
+    final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+    try {
+      final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+      final int _cursorIndexOfHighlight = CursorUtil.getColumnIndexOrThrow(_cursor, "highlight");
+      final int _cursorIndexOfAnnotation = CursorUtil.getColumnIndexOrThrow(_cursor, "annotation");
+      final int _cursorIndexOfEmotion = CursorUtil.getColumnIndexOrThrow(_cursor, "emotion");
+      final int _cursorIndexOfUserId = CursorUtil.getColumnIndexOrThrow(_cursor, "user_id");
+      final int _cursorIndexOfDate = CursorUtil.getColumnIndexOrThrow(_cursor, "date");
+      final DiaryEntry _result;
+      if(_cursor.moveToFirst()) {
+        final String _tmpHighlight;
+        if (_cursor.isNull(_cursorIndexOfHighlight)) {
+          _tmpHighlight = null;
+        } else {
+          _tmpHighlight = _cursor.getString(_cursorIndexOfHighlight);
+        }
+        final String _tmpAnnotation;
+        if (_cursor.isNull(_cursorIndexOfAnnotation)) {
+          _tmpAnnotation = null;
+        } else {
+          _tmpAnnotation = _cursor.getString(_cursorIndexOfAnnotation);
+        }
+        final int _tmpEmotion;
+        _tmpEmotion = _cursor.getInt(_cursorIndexOfEmotion);
+        final int _tmpUser_id;
+        _tmpUser_id = _cursor.getInt(_cursorIndexOfUserId);
+        final long _tmpDate;
+        _tmpDate = _cursor.getLong(_cursorIndexOfDate);
+        _result = new DiaryEntry(_tmpHighlight,_tmpAnnotation,_tmpEmotion,_tmpUser_id,_tmpDate);
+        final int _tmpId;
+        _tmpId = _cursor.getInt(_cursorIndexOfId);
+        _result.setId(_tmpId);
+      } else {
+        _result = null;
       }
       return _result;
     } finally {

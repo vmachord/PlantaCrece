@@ -78,7 +78,210 @@
             android:background="#FF00FF" /> <!-- Morado -->
     </LinearLayout>
 
+    <com.pim.planta.models.YearSelectorButton
+        android:id="@+id/year_selector_button"
+        android:layout_width="341dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageButton
+        android:id="@+id/previousMonthButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:background="@null"
+        android:src="@drawable/ic_arrow_left"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/calendar_draw"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.278" />
+
+    <ImageButton
+        android:id="@+id/nextMonthButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:background="@null"
+        android:src="@drawable/ic_arrow_right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/calendar_draw"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.279" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomSection"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:minHeight="1000dp"
+        android:background="@drawable/rounded_background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar_draw">
+
+        <View
+            android:id="@+id/greenArrow"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:background="@drawable/ic_arrow_up"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="1.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.2" />
+
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="68dp"
+            android:fontFamily="@font/aventa"
+            android:text="dd MMM yyyy"
+            android:textColor="@color/dark_green"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/greenArrow" />
+
+        <LinearLayout
+            android:id="@+id/emotionsLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@null"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dateTextView">
+
+            <ImageView
+                android:id="@+id/excitedImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:src="@drawable/excited" />
+
+            <ImageView
+                android:id="@+id/happyImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:src="@drawable/happy" />
+
+            <ImageView
+                android:id="@+id/neutralImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:src="@drawable/neutral" />
+
+            <ImageView
+                android:id="@+id/sadImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:src="@drawable/sad" />
+
+            <ImageView
+                android:id="@+id/verySadImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:src="@drawable/very_sad" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textHighlight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/aventa"
+            android:text="Highlight of the day"
+            android:textSize="20sp"
+            android:textColor="#15824F"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/emotionsLayout" />
+        <EditText
+            android:id="@+id/highlightInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_background_light_green"
+            android:padding="16dp"
+            android:maxLines="2"
+            android:inputType="textMultiLine"
+            android:hint="Your highlight..."
+            android:textColorHint="@color/dark_green"
+            android:textColor="@color/dark_green"
+            android:textSize="14sp"
+            android:fontFamily="@font/aventa"
+            android:gravity="top|start"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textHighlight"/>
+        <TextView
+            android:id="@+id/textAnnotation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/aventa"
+            android:text="Tell us more"
+            android:textSize="20sp"
+            android:textColor="#15824F"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/highlightInput" />
+        <EditText
+            android:id="@+id/annotationInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="200dp"
+            android:background="@drawable/rounded_background_light_green"
+            android:padding="16dp"
+            android:inputType="textMultiLine"
+            android:hint="More about your day here"
+            android:textColorHint="@color/dark_green"
+            android:textColor="@color/dark_green"
+            android:textSize="14sp"
+            android:fontFamily="@font/aventa"
+            android:gravity="top|start"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textAnnotation"/>
+        <Button
+            android:id="@+id/buttonSaveEntry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/dark_green"
+            android:fontFamily="@font/aventa"
+            android:text="Save Entry"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/annotationInput" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
@@ -130,39 +333,5 @@
             android:src="@drawable/ic_profile" />
 
     </LinearLayout>
-
-    <com.pim.planta.models.YearSelectorButton
-        android:id="@+id/year_selector_button"
-        android:layout_width="341dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/previousMonthButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:background="@null"
-        android:src="@drawable/ic_arrow_left"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/calendar_draw"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.278" />
-
-    <ImageButton
-        android:id="@+id/nextMonthButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:background="@null"
-        android:src="@drawable/ic_arrow_right"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/calendar_draw"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.279" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -34,17 +34,17 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
 
   @Override
   protected SupportSQLiteOpenHelper createOpenHelper(DatabaseConfiguration configuration) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(configuration, new RoomOpenHelper.Delegate(6) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(configuration, new RoomOpenHelper.Delegate(9) {
       @Override
       public void createAllTables(SupportSQLiteDatabase _db) {
         _db.execSQL("CREATE TABLE IF NOT EXISTS `plants` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `basePath` TEXT, `imageResourceId` INTEGER NOT NULL, `xp` INTEGER NOT NULL, `xpMax` INTEGER NOT NULL, `description` TEXT)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `password` TEXT, `email` TEXT)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS `calendar` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fechas` TEXT, `anotaciones` TEXT, `emociones` INTEGER NOT NULL)");
-        _db.execSQL("CREATE TABLE IF NOT EXISTS `diary-entries` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `annotation` TEXT, `emotion` INTEGER NOT NULL, `user_id` INTEGER NOT NULL, `date` INTEGER NOT NULL)");
+        _db.execSQL("CREATE TABLE IF NOT EXISTS `diary-entries` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `highlight` TEXT, `annotation` TEXT, `emotion` INTEGER NOT NULL, `user_id` INTEGER NOT NULL, `date` INTEGER NOT NULL)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS `user_plant_relation` (`userId` INTEGER NOT NULL, `plantId` INTEGER NOT NULL, `growCount` INTEGER NOT NULL, PRIMARY KEY(`userId`, `plantId`), FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`plantId`) REFERENCES `plants`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
         _db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_user_plant_relation_userId_plantId` ON `user_plant_relation` (`userId`, `plantId`)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd8e4561112fa50dca978c1592d012d9e')");
+        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6463831e8f3b20bc6153afbfe1fab572')");
       }
 
       @Override
@@ -138,8 +138,9 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
                   + " Expected:\n" + _infoCalendar + "\n"
                   + " Found:\n" + _existingCalendar);
         }
-        final HashMap<String, TableInfo.Column> _columnsDiaryEntries = new HashMap<String, TableInfo.Column>(5);
+        final HashMap<String, TableInfo.Column> _columnsDiaryEntries = new HashMap<String, TableInfo.Column>(6);
         _columnsDiaryEntries.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDiaryEntries.put("highlight", new TableInfo.Column("highlight", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsDiaryEntries.put("annotation", new TableInfo.Column("annotation", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsDiaryEntries.put("emotion", new TableInfo.Column("emotion", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsDiaryEntries.put("user_id", new TableInfo.Column("user_id", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -171,7 +172,7 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "d8e4561112fa50dca978c1592d012d9e", "342e95766ed468dad36997ce21f389f2");
+    }, "6463831e8f3b20bc6153afbfe1fab572", "1500b8fb1ff8c92b5880675641412cb5");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(configuration.context)
         .name(configuration.name)
         .callback(_openCallback)

@@ -1,7 +1,6 @@
 package com.pim.planta.models;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,14 +9,11 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.core.content.res.ResourcesCompat;
 
 import com.pim.planta.R;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -30,9 +26,10 @@ import java.util.stream.Collectors;
 
 public class CalendarDraw extends View {
 
-    private Paint dayPaint, headerPaint, backGroundPaint, underlinePaint;
+    private Paint dayPaint, headerPaint, backGroundPaint, underlinePaint, highlightedDayPaint, highlightedDayCircle;
     private int currentMonth, currentYear;
     private Typeface customFont, customFontBold;
+    private LocalDate highlightedDay;
 
     // Almacena el color de fondo para cada día
     private HashMap<Long, Integer> dayBackgroundColors = new HashMap<>();
@@ -66,6 +63,20 @@ public class CalendarDraw extends View {
         headerPaint.setTextSize(48);
         headerPaint.setTextAlign(Paint.Align.CENTER);
         headerPaint.setTypeface(customFontBold);
+
+        highlightedDayPaint = new Paint();
+        highlightedDayPaint.setColor(Color.WHITE);
+        highlightedDayPaint.setTextSize(46);
+        highlightedDayPaint.setTextAlign(Paint.Align.CENTER);
+        highlightedDayPaint.setTypeface(customFont);
+
+        highlightedDayCircle = new Paint();
+        highlightedDayCircle.setColor(getResources().getColor(R.color.dark_green));
+        highlightedDayCircle.setStyle(Paint.Style.FILL);
+
+        backGroundPaint = new Paint();
+        backGroundPaint.setColor(Color.WHITE);
+        backGroundPaint.setStyle(Paint.Style.FILL);
 
         backGroundPaint = new Paint();
         backGroundPaint.setColor(Color.WHITE);
@@ -128,31 +139,28 @@ public class CalendarDraw extends View {
 
             //emotionPaint.setColor(Color.WHITE);
             //canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
+
             canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
-        }
-
-        List<DiaryEntry> monthEntries = getEntriesForCurrentMonth();
-        if (!monthEntries.isEmpty()){
-            //Dibuja las entradas del diario encima del calendario vacio
-            for (DiaryEntry entry : monthEntries) {
-                long dateInMillis = normalizeToStartOfDay(entry.getDate());
-                int day = getDayOfMonthFromMillis(dateInMillis);
-
-                //Logica de los dias
-                int column = (startColumn + day - 1) % 7;
-                int row = (startColumn + day - 1) / 7;
-
-                float x = column * dayWidth + dayWidth / 2;
-                float y = row * dayHeight + dayHeight / 2 + 100;
-
-                // Dibujar el día con el color correspondiente a la emoción
-                //emotionPaint.setColor(getColorForEmotion(entry.emotionToString()));
-                //canvas.drawCircle(x, y, dayWidth / 3, emotionPaint);
-                canvas.drawText(String.valueOf(day), x, y + 10, dayPaint);
+            LocalDate currentDay = LocalDate.of(currentYear, currentMonth, day);
+            if (hasEntryForDay(currentDay) && !currentDay.equals(highlightedDay)) {
+                // Draw entry style (green line)
                 float lineStartX = x - dayWidth / 4;
                 float lineEndX = x + dayWidth / 4;
                 float lineY = y + 20;
                 canvas.drawLine(lineStartX, lineY, lineEndX, lineY, underlinePaint);
+            }
+            if (currentDay.equals(highlightedDay) && hasEntryForDay(currentDay)) {
+                // Draw highlighted day style
+                canvas.drawCircle(x, y, dayWidth / 3, highlightedDayCircle); // Draw circle
+                canvas.drawText(String.valueOf(day), x, y + 10, highlightedDayPaint); // Draw day number
+                float lineStartX = x - dayWidth / 4;
+                float lineEndX = x + dayWidth / 4;
+                float lineY = y + 20;
+                canvas.drawLine(lineStartX, lineY, lineEndX, lineY, highlightedDayPaint);
+            }
+            if (currentDay.equals(highlightedDay) && !hasEntryForDay(currentDay)) {
+                canvas.drawCircle(x, y, dayWidth / 3, highlightedDayCircle); // Draw circle
+                canvas.drawText(String.valueOf(day), x, y + 10, highlightedDayPaint); // Draw day number
             }
         }
     }
@@ -181,8 +189,6 @@ public class CalendarDraw extends View {
     // Método para obtener el texto del botón según la perspectiva actual
     private String getCurrentPerspectiveText() {
         switch (currentPerspective) {
-            case "MONTH_VIEW":
-                return "Mes";
             case "WEEK_VIEW":
                 return "Semana";
             case "DAY_VIEW":
@@ -225,7 +231,7 @@ public class CalendarDraw extends View {
     }
 
 
-    public void showEmotionDialog(long dateInMillis, OnDiaryEntryListener listener) {
+    /*public void showEmotionDialog(long dateInMillis, OnDiaryEntryListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Seleccione una emoción para el día " +
                 new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dateInMillis));
@@ -278,7 +284,7 @@ public class CalendarDraw extends View {
             case "Estresado": return Color.MAGENTA;
             default: return Color.WHITE; // Color predeterminado si no hay emoción
         }
-    }
+    }*/
 
     public int getDayFromCoordinates(float x, float y) {
         int calendarStartY = getHeight() / 5;
@@ -343,7 +349,24 @@ public class CalendarDraw extends View {
         return currentMonth;
     }
 
+    public LocalDate getCurrentDay() {return highlightedDay;}
+
     public void setCurrentMonth(int monthValue) {
         this.currentMonth = monthValue;
+    }
+    public void highlightDay(LocalDate date) {
+        highlightedDay = date;
+        invalidate(); // Redraw the calendar
+    }
+    private boolean hasEntryForDay(LocalDate day) {
+        if (diaryEntries == null || diaryEntries.isEmpty()) {
+            return false;
+        }
+        for (DiaryEntry entry : diaryEntries) {
+            if (Instant.ofEpochMilli(entry.getDate()).atZone(ZoneId.systemDefault()).toLocalDate().equals(day)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
