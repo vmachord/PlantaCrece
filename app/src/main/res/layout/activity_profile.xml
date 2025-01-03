@@ -8,10 +8,10 @@
 
 
     <FrameLayout
-        android:layout_width="407dp"
-        android:layout_height="600dp"
+        android:id="@+id/frame"
+        android:layout_width="408dp"
+        android:layout_height="863dp"
         android:layout_marginTop="300dp"
-        android:layout_marginEnd="4dp"
         android:background="@drawable/round_border_top"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -43,8 +43,8 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="360dp"
             android:layout_marginEnd="24dp"
-            android:color="#F0F0F0"
-            android:background="@drawable/rounded_background">
+            android:background="@drawable/rounded_background"
+            android:color="#F0F0F0">
 
             <TextView
                 android:id="@+id/textView4"
@@ -61,8 +61,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:orientation="vertical"
-                android:background="@color/white">
+                android:background="@color/white"
+                android:orientation="vertical">
                 <!-- Contenido del bottom -->
             </LinearLayout>
 
@@ -81,6 +81,13 @@
             android:layout_marginLeft="180dp"
             android:layout_marginTop="22dp"
             app:srcCompat="@drawable/vector_160" />
+
+        <ImageView
+            android:id="@+id/imageView14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="450dp"
+            app:srcCompat="@drawable/other" />
 
     </FrameLayout>
 

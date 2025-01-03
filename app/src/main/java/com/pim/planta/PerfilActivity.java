@@ -20,6 +20,8 @@ import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -55,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import android.view.View;
 
 
 public class PerfilActivity extends AppCompatActivity{
@@ -69,6 +72,8 @@ public class PerfilActivity extends AppCompatActivity{
     private TextView textViewText;
     private TextView textViewText2;
 
+    private boolean isExpanded = false;
+
     private long instagramUsageTime = 0;
     private long tiktokUsageTime = 0;
     private long youtubeUsageTime = 0;
@@ -78,6 +83,14 @@ public class PerfilActivity extends AppCompatActivity{
     private View bottomSection;
     private ImageView imageView12;
     private boolean isAtTop = false;
+
+    private FrameLayout frame;
+    private ImageView profileImage;
+    private ImageView imageView13;
+    private TextView userName;
+    private TextView textView8;
+    private TextView textView9;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,12 +105,58 @@ public class PerfilActivity extends AppCompatActivity{
         textViewText.setText("Bloomed on 14th November 2024");
         textViewText2 = findViewById(R.id.textView9);
         textViewText2.setText("Scientific plant name: Tulipa\n Nicname: Nacho de Tulipán.");
+        imageView12 = findViewById(R.id.imageView12);
+        frame = findViewById(R.id.frame);
+        profileImage = findViewById(R.id.profile_image);
+        imageView13 = findViewById(R.id.imageView13);
+        userName = findViewById(R.id.user_name);
+        textView8 = findViewById(R.id.textView8);
+        textView9 = findViewById(R.id.textView9);
+        setupClickListener();
+    }
 
+    private void setupClickListener() {
+        imageView12.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isExpanded = !isExpanded; // Alternar el estado de expansión
+
+                // Cambiar la visibilidad de los elementos
+                if (isExpanded) {
+                    // Mostrar los elementos
+                    profileImage.setVisibility(View.VISIBLE);
+                    imageView13.setVisibility(View.VISIBLE);
+                    userName.setVisibility(View.VISIBLE);
+                    textView8.setVisibility(View.VISIBLE);
+                    textView9.setVisibility(View.VISIBLE);
+                } else {
+                    // Ocultar los elementos
+                    profileImage.setVisibility(View.GONE);
+                    imageView13.setVisibility(View.GONE);
+                    userName.setVisibility(View.GONE);
+                    textView8.setVisibility(View.GONE);
+                    textView9.setVisibility(View.GONE);
+                }
+
+                // Realizar la animación de expansión/colapso
+                frame.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        float targetTranslationY = isExpanded ? 0 : -frame.getHeight() / 4;
+
+                        frame.animate()
+                                .translationY(targetTranslationY)
+                                .setDuration(300)
+                                .setInterpolator(new AccelerateDecelerateInterpolator())
+                                .start();
+                    }
+                });
+            }
+        });
     }
 
     private void initializeGraph() {
         barChart = findViewById(R.id.bar_chart);
-
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
 
         float[][] appUsagePerDay = new float[7][5]; // 7 días de la semana, 5 aplicaciones
@@ -130,6 +189,11 @@ public class PerfilActivity extends AppCompatActivity{
                 Color.parseColor("#81C784"), // Twitter - Verde claro
                 Color.parseColor("#A5D6A7")  // Facebook - Verde muy claro
         });
+
+      // Crear el objeto de datos y asignarlo al gráfico
+        BarData data = new BarData(barDataSet);
+        barChart.setData(data);
+        barChart.invalidate();
 
         BarData barData = new BarData(barDataSet);
         barData.setBarWidth(0.5f);
