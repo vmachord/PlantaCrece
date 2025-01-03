@@ -79,7 +79,7 @@ public class InvernaderoActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
             setText(selectedPlant, dao);
-        });  */
+        });   */
         setImage(dao);
         ImageView imageView9 = findViewById(R.id.imageView9);
         ImageView imageView = findViewById(R.id.imageView);

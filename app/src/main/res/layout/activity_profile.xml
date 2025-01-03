@@ -43,6 +43,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="360dp"
             android:layout_marginEnd="24dp"
+            android:color="#F0F0F0"
             android:background="@drawable/rounded_background">
 
             <TextView
@@ -55,6 +56,16 @@
                 android:text="TextView"
                 android:textSize="18sp" />
 
+            <LinearLayout
+                android:id="@+id/bottomSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:orientation="vertical"
+                android:background="@color/white">
+                <!-- Contenido del bottom -->
+            </LinearLayout>
+
 
         </FrameLayout>
 
@@ -62,6 +73,15 @@
             android:id="@+id/textView10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/imageView12"
+            android:layout_width="63dp"
+            android:layout_height="14dp"
+            android:layout_marginLeft="180dp"
+            android:layout_marginTop="22dp"
+            app:srcCompat="@drawable/vector_160" />
+
     </FrameLayout>
 
     <TextView
@@ -165,5 +185,15 @@
         android:text="TextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/textView8" />
+
+    <ImageView
+        android:id="@+id/imageView13"
+        android:layout_width="53dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="140dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/edit" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
