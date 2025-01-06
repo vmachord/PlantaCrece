@@ -1,5 +1,7 @@
 package com.pim.planta;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -47,41 +49,75 @@ public class PlantListActivity extends AppCompatActivity {
         plantListRecyclerView = findViewById(R.id.plant_list_recyclerview);
         plantListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-
         plantAdapter = new PlantAdapter(plantList);
         plantListRecyclerView.setAdapter(plantAdapter);
+
         plantAdapter.setOnItemClickListener(new PlantAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Plant plant) {
+                // Actualizar el texto y mostrar la imagen
                 plantaElegidaTextView.setText("Planta Elegida: " + plant.getName());
                 imageView6.setVisibility(View.VISIBLE);
 
+                // Animación de desvanecimiento
+                plantaElegidaTextView.setAlpha(0f);
+                plantaElegidaTextView.animate().alpha(1f).setDuration(300).start();
+
+                imageView6.setAlpha(0f);
+                imageView6.animate().alpha(1f).setDuration(300).start();
+
+                // Efecto de rebote en la imagen
+                imageView6.animate()
+                        .scaleX(1.2f).scaleY(1.2f)
+                        .setDuration(200)
+                        .withEndAction(() -> imageView6.animate()
+                                .scaleX(1f).scaleY(1f)
+                                .setDuration(200)
+                                .start())
+                        .start();
+
+                // Guardar la planta seleccionada
                 SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("selectedPlant", plant.getName());
                 editor.apply();
-
             }
         });
     }
 
-    public void setupBottom(){
+    // Método para animar los botones de la barra inferior
+    private void animateButton(View view) {
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
+                view,
+                PropertyValuesHolder.ofFloat("scaleX", 0.9f, 1.0f),
+                PropertyValuesHolder.ofFloat("scaleY", 0.9f, 1.0f)
+        );
+        animator.setDuration(150); // Duración de la animación
+        animator.start();
+    }
+
+    public void setupBottom() {
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
-        imageButtonPlantadex.setEnabled(false); // Deshabilita el boton
-        imageButtonPlantadex.setImageAlpha(128); // Oscurece el boton
+        imageButtonPlantadex.setEnabled(false); // Deshabilita el botón
+        imageButtonPlantadex.setImageAlpha(128); // Oscurece el botón
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
 
         imageButtonLupa.setOnClickListener(v -> {
+            animateButton(v); // Añade la animación
             Intent intent = new Intent(PlantListActivity.this, DiaryActivity.class);
             startActivity(intent);
         });
+
         imageButtonMaceta.setOnClickListener(view -> {
+            animateButton(view); // Añade la animación
             Intent intent = new Intent(PlantListActivity.this, JardinActivity.class);
             startActivity(intent);
         });
+
         imageButtonUsuario.setOnClickListener(v -> {
+            animateButton(v); // Añade la animación
             Intent intent = new Intent(PlantListActivity.this, PerfilActivity.class);
             startActivity(intent);
         });

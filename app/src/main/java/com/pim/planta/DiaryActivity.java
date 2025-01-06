@@ -2,6 +2,8 @@ package com.pim.planta;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -271,7 +273,15 @@ public class DiaryActivity extends AppCompatActivity  {
             }
         });
     }
-
+    private void animateButton(View view) {
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
+                view,
+                PropertyValuesHolder.ofFloat("scaleX", 0.9f, 1.0f),
+                PropertyValuesHolder.ofFloat("scaleY", 0.9f, 1.0f)
+        );
+        animator.setDuration(150); // Duración de la animación
+        animator.start();
+    }
     public void setUpBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         imageButtonLupa.setEnabled(false); // Deshabilita el boton
@@ -281,14 +291,17 @@ public class DiaryActivity extends AppCompatActivity  {
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
 
         imageButtonPlantadex.setOnClickListener(v -> {
+            animateButton(v);
             Intent intent = new Intent(DiaryActivity.this, PlantListActivity.class);
             startActivity(intent);
         });
         imageButtonMaceta.setOnClickListener(view -> {
+            animateButton(view);
             Intent intent = new Intent(DiaryActivity.this, JardinActivity.class);
             startActivity(intent);
         });
         imageButtonUsuario.setOnClickListener(v -> {
+            animateButton(v);
             Intent intent = new Intent(DiaryActivity.this, PerfilActivity.class);
             startActivity(intent);
         });

@@ -1,5 +1,7 @@
 package com.pim.planta;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -305,6 +307,16 @@ public class PerfilActivity extends AppCompatActivity{
         profileImageView.setImageResource(R.drawable.default_profile);
     }
 
+    private void animateButton(View view) {
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
+                view,
+                PropertyValuesHolder.ofFloat("scaleX", 0.9f, 1.0f),
+                PropertyValuesHolder.ofFloat("scaleY", 0.9f, 1.0f)
+        );
+        animator.setDuration(150); // Duración de la animación
+        animator.start();
+    }
+
     public void setUpBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
@@ -314,14 +326,17 @@ public class PerfilActivity extends AppCompatActivity{
         imageButtonUsuario.setImageAlpha(128); // Oscurece el boton
 
         imageButtonLupa.setOnClickListener(v -> {
+            animateButton(v);
             Intent intent = new Intent(PerfilActivity.this, DiaryActivity.class);
             startActivity(intent);
         });
         imageButtonPlantadex.setOnClickListener(v -> {
+            animateButton(v);
             Intent intent = new Intent(PerfilActivity.this, PlantListActivity.class);
             startActivity(intent);
         });
         imageButtonMaceta.setOnClickListener(view -> {
+            animateButton(view);
             Intent intent = new Intent(PerfilActivity.this, JardinActivity.class);
             startActivity(intent);
         });

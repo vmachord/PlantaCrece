@@ -1,6 +1,8 @@
 package com.pim.planta;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,6 +17,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -92,6 +95,15 @@ public class JardinActivity extends AppCompatActivity {
             }
         });
     }
+    private void animateButton(View view) {
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
+                view,
+                PropertyValuesHolder.ofFloat("scaleX", 0.9f, 1.0f),
+                PropertyValuesHolder.ofFloat("scaleY", 0.9f, 1.0f)
+        );
+        animator.setDuration(150); // Duración de la animación
+        animator.start();
+    }
 
     public void setUpBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
@@ -102,15 +114,18 @@ public class JardinActivity extends AppCompatActivity {
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
 
         imageButtonLupa.setOnClickListener(v -> {
+            animateButton(v);
             Intent intent = new Intent(JardinActivity.this, DiaryActivity.class);
             //sendUsageNotification("¡Felicidades, tu jardin ha crecido!. Estado actual: " + 1);
             startActivity(intent);
         });
         imageButtonPlantadex.setOnClickListener(v -> {
+            animateButton(v);
             Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
             startActivity(intent);
         });
         imageButtonUsuario.setOnClickListener(v -> {
+            animateButton(v);
             Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
             startActivity(intent);
         });
