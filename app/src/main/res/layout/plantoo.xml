@@ -87,6 +87,73 @@
             app:layout_constraintTop_toTopOf="@+id/linearLayout2"
             app:layout_constraintVertical_bias="0.949" />
 
+        <LinearLayout
+            android:id="@+id/plant_desc_popup"
+            android:layout_width="314dp"
+            android:layout_height="293dp"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="204dp"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="MissingConstraints">
+
+            <TextView
+                android:id="@+id/plant_name_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Escribe una descripción"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/plant_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Descripción"
+                android:inputType="textMultiLine" />
+
+            <Button
+                android:id="@+id/btn_desc_close"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Close"
+                tools:layout_editor_absoluteY="400dp" />
+
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/plant_lvl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="180dp"
+            android:text="Nivel
+"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.92"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+            android:layout_width="250dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="244dp"
+            android:layout_marginTop="352dp"
+            android:max="100"
+            android:progress="0"
+            android:rotation="270"
+            android:progressTint="#32CD32"
+            android:backgroundTint="#CCCCCC"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="MissingConstraints" />
+
         <ImageButton
             android:id="@+id/icon_gesture"
             android:layout_width="48dp"
@@ -107,6 +174,8 @@
             android:layout_height="48dp"
             android:background="@android:color/transparent"
             android:contentDescription="Water Icon"
+            android:focusable="true"
+            android:clickable="true"
             android:src="@drawable/ic_water"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -129,6 +198,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
             app:layout_constraintVertical_bias="0.059" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

@@ -14,12 +14,17 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,13 +36,12 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.pim.planta.db.DAO;
+import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.UserLogged;
 import com.pim.planta.models.UserPlantRelation;
-import com.pim.planta.R;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +54,17 @@ public class JardinActivity extends AppCompatActivity {
     private int previousImageIndex = -1;
     private static final String CHANNEL_ID = "default";
     private static final int NOTIFICATION_PERMISSION_CODE = 100;
+    private PopupWindow tooltipWindow;
+
+    private Plant plant;
+    //Variables watering plant
+    private boolean canWater = true;
+    private long remainingTimeMillisWatering = 0;
+    private static final long ONE_DAY_MILLIS = 24 * 60 * 60 * 1000;
+    //Variables pad plant
+    private boolean canPad = true;
+    private long remainingTimeMillisPad = 0;
+    private static final long FIVE_MIN_MILLIS = 5 * 60 * 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,11 +81,6 @@ public class JardinActivity extends AppCompatActivity {
 
         setUpBottom();
 
-        ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
-        imageButtonOjo.setOnClickListener(v -> {
-            Intent intent = new Intent(JardinActivity.this, InvernaderoActivity.class);
-            startActivity(intent);
-        });
         if (Build.VERSION.SDK_INT >= 33) {  // También puedes usar Build.VERSION_CODES.TIRAMISU
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -85,6 +95,8 @@ public class JardinActivity extends AppCompatActivity {
             //Redirige al usuario a la configuración de Android para habilitar el acceso a las estadísticas de uso
             startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
         }
+
+        //QUE HACE ESTO?!?!??
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             if (dao.getUserPlantRelations(UserLogged.getInstance().getCurrentUser().getId()).isEmpty()) {
@@ -94,7 +106,160 @@ public class JardinActivity extends AppCompatActivity {
                 }
             }
         });
+
+        //Boton my cares
+        Button btnMyCares = findViewById(R.id.btn_my_cares);
+        btnMyCares.setOnClickListener(view -> showDescriptionPopup());
+
+        //Boton de dentro del popup para hacer que se vaya
+        Button btn_desc_close = findViewById(R.id.btn_desc_close);
+        btn_desc_close.setOnClickListener(view -> {
+            View popupView = findViewById(R.id.plant_desc_popup);
+            popupView.setVisibility(View.INVISIBLE);
+        });
+
+        //Boton para navegar al Invernadero
+        ImageButton imageButtonOjo = findViewById(R.id.imageButtonOjo);
+        imageButtonOjo.setOnClickListener(v -> {
+            Intent intent = new Intent(JardinActivity.this, InvernaderoActivity.class);
+            startActivity(intent);
+        });
+
+        //Boton regar planta
+        ImageButton imageWater = findViewById(R.id.icon_water);
+        imageWater.setOnClickListener(v -> {
+            if (!canWater) {
+                showTooltip(v, "Next water in : " + formatTime(remainingTimeMillisWatering));
+            } else {
+                wateringPlant();
+            }
+        });
+
+        //Boton pad planta
+        ImageButton imagePad = findViewById(R.id.icon_gesture);
+        imagePad.setOnClickListener(v -> {
+            if (!canPad) {
+                showTooltip(v, "Next pad in : " + formatTime(remainingTimeMillisPad));
+            } else {
+                padPlant();
+            }
+        });
+
+        getPlantFromDB();
+
+        //calculateXPprogress(plant);
+
     }
+
+    private void getPlantFromDB(){
+        SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
+
+        PlantRepository plantaRepo = PlantRepository.getInstance(this);
+        DAO dao = plantaRepo.getPlantaDAO();
+
+        DatabaseExecutor.execute(() -> {
+            plant = dao.getPlantaByName(sharedPreferences.getString("selectedPlant", ""));
+            Log.d("PLANTA", plant.getName()+ "");
+            calculatePlantIndex(plant);
+            calculateXPprogress(plant);
+        });
+
+    }
+
+    private void showDescriptionPopup() {
+        // Inflar el diseño del pop-up
+        View popupView = findViewById(R.id.plant_desc_popup);
+        popupView.setVisibility(View.VISIBLE);
+
+        TextView plantTitle = findViewById(R.id.plant_name_desc);
+        plantTitle.setText(plant.getName());
+
+
+        TextView plantDesc = findViewById(R.id.plant_desc);
+        plantDesc.setText(  "XP actual de la planta : " + plant.getXp() + "\n" +
+                            "XP máxima de la planta : " + plant.getXpMax());
+    }
+
+    private void calculatePlantIndex(Plant plant){
+        //Formula que calcula el nivel de la planta para saber el indice de la foto
+        int level = (int) Math.floor(Math.sqrt((double) plant.getXp() / plant.getXpMax()) * 5);
+
+        Log.d("BasePath", "" + plant.getBasePath());
+        setImageBasedOnUsage(plant.getBasePath(),level);
+
+        TextView plant_lvl_text = findViewById(R.id.plant_lvl);
+        plant_lvl_text.setText("LVL " + level);
+    }
+
+    private void calculateXPprogress(Plant plant){
+        int xpMax = plant.getXpMax();
+        int xpNow = plant.getXp();
+
+        //Formula que calcula el nivel de la planta para saber el indice de la foto
+        int level = (int) Math.floor(Math.sqrt((double) xpNow / xpMax) * 5);
+
+        double xpCurrentLevel = Math.pow((double) level / 5, 2) * xpMax;
+        double xpNextLevel = Math.pow((double) (level + 1) / 5, 2) * xpMax;
+
+        Log.d("XP", "CurrentLVL : "+  xpCurrentLevel);
+        Log.d("XP", "NextLVL : "+  xpNextLevel);
+
+        double progress = (xpNow - xpCurrentLevel) / (xpNextLevel - xpCurrentLevel);
+
+        Log.d("XP", "PROGRESS " + progress);
+
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        progressBar.setProgress((int) progress * 100);
+    }
+
+    private void wateringPlant(){
+        plant.addXp(400);
+        calculateXPprogress(plant);
+        calculatePlantIndex(plant);
+        startWateringCooldown();
+    }
+    private void padPlant(){
+        plant.addXp(5);
+        calculateXPprogress(plant);
+        calculatePlantIndex(plant);
+        startPadCooldown();
+    }
+    private void startWateringCooldown() {
+        canWater = false;
+        remainingTimeMillisWatering = ONE_DAY_MILLIS;
+
+        new CountDownTimer(remainingTimeMillisWatering, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                remainingTimeMillisWatering = millisUntilFinished;
+            }
+
+            @Override
+            public void onFinish() {
+                canWater = true;
+                remainingTimeMillisWatering = 0;
+            }
+        }.start();
+    }
+    private void startPadCooldown() {
+        canPad = false;
+        remainingTimeMillisPad = FIVE_MIN_MILLIS;
+
+        new CountDownTimer(remainingTimeMillisPad, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                remainingTimeMillisPad = millisUntilFinished;
+            }
+
+            @Override
+            public void onFinish() {
+                canWater = true;
+                remainingTimeMillisPad = 0;
+            }
+        }.start();
+    }
+
+
     private void animateButton(View view) {
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
                 view,
@@ -105,35 +270,6 @@ public class JardinActivity extends AppCompatActivity {
         animator.start();
     }
 
-    public void setUpBottom(){
-        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
-        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
-        imageButtonMaceta.setEnabled(false); // Deshabilita el boton
-        imageButtonMaceta.setImageAlpha(128); // Oscurece el boton
-        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
-        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
-
-        imageButtonLupa.setOnClickListener(v -> {
-            animateButton(v);
-            Intent intent = new Intent(JardinActivity.this, DiaryActivity.class);
-            //sendUsageNotification("¡Felicidades, tu jardin ha crecido!. Estado actual: " + 1);
-            startActivity(intent);
-        });
-        imageButtonPlantadex.setOnClickListener(v -> {
-            animateButton(v);
-            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
-            startActivity(intent);
-        });
-        imageButtonUsuario.setOnClickListener(v -> {
-            animateButton(v);
-            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
-            startActivity(intent);
-        });
-    }
-
-
-
-
     //Se llama cada vez que la actividad vuelve a ser visible
     @Override
     protected void onResume() {
@@ -142,6 +278,7 @@ public class JardinActivity extends AppCompatActivity {
             trackAppUsage();
         }
     }
+
     //Verifica si la aplicación tiene permiso para acceder a las estadísticas de uso del dispositivo
     private boolean hasUsageStatsPermission() {
         AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
@@ -157,10 +294,11 @@ public class JardinActivity extends AppCompatActivity {
         List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
                 UsageStatsManager.INTERVAL_DAILY, currentTime - 86400000, currentTime);
 
-        long instagramUsageTime = 0;
+        //TO DO
+        long instagramUsageTime = 900000;
         long tiktokUsageTime = 0;
-        long youtubeUsageTime = 0;
-        long twitterUsageTime = 0;
+        long youtubeUsageTime = 900000;
+        long twitterUsageTime = 900000;
         long facebookUsageTime = 0;
 
         if (usageStatsList != null && !usageStatsList.isEmpty()) {
@@ -215,10 +353,9 @@ public class JardinActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
         String selectedPlant = sharedPreferences.getString("selectedPlant", null);
         if (selectedPlant == null) {
-            selectedPlant = "rosa";
+            selectedPlant = "girasol";
         }
         setImageBasedOnUsage(selectedPlant,imageIndex);
-        //setImageBasedOnUsage(imageIndex);
     }
 
     // Función para calcular el índice de la imagen según la media de tiempo de uso
@@ -235,6 +372,7 @@ public class JardinActivity extends AppCompatActivity {
             return 1; // más de 30 minutos
         }
     }
+
     private void createNotificationChannel() {
         // Verifica si el dispositivo está ejecutando Android Oreo (API 26) o superior
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -257,7 +395,6 @@ public class JardinActivity extends AppCompatActivity {
         }
     }
 
-
     private void sendUsageNotification(String message) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -276,23 +413,16 @@ public class JardinActivity extends AppCompatActivity {
         notificationManager.notify(1, builder.build());
     }
 
+    //Este metodo tiene como entries, el nombre de la planta y el indice de su crecimiento
+    private void setImageBasedOnUsage(String basePath, int imageIndex) {
+        // Crear el nombre del recurso de la imagen usando el basepath de la planta y el índice
+        String imageName;
+        if (imageIndex == 0){
+            imageName = basePath;
+        }else {
+            imageName = basePath + imageIndex;
 
-    // Función para mostrar la imagen según el índice
-    private void setImageBasedOnUsage(int imageIndex) {
-        String imageName = "image_" + imageIndex;
-        int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
-        ImageView imageView = findViewById(R.id.plant_image);
-        imageView.setImageResource(resID);
-        currentImageIndex = imageIndex;
-    }
-
-    private void setImageBasedOnUsage(String plantName, int imageIndex) {
-        // Reemplazar los espacios por guiones bajos y eliminar los acentos
-        String sanitizedPlantName = plantName.replace(" ", "_").toLowerCase();
-        sanitizedPlantName = removeAccents(sanitizedPlantName); // Eliminar caracteres acentuados
-
-        // Crear el nombre del recurso de la imagen usando el nombre de la planta y el índice
-        String imageName = "image_" + sanitizedPlantName + imageIndex;
+        }
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
 
         ImageView imageView = findViewById(R.id.plant_image);
@@ -301,9 +431,7 @@ public class JardinActivity extends AppCompatActivity {
         if (resID != 0) {
             imageView.setImageResource(resID);
         } else {
-            // Si no existe, usar solo el índice como nombre del recurso
-            String fallbackImageName = "image_" + imageIndex;
-            int fallbackResID = getResources().getIdentifier(fallbackImageName, "drawable", getPackageName());
+            int fallbackResID = getResources().getIdentifier("tulipan", "drawable", getPackageName());
             imageView.setImageResource(fallbackResID);
         }
 
@@ -326,4 +454,51 @@ public class JardinActivity extends AppCompatActivity {
         long hours = (milliseconds / (1000 * 60 * 60)) % 24;
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
+
+    private void showTooltip(View anchorView, String tooltipText) {
+        // Infla el diseño del bocadillo
+        View tooltipView = LayoutInflater.from(anchorView.getContext())
+                .inflate(R.layout.hover_text_plantoo, null);
+
+        // Establece el texto
+        TextView textView = tooltipView.findViewById(R.id.tooltipText);
+        textView.setText(tooltipText);
+
+        // Crea y configura el PopupWindow
+        tooltipWindow = new PopupWindow(tooltipView,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                false);
+        tooltipWindow.setOutsideTouchable(true);
+        tooltipWindow.setBackgroundDrawable(null);
+
+        // Muestra el PopupWindow
+        tooltipWindow.showAsDropDown(anchorView, 0, -anchorView.getHeight() - 20);
+    }
+    public void setUpBottom(){
+        ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
+        ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        imageButtonMaceta.setEnabled(false); // Deshabilita el boton
+        imageButtonMaceta.setImageAlpha(128); // Oscurece el boton
+        ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
+        ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
+
+        imageButtonLupa.setOnClickListener(v -> {
+            animateButton(v);
+            Intent intent = new Intent(JardinActivity.this, DiaryActivity.class);
+            //sendUsageNotification("¡Felicidades, tu jardin ha crecido!. Estado actual: " + 1);
+            startActivity(intent);
+        });
+        imageButtonPlantadex.setOnClickListener(v -> {
+            animateButton(v);
+            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
+            startActivity(intent);
+        });
+        imageButtonUsuario.setOnClickListener(v -> {
+            animateButton(v);
+            Intent intent = new Intent(JardinActivity.this, PerfilActivity.class);
+            startActivity(intent);
+        });
+    }
+
 }

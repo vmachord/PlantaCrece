@@ -81,6 +81,9 @@ public class PlantListActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("selectedPlant", plant.getName());
                 editor.apply();
+
+                Intent intent = new Intent(PlantListActivity.this, JardinActivity.class);
+                startActivity(intent);
             }
         });
     }
