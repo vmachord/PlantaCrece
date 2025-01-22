@@ -204,17 +204,10 @@ public class JardinActivity extends AppCompatActivity {
             double xpCurrentLevel = Math.pow((double) level / 5, 2) * xpMax;
             double xpNextLevel = Math.pow((double) (level + 1) / 5, 2) * xpMax;
 
-            Log.d("XP", "CurrentLVL : "+  xpCurrentLevel);
-            Log.d("XP", "NextLVL : "+  xpNextLevel);
-
             double progress = (xpNow - xpCurrentLevel) / (xpNextLevel - xpCurrentLevel);
-
-            Log.d("XP", "PROGRESS " + progress);
 
             ProgressBar progressBar = findViewById(R.id.progressBar);
             progressBar.setProgress((int) (progress * 100),true);
-
-            Log.d("progress", "progress  : " + progressBar.getProgress());
         }
 
         TextView plant_name  = findViewById(R.id.plant_name);
@@ -231,7 +224,7 @@ public class JardinActivity extends AppCompatActivity {
             plant.addXp(xp);
             calculateXPprogress(plant);
             calculatePlantIndex(plant);
-            //startWateringCooldown();
+            startWateringCooldown();
         }
     }
     private void padPlant(){
