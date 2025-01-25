@@ -131,7 +131,7 @@ public class JardinActivity extends AppCompatActivity {
             if (!canWater) {
                // showTooltip(v, "Next water in : " + formatTime(remainingTimeMillisWatering));
             } else {
-                wateringPlant();
+                wateringPlant(300);
             }
         });
 
@@ -147,7 +147,7 @@ public class JardinActivity extends AppCompatActivity {
 
         getPlantFromDB();
 
-        //calculateXPprogress(plant);
+        //android:background="@drawable/background_plantoo"
 
     }
 
@@ -159,7 +159,6 @@ public class JardinActivity extends AppCompatActivity {
 
         DatabaseExecutor.execute(() -> {
             plant = dao.getPlantaByName(sharedPreferences.getString("selectedPlant", ""));
-            Log.d("PLANTA", plant.getName()+ "");
             calculatePlantIndex(plant);
             calculateXPprogress(plant);
         });
@@ -184,11 +183,10 @@ public class JardinActivity extends AppCompatActivity {
         //Formula que calcula el nivel de la planta para saber el indice de la foto
         int level = (int) Math.floor(Math.sqrt((double) plant.getXp() / plant.getXpMax()) * 5);
 
-        Log.d("BasePath", "" + plant.getBasePath());
         setImageBasedOnUsage(plant.getBasePath(),level);
 
         TextView plant_lvl_text = findViewById(R.id.plant_lvl);
-        plant_lvl_text.setText("LVL " + level);
+        plant_lvl_text.setText(""+ level);
     }
 
     private void calculateXPprogress(Plant plant){
@@ -198,25 +196,36 @@ public class JardinActivity extends AppCompatActivity {
         //Formula que calcula el nivel de la planta para saber el indice de la foto
         int level = (int) Math.floor(Math.sqrt((double) xpNow / xpMax) * 5);
 
-        double xpCurrentLevel = Math.pow((double) level / 5, 2) * xpMax;
-        double xpNextLevel = Math.pow((double) (level + 1) / 5, 2) * xpMax;
+        if(xpMax == xpNow){
+            ProgressBar progressBar = findViewById(R.id.progressBar);
+            progressBar.setProgress(100,true);
+        } else {
 
-        Log.d("XP", "CurrentLVL : "+  xpCurrentLevel);
-        Log.d("XP", "NextLVL : "+  xpNextLevel);
+            double xpCurrentLevel = Math.pow((double) level / 5, 2) * xpMax;
+            double xpNextLevel = Math.pow((double) (level + 1) / 5, 2) * xpMax;
 
-        double progress = (xpNow - xpCurrentLevel) / (xpNextLevel - xpCurrentLevel);
+            double progress = (xpNow - xpCurrentLevel) / (xpNextLevel - xpCurrentLevel);
 
-        Log.d("XP", "PROGRESS " + progress);
+            ProgressBar progressBar = findViewById(R.id.progressBar);
+            progressBar.setProgress((int) (progress * 100),true);
+        }
 
-        ProgressBar progressBar = findViewById(R.id.progressBar);
-        progressBar.setProgress((int) progress * 100);
+        TextView plant_name  = findViewById(R.id.plant_name);
+        plant_name.setText(plant.getName() + " | L."  + level);
     }
 
-    private void wateringPlant(){
-        plant.addXp(400);
-        calculateXPprogress(plant);
-        calculatePlantIndex(plant);
-        startWateringCooldown();
+    private void wateringPlant(int xp){
+        if ((plant.getXp() + xp) > plant.getXpMax()){
+            int xp_needed = plant.getXpMax() - plant.getXp();
+            plant.addXp(xp_needed);
+            calculateXPprogress(plant);
+            calculatePlantIndex(plant);
+        } else{
+            plant.addXp(xp);
+            calculateXPprogress(plant);
+            calculatePlantIndex(plant);
+            startWateringCooldown();
+        }
     }
     private void padPlant(){
         plant.addXp(5);
