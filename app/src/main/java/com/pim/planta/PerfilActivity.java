@@ -117,6 +117,11 @@ public class PerfilActivity extends AppCompatActivity{
         setupClickListener();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        trackAppUsage2();
+    }
     private void setupClickListener() {
         imageView12.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,12 +172,17 @@ public class PerfilActivity extends AppCompatActivity{
 
         Calendar calendar = Calendar.getInstance();
         int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK); // Domingo = 1, Lunes = 2, ..., Sábado = 7
+        currentDayOfWeek--;  // Ajusta para que Lunes sea 0, ..., Domingo sea 6
 
+        // Llenar los datos de uso de las aplicaciones para los últimos 7 días
         for (int i = 0; i < 7; i++) {
-            String day = daysOfWeek[i];
+            // Calcula el índice para el día actual de la semana, asegurando el ciclo
+            int dayIndex = (currentDayOfWeek - i + 7) % 7;
+            String day = daysOfWeek[dayIndex];
+
             for (int j = 0; j < 5; j++) { // Recorrer las 5 aplicaciones
                 String appKey = day + "_" + (j == 0 ? "Instagram" : j == 1 ? "TikTok" : j == 2 ? "YouTube" : j == 3 ? "Twitter" : "Facebook");
-                appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 60f;
+                appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 60f;  // Convertir a minutos
             }
         }
 
@@ -181,7 +191,7 @@ public class PerfilActivity extends AppCompatActivity{
             barEntries.add(new BarEntry(i, appUsagePerDay[i]));
         }
 
-        BarDataSet barDataSet = new BarDataSet(barEntries, "");
+        BarDataSet barDataSet = new BarDataSet(barEntries, "Uso de Aplicaciones");
         barDataSet.setStackLabels(new String[]{"Insta", "TikTok", "YouTube", "Twitter", "Face"});
 
         barDataSet.setColors(new int[]{
@@ -192,14 +202,10 @@ public class PerfilActivity extends AppCompatActivity{
                 Color.parseColor("#A5D6A7")  // Facebook - Verde muy claro
         });
 
-      // Crear el objeto de datos y asignarlo al gráfico
+        // Crear el objeto de datos y asignarlo al gráfico
         BarData data = new BarData(barDataSet);
+        data.setBarWidth(0.5f); // Ajuste de ancho de barra
         barChart.setData(data);
-        barChart.invalidate();
-
-        BarData barData = new BarData(barDataSet);
-        barData.setBarWidth(0.5f);
-        barChart.setData(barData);
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));
@@ -217,15 +223,14 @@ public class PerfilActivity extends AppCompatActivity{
         barChart.getAxisRight().setEnabled(false);
 
         Legend legend = barChart.getLegend();
-        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM); // Posición en la parte inferior
-        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER); // Centrada horizontalmente
-        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL); // Orientación horizontal
-        legend.setDrawInside(false); // Evitar que se superponga con el gráfico
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        legend.setDrawInside(false);
         legend.setTextSize(12f);
         legend.setTextColor(Color.BLACK);
 
         barChart.animateY(1000, Easing.EaseInOutCubic);
-
         barChart.setFitBars(true);
         barChart.invalidate();
     }
@@ -345,15 +350,11 @@ public class PerfilActivity extends AppCompatActivity{
     public long getTotalUsageToday() {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-
-        long startOfDay = calendar.getTimeInMillis();
+        // Obtén el inicio del día a las 00:00:00
+        long startOfDay = getStartOfDay();
         long endOfDay = System.currentTimeMillis();
 
+        // Consulta las estadísticas de uso para hoy
         List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startOfDay, endOfDay);
 
         long totalTimeToday = 0;
@@ -460,7 +461,8 @@ public class PerfilActivity extends AppCompatActivity{
             return;
         }
 
-        long totalTimeToday = getTotalUsageToday();  // Usamos la función para obtener el uso total del día de hoy
+        // Obtén el tiempo total de uso de hoy usando la función
+        long totalTimeToday = getTotalUsageToday();
 
         // Inicializar el uso de las aplicaciones para hoy
         long instagramUsageTimeToday = 0;
@@ -469,8 +471,13 @@ public class PerfilActivity extends AppCompatActivity{
         long twitterUsageTimeToday = 0;
         long facebookUsageTimeToday = 0;
 
+        // Obtén el inicio y final del día de hoy
+        long startOfDay = getStartOfDay();
+        long endOfDay = System.currentTimeMillis();
+
+        // Consulta las estadísticas de uso para el día de hoy
         List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY, System.currentTimeMillis() - 86400000, System.currentTimeMillis());
+                UsageStatsManager.INTERVAL_DAILY, startOfDay, endOfDay);
 
         if (usageStatsList == null || usageStatsList.isEmpty()) {
             Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
@@ -480,6 +487,7 @@ public class PerfilActivity extends AppCompatActivity{
         // Recorrer las estadísticas de uso
         for (UsageStats usageStats : usageStatsList) {
             String packageName = usageStats.getPackageName();
+            Log.d("AppUsage", "Paquete encontrado: " + packageName);  // Log para depurar
 
             switch (packageName) {
                 case "com.instagram.android":
@@ -500,13 +508,15 @@ public class PerfilActivity extends AppCompatActivity{
             }
         }
 
+        // Guarda los datos en SharedPreferences
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
+        // Obtén el día actual y formatea la clave de SharedPreferences
         String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+        Log.d("AppUsage", "Hoy es: " + today);  // Log para depurar
 
-        editor.putLong(today + "_Total", getTotalUsageToday());
-
+        editor.putLong(today + "_Total", totalTimeToday);
         editor.putLong(today + "_Instagram", instagramUsageTimeToday);
         editor.putLong(today + "_TikTok", tiktokUsageTimeToday);
         editor.putLong(today + "_YouTube", youtubeUsageTimeToday);
@@ -515,6 +525,7 @@ public class PerfilActivity extends AppCompatActivity{
 
         editor.apply();
 
+        // Actualiza la UI con los datos guardados
         updateUsageSummary();
         initializeGraph();
     }
@@ -598,13 +609,13 @@ public class PerfilActivity extends AppCompatActivity{
     /**
      * Obtiene el timestamp del inicio del día (medianoche).
      */
-    private long getStartOfDay(long currentTime) {
+    public long getStartOfDay() {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(currentTime);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+
         return calendar.getTimeInMillis();
     }
 
