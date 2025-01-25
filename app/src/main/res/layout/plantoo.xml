@@ -6,7 +6,7 @@
     android:id="@+id/home_screen"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient">
+    android:background="@drawable/background_plantoo">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -58,21 +58,6 @@
         </LinearLayout>
 
 
-        <ImageView
-            android:id="@+id/plant_image"
-            android:layout_width="187dp"
-            android:layout_height="304dp"
-            android:layout_gravity="center"
-            android:layout_marginBottom="80dp"
-            android:contentDescription="Plant Image"
-            android:src="@drawable/tulipan"
-            app:layout_constraintBottom_toTopOf="@+id/btn_my_cares"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.415"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
-
         <Button
             android:id="@+id/btn_my_cares"
             android:layout_width="265dp"
@@ -91,8 +76,8 @@
             android:id="@+id/plant_desc_popup"
             android:layout_width="314dp"
             android:layout_height="293dp"
-            android:layout_marginStart="48dp"
-            android:layout_marginTop="204dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="156dp"
             android:orientation="vertical"
             android:padding="16dp"
             android:visibility="invisible"
@@ -145,11 +130,11 @@
             android:layout_height="100dp"
             android:layout_marginStart="244dp"
             android:layout_marginTop="352dp"
+            android:backgroundTint="#CCCCCC"
             android:max="100"
             android:progress="0"
-            android:rotation="270"
             android:progressTint="#32CD32"
-            android:backgroundTint="#CCCCCC"
+            android:rotation="270"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="MissingConstraints" />
@@ -173,9 +158,9 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="@android:color/transparent"
+            android:clickable="true"
             android:contentDescription="Water Icon"
             android:focusable="true"
-            android:clickable="true"
             android:src="@drawable/ic_water"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -191,13 +176,27 @@
             android:background="@null"
             android:contentDescription="Eye Button"
             android:scaleType="fitCenter"
-            android:src="@drawable/boton_ojo"
+            android:src="@drawable/buton_ojo"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.672"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
             app:layout_constraintVertical_bias="0.059" />
+
+        <ImageView
+            android:id="@+id/plant_image"
+            android:layout_width="274dp"
+            android:layout_height="362dp"
+            android:layout_gravity="center"
+            android:contentDescription="Plant Image"
+            android:src="@drawable/tulipan5"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.416"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/linearLayout2"
+            app:layout_constraintVertical_bias="0.7" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -37,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
 
         plantaRepo = new PlantRepository(this);
 
+        DatabaseExecutor.execute(() -> {
+                    Plant planta = new Plant("TulipanPau", "tulipan", R.drawable.tulipan5, 0, 10000, "Una metomorfosis unica");
+                    plantaRepo.getPlantaDAO().insert(planta);
+                });
 
         // Poblar la base de datos en caso de que no lo este
         DatabaseExecutor.execute(() -> {
