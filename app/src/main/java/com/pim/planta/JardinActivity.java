@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -151,6 +152,17 @@ public class JardinActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // Verifica si la tecla presionada es "O"
+        if (keyCode == KeyEvent.KEYCODE_O) {
+            // Ejecuta tu función aquí
+            wateringPlant(300);
+            return true; // Indica que el evento ha sido manejado
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     private void getPlantFromDB(){
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
 
@@ -220,6 +232,7 @@ public class JardinActivity extends AppCompatActivity {
             plant.addXp(xp_needed);
             calculateXPprogress(plant);
             calculatePlantIndex(plant);
+            startWateringCooldown();
         } else{
             plant.addXp(xp);
             calculateXPprogress(plant);
@@ -228,6 +241,23 @@ public class JardinActivity extends AppCompatActivity {
         }
     }
     private void padPlant(){
+        if ((plant.getXp() + 5) > plant.getXpMax()){
+            int xp_needed = plant.getXpMax() - plant.getXp();
+            plant.addXp(xp_needed);
+            calculateXPprogress(plant);
+            calculatePlantIndex(plant);
+            startPadCooldown();
+        } else{
+            plant.addXp(5);
+            calculateXPprogress(plant);
+            calculatePlantIndex(plant);
+            startPadCooldown();
+        }
+
+
+
+
+
         plant.addXp(5);
         calculateXPprogress(plant);
         calculatePlantIndex(plant);

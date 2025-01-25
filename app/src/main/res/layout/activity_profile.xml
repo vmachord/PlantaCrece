@@ -115,7 +115,7 @@
         android:background="@drawable/circle_border"
         android:clipToOutline="true"
         android:scaleType="centerCrop"
-        android:src="@drawable/tulipan"
+        android:src="@drawable/tulipan5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

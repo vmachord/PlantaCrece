@@ -64,7 +64,7 @@
             android:layout_gravity="center"
             android:layout_marginBottom="80dp"
             android:contentDescription="Plant Image"
-            android:src="@drawable/tulipan"
+            android:src="@drawable/tulipan5"
             app:layout_constraintBottom_toTopOf="@+id/btn_my_cares"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.415"
