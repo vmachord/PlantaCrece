@@ -11,7 +11,7 @@
         android:id="@+id/imageButtonOjo"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/boton_ojo"
+        android:src="@drawable/buton_ojo"
         android:background="@null"
         android:scaleType="fitCenter"
         app:layout_constraintStart_toStartOf="parent"
