@@ -44,7 +44,10 @@ import com.pim.planta.models.Plant;
 import com.pim.planta.models.UserLogged;
 import com.pim.planta.models.UserPlantRelation;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -146,6 +149,7 @@ public class JardinActivity extends AppCompatActivity {
             }
         });
 
+
         getPlantFromDB();
 
         //android:background="@drawable/background_plantoo"
@@ -154,11 +158,36 @@ public class JardinActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        // Verifica si la tecla presionada es "O"
         if (keyCode == KeyEvent.KEYCODE_O) {
-            // Ejecuta tu función aquí
             wateringPlant(300);
-            return true; // Indica que el evento ha sido manejado
+            return true;
+        }
+        if (keyCode == KeyEvent.KEYCODE_P) {
+            wateringPlant(-300);
+            return true;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_U) {
+            String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+
+            SharedPreferences sharedPreferences = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+            long prevInstagramTime = sharedPreferences.getLong(today + "_Instagram",0);
+
+            // Añade 1 minuto (60,000 ms)
+            long newInstagramTime = prevInstagramTime + 60000;
+
+            // Guarda el nuevo tiempo en SharedPreferences
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putLong(today + "_Instagram", newInstagramTime);
+            editor.apply();
+
+            // Muestra un log para confirmar que el tiempo ha cambiado
+            Log.d("Tiempo", "Nuevo tiempo de "+  today + "_Instagram"+": " + formatTime(newInstagramTime));
+
+            // Opción: muestra un Toast para que sea visible en pantalla
+            Toast.makeText(this, "Se añadió 1 minuto al tiempo de Instagram", Toast.LENGTH_SHORT).show();
+
+            return true; // Indica que se manejó la pulsación de la tecla
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -187,8 +216,11 @@ public class JardinActivity extends AppCompatActivity {
 
 
         TextView plantDesc = findViewById(R.id.plant_desc);
-        plantDesc.setText(  "XP actual de la planta : " + plant.getXp() + "\n" +
-                            "XP máxima de la planta : " + plant.getXpMax());
+
+        String desc = "\n\n" + plant.getDescription() + "\n\n" +
+                "XP actual de la planta : " + plant.getXp() + "\n" +
+                "XP máxima de la planta : " + plant.getXpMax() + "\n\n\n\n";
+        plantDesc.setText(desc);
     }
 
     private void calculatePlantIndex(Plant plant){
@@ -253,15 +285,6 @@ public class JardinActivity extends AppCompatActivity {
             calculatePlantIndex(plant);
             startPadCooldown();
         }
-
-
-
-
-
-        plant.addXp(5);
-        calculateXPprogress(plant);
-        calculatePlantIndex(plant);
-        startPadCooldown();
     }
     private void startWateringCooldown() {
         canWater = false;
@@ -314,6 +337,7 @@ public class JardinActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (hasUsageStatsPermission()) {
+            penalizeIfUsageIncreased();
             trackAppUsage();
         }
     }
@@ -326,6 +350,55 @@ public class JardinActivity extends AppCompatActivity {
         return mode == AppOpsManager.MODE_ALLOWED;
     }
 
+    private void saveAppUsageTimes(SharedPreferences sharedPreferences,
+                                   long instagramUsageTime,
+                                   long tiktokUsageTime,
+                                   long youtubeUsageTime,
+                                   long twitterUsageTime,
+                                   long facebookUsageTime) {
+        String todayKey = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong(todayKey + "_Instagram", instagramUsageTime);
+        editor.putLong(todayKey + "_TikTok", tiktokUsageTime);
+        editor.putLong(todayKey + "_YouTube", youtubeUsageTime);
+        editor.putLong(todayKey + "_Twitter", twitterUsageTime);
+        editor.putLong(todayKey + "_Facebook", facebookUsageTime);
+        editor.apply();
+    }
+
+    private long getPreviousAppUsage(SharedPreferences sharedPreferences, String dayKey) {
+        // Lista de claves de las aplicaciones a sumar
+        String[] appKeys = {
+                "_Instagram",
+                "_TikTok",
+                "_YouTube",
+                "_Twitter",
+                "_Facebook"
+        };
+
+        long totalUsage = 0;
+
+        // Sumar los tiempos de todas las aplicaciones con el token del día
+        for (String key : appKeys) {
+            totalUsage += sharedPreferences.getLong(dayKey + key, 0);
+        }
+
+        return totalUsage; // Retorna el total de uso acumulado para el día
+    }
+
+
+    private void penalizeIfUsageIncreased() {
+        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+        String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+
+        long currentTime = prefs.getLong(today+"_Total",0);
+
+        if (currentTime > 0) {
+            long difference = currentTime - 0;
+            Toast.makeText(this, "Se te ha quitado " + difference + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
+        }
+    }
+
     private void trackAppUsage() {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
         long currentTime = System.currentTimeMillis();
@@ -333,17 +406,22 @@ public class JardinActivity extends AppCompatActivity {
         List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
                 UsageStatsManager.INTERVAL_DAILY, currentTime - 86400000, currentTime);
 
+        SharedPreferences sharedPreferencesUsage = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+        String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+
         //TO DO
         long instagramUsageTime = 900000;
         long tiktokUsageTime = 0;
-        long youtubeUsageTime = 900000;
-        long twitterUsageTime = 900000;
+        long youtubeUsageTime = 0;
+        long twitterUsageTime = 0;
         long facebookUsageTime = 0;
+
+        long totalTimeInForeground = 0;
 
         if (usageStatsList != null && !usageStatsList.isEmpty()) {
             for (UsageStats usageStats : usageStatsList) { // Recorre la lista de uso de aplicaciones
                 String packageName = usageStats.getPackageName();
-                long totalTimeInForeground = usageStats.getTotalTimeInForeground();
+                totalTimeInForeground = usageStats.getTotalTimeInForeground();
 
                 switch (packageName) {
                     case "com.instagram.android":
@@ -369,6 +447,7 @@ public class JardinActivity extends AppCompatActivity {
             Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
         }
 
+
         // Calcular la media del tiempo de uso (excluyendo Google)
         int appCount = 5; // Cinco aplicaciones: Instagram, TikTok, YouTube, Twitter y Facebook
         long totalUsageTime = instagramUsageTime + tiktokUsageTime + youtubeUsageTime + twitterUsageTime + facebookUsageTime;
@@ -377,19 +456,11 @@ public class JardinActivity extends AppCompatActivity {
         // Mostrar la imagen adecuada según la media
         int imageIndex = getImageBasedOnAverageTime(averageUsageTime);
 
-        //Actualiza el TextView con los tiempos de uso de cada aplicación
-        String usageSummary = "Tiempo de uso:\n" +
-                "Instagram: " + formatTime(instagramUsageTime) + "\n" +
-                "TikTok: " + formatTime(tiktokUsageTime) + "\n" +
-                "YouTube: " + formatTime(youtubeUsageTime) + "\n" +
-                "Twitter: " + formatTime(twitterUsageTime) + "\n" +
-                "Facebook: " + formatTime(facebookUsageTime) + "\n" +
-                "Media de uso: " + formatTime(averageUsageTime);
-
-
         if(previousImageIndex == -1)
             previousImageIndex = imageIndex;
+
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
+
         String selectedPlant = sharedPreferences.getString("selectedPlant", null);
         if (selectedPlant == null) {
             selectedPlant = "girasol";

@@ -505,6 +505,8 @@ public class PerfilActivity extends AppCompatActivity{
 
         String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
 
+        editor.putLong(today + "_Total", getTotalUsageToday());
+
         editor.putLong(today + "_Instagram", instagramUsageTimeToday);
         editor.putLong(today + "_TikTok", tiktokUsageTimeToday);
         editor.putLong(today + "_YouTube", youtubeUsageTimeToday);
