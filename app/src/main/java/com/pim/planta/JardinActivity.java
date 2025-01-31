@@ -133,7 +133,7 @@ public class JardinActivity extends AppCompatActivity {
         ImageButton imageWater = findViewById(R.id.icon_water);
         imageWater.setOnClickListener(v -> {
             if (!canWater) {
-               // showTooltip(v, "Next water in : " + formatTime(remainingTimeMillisWatering));
+                showTooltip(v, "Next water in : " + formatTime(remainingTimeMillisWatering));
             } else {
                 wateringPlant(300);
             }
@@ -143,7 +143,7 @@ public class JardinActivity extends AppCompatActivity {
         ImageButton imagePad = findViewById(R.id.icon_gesture);
         imagePad.setOnClickListener(v -> {
             if (!canPad) {
-               // showTooltip(v, "Next pad in : " + formatTime(remainingTimeMillisPad));
+                showTooltip(v, "Next pad in : " + formatTime(remainingTimeMillisPad));
             } else {
                 padPlant();
             }
@@ -410,7 +410,7 @@ public class JardinActivity extends AppCompatActivity {
         String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
 
         //TO DO
-        long instagramUsageTime = 900000;
+        long instagramUsageTime = 0;
         long tiktokUsageTime = 0;
         long youtubeUsageTime = 0;
         long twitterUsageTime = 0;
@@ -564,7 +564,7 @@ public class JardinActivity extends AppCompatActivity {
         long hours = (milliseconds / (1000 * 60 * 60)) % 24;
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
-/*
+
     private void showTooltip(View anchorView, String tooltipText) {
         // Infla el diseño del bocadillo
         View tooltipView = LayoutInflater.from(anchorView.getContext())
@@ -584,7 +584,7 @@ public class JardinActivity extends AppCompatActivity {
 
         // Muestra el PopupWindow
         tooltipWindow.showAsDropDown(anchorView, 0, -anchorView.getHeight() - 20);
-    }*/
+    }
     public void setUpBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
