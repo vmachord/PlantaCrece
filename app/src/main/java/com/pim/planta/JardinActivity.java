@@ -44,13 +44,29 @@ import com.pim.planta.models.Plant;
 import com.pim.planta.models.UserLogged;
 import com.pim.planta.models.UserPlantRelation;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.io.*;
+import java.util.*;
 
 public class JardinActivity extends AppCompatActivity {
 
@@ -69,6 +85,7 @@ public class JardinActivity extends AppCompatActivity {
     private boolean canPad = true;
     private long remainingTimeMillisPad = 0;
     private static final long FIVE_MIN_MILLIS = 5 * 60 * 1000;
+    private static String filePathDataCSV = Paths.get("C:", "Users", "PauGa12", "AndroidStudioProjects", "PlantaCrece", "app", "src", "main", "java", "com", "pim", "planta", "sampledata", "Data.csv").toString();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -336,11 +353,184 @@ public class JardinActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (hasUsageStatsPermission()) {
-            penalizeIfUsageIncreased();
-            trackAppUsage();
+
+        // Ruta del archivo en el almacenamiento interno
+        File file = new File(getFilesDir(), "Data.csv");
+        String filePathDataCSV = file.getAbsolutePath();
+
+        // Crear el archivo si no existe
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Leer el archivo CSV
+        readCSV(filePathDataCSV);
+        List<String> dias = getColumnValues(filePathDataCSV, 0);
+
+        if (dias.contains(LocalDate.now().toString())) {
+            System.out.println("Contenido del CSV:");
+            readCSV(filePathDataCSV);
+
+            System.out.println("Días encontrados en el CSV: " + dias);
+            System.out.println("Buscando ID para el día: " + LocalDate.now().toString());
+            String id = getIdByValue(filePathDataCSV, LocalDate.now().toString());
+            List<String> valores = getRowValues(filePathDataCSV, id);
+
+            // Verificar que la lista tiene al menos 3 elementos antes de acceder a ellos
+            if (!valores.isEmpty() && valores.size() > 2) {
+                String hora = valores.get(1);
+                LocalTime horaFormat = LocalTime.parse(hora);
+                String tiempototal = valores.get(2);
+
+                try {
+                    long tiempoCSV = Long.parseLong(tiempototal);
+
+                    if (horaFormat.isBefore(LocalTime.now())) {
+                        long tiempoTotalAhora = 20000; // Este valor debería ser calculado dinámicamente
+                        long difference = tiempoTotalAhora - tiempoCSV;
+
+                        // Asegurarnos de que 'plant' no es null antes de intentar modificarlo
+                        if (plant != null) {
+                            // Aquí se llamaría el método para añadir XP, por ejemplo
+                            plant.addXp((int) -difference / 100); // Actualizar XP de la planta
+                        } else {
+                            Log.e("JardinActivity", "La planta no está inicializada.");
+                        }
+
+                        // Actualizar el CSV con la nueva hora y tiempo total
+                        updateCSV(filePathDataCSV, id, 1, LocalTime.now().toString());
+                        updateCSV(filePathDataCSV, id, 2, String.valueOf(tiempoTotalAhora));
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Error al convertir tiempoCSV a long: " + tiempototal);
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Advertencia: No se encontraron valores válidos en la fila con ID: " + id);
+            }
+        } else {
+            // Si el día no existe en el CSV, crear una nueva entrada
+            String[] lista = {
+                    LocalDate.now().toString(),
+                    LocalTime.now().toString(),
+                    "10000" // Este valor debería ser calculado dinámicamente
+            };
+            writeCSV(filePathDataCSV, lista);
         }
     }
+
+
+
+    public static void readCSV(String filePath) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> getColumnValues(String filePath, int columnIndex) {
+        List<String> values = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (columnIndex < parts.length) {
+                    values.add(parts[columnIndex]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return values;
+    }
+
+    private void writeCSV(String filePath, String[] data) {
+        try {
+            FileWriter writer = new FileWriter(filePath, true);  // 'true' para añadir al final del archivo
+            BufferedWriter bufferedWriter = new BufferedWriter(writer);
+
+            // Convertir el array de strings en una línea CSV
+            StringBuilder sb = new StringBuilder();
+            for (String str : data) {
+                sb.append(str).append(",");
+            }
+            sb.setLength(sb.length() - 1); // Eliminar la última coma
+            bufferedWriter.write(sb.toString());
+            bufferedWriter.newLine(); // Nueva línea después de escribir los datos
+
+            bufferedWriter.close(); // Cerrar el BufferedWriter
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public static void updateCSV(String filePath, String id, int columnIndex, String newValue) {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > columnIndex && parts[0].equals(id)) {
+                    parts[columnIndex] = newValue;
+                }
+                lines.add(String.join(",", parts));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, false))) { // Modo sobrescritura
+            for (String updatedLine : lines) {
+                bw.write(updatedLine);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> getRowValues(String filePath, String id) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > 0 && parts[0].equals(id)) {
+                    return Arrays.asList(parts);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList(); // Retorna una lista vacía en lugar de null
+    }
+
+    public static String getIdByValue(String filePath, String value) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > 0 && parts[0].trim().equals(value.trim())) {
+                    return parts[0].trim(); // Retornamos el día como ID
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ""; // Si no se encuentra, devolver cadena vacía
+    }
+
+
 
     //Verifica si la aplicación tiene permiso para acceder a las estadísticas de uso del dispositivo
     private boolean hasUsageStatsPermission() {
