@@ -368,14 +368,15 @@ public class JardinActivity extends AppCompatActivity {
         }
 
         // Leer el archivo CSV
-        readCSV(filePathDataCSV);
+        //readCSV(filePathDataCSV);
         List<String> dias = getColumnValues(filePathDataCSV, 0);
+        System.out.println("Días encontrados en el CSV: " + dias);
 
         if (dias.contains(LocalDate.now().toString())) {
-            System.out.println("Contenido del CSV:");
-            readCSV(filePathDataCSV);
+            //System.out.println("Contenido del CSV:");
+            //readCSV(filePathDataCSV);
 
-            System.out.println("Días encontrados en el CSV: " + dias);
+
             System.out.println("Buscando ID para el día: " + LocalDate.now().toString());
             String id = getIdByValue(filePathDataCSV, LocalDate.now().toString());
             List<String> valores = getRowValues(filePathDataCSV, id);
@@ -388,11 +389,11 @@ public class JardinActivity extends AppCompatActivity {
 
                 try {
                     long tiempoCSV = Long.parseLong(tiempototal);
-
+                    Log.d("PRUEBA", "Prueba tiempo que hay en el csv : " + tiempoCSV);
                     if (horaFormat.isBefore(LocalTime.now())) {
                         long tiempoTotalAhora = 20000; // Este valor debería ser calculado dinámicamente
                         long difference = tiempoTotalAhora - tiempoCSV;
-
+                        Log.d("PRUEBA", "Ha entrado a la comprobacion de que el tiempo de ahora es mayor que el de antes : " + difference);
                         // Asegurarnos de que 'plant' no es null antes de intentar modificarlo
                         if (plant != null) {
                             // Aquí se llamaría el método para añadir XP, por ejemplo
@@ -417,8 +418,9 @@ public class JardinActivity extends AppCompatActivity {
             String[] lista = {
                     LocalDate.now().toString(),
                     LocalTime.now().toString(),
-                    "10000" // Este valor debería ser calculado dinámicamente
+                    "5555" // Este valor debería ser calculado dinámicamente
             };
+            Log.d("ELSE", "Ha entrado al else");
             writeCSV(filePathDataCSV, lista);
         }
     }
@@ -452,21 +454,13 @@ public class JardinActivity extends AppCompatActivity {
         return values;
     }
 
-    private void writeCSV(String filePath, String[] data) {
-        try {
-            FileWriter writer = new FileWriter(filePath, true);  // 'true' para añadir al final del archivo
-            BufferedWriter bufferedWriter = new BufferedWriter(writer);
-
-            // Convertir el array de strings en una línea CSV
-            StringBuilder sb = new StringBuilder();
-            for (String str : data) {
-                sb.append(str).append(",");
-            }
-            sb.setLength(sb.length() - 1); // Eliminar la última coma
-            bufferedWriter.write(sb.toString());
-            bufferedWriter.newLine(); // Nueva línea después de escribir los datos
-
-            bufferedWriter.close(); // Cerrar el BufferedWriter
+    public static void writeCSV(String fileName, String[] data) {
+        try (FileWriter fw = new FileWriter(fileName, true);
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw)) {
+            out.println(String.join(",", data));
+            out.flush(); // Asegurar que los datos se escriban en el archivo inmediatamente
+            Log.d("JDR", "Se ha guardado");
         } catch (IOException e) {
             e.printStackTrace();
         }
