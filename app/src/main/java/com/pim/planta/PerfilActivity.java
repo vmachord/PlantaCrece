@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -95,6 +96,7 @@ public class PerfilActivity extends AppCompatActivity{
     private TextView userName;
     private TextView textView8;
     private TextView textView9;
+    private int currentWeek;
 
 
     @Override
@@ -118,9 +120,33 @@ public class PerfilActivity extends AppCompatActivity{
         textView8 = findViewById(R.id.textView8);
         textView9 = findViewById(R.id.textView9);
         setupClickListener();
+
+        currentWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
+
+        ImageButton buttonPreviousWeek = findViewById(R.id.buttonPreviousWeek);
+        ImageButton buttonNextWeek = findViewById(R.id.buttonNextWeek);
+
+        buttonPreviousWeek.setOnClickListener(v -> {
+            currentWeek--; // Retroceder a la semana anterior
+            if (currentWeek < 1) {
+                currentWeek = 52; // Si estamos en la semana 1, volvemos a la semana 52
+            }
+            updateGraphAndData(currentWeek);
+        });
+
+        buttonNextWeek.setOnClickListener(v -> {
+            currentWeek++; // Avanzar a la siguiente semana
+            if (currentWeek > 52) {
+                currentWeek = 1; // Si estamos en la semana 52, volvemos a la semana 1
+            }
+            updateGraphAndData(currentWeek);
+        });
+
+        updateGraphAndData(currentWeek);
+
     }
 
-    private void loadWeeklyData(int selectedWeek) {
+    private void updateGraphAndData(int selectedWeek) {
         initializeGraph(selectedWeek);
         updateUsageSummary(selectedWeek);
     }
@@ -180,17 +206,19 @@ public class PerfilActivity extends AppCompatActivity{
         String[] daysOfWeek = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
         Calendar calendar = Calendar.getInstance();
-        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-        currentDayOfWeek = (currentDayOfWeek == 1) ? 6 : currentDayOfWeek - 2;
+        calendar.set(Calendar.WEEK_OF_YEAR, selectedWeek);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY); // Asegurar que empieza en lunes
 
         for (int i = 0; i < 7; i++) {
-            int dayIndex = (currentDayOfWeek - i + 7) % 7;
-            String day = daysOfWeek[dayIndex];
+            String day = daysOfWeek[i];
 
             for (int j = 0; j < 5; j++) {
                 String appKey = "Week" + selectedWeek + "_" + day + "_" +
                         (j == 0 ? "Instagram" : j == 1 ? "TikTok" : j == 2 ? "YouTube" : j == 3 ? "Twitter" : "Facebook");
+
                 appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 3600000f;
+
+                Log.d("AppUsage", "Cargando datos para: " + appKey + " -> " + prefs.getLong(appKey, 0));
             }
         }
 
@@ -241,6 +269,7 @@ public class PerfilActivity extends AppCompatActivity{
         barChart.setFitBars(true);
         barChart.invalidate();
     }
+
 
 /*
     private void initializeGraph() {

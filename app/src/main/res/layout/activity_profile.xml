@@ -81,6 +81,15 @@
             android:layout_marginLeft="180dp"
             android:layout_marginTop="22dp"
             app:srcCompat="@drawable/vector_160" />
+        <ImageButton
+            android:id="@+id/buttonPreviousWeek"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginLeft="140dp"
+            android:layout_marginTop="10dp"
+            android:background="@null"
+            android:src="@android:drawable/ic_media_previous" />
+
 
         <ImageView
             android:id="@+id/imageView14"
@@ -88,6 +97,16 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="450dp"
             app:srcCompat="@drawable/other" />
+
+        <ImageButton
+            android:id="@+id/buttonNextWeek"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginLeft="250dp"
+            android:layout_marginTop="10dp"
+            android:background="@null"
+            android:src="@android:drawable/ic_media_next"
+            />
 
     </FrameLayout>
 
