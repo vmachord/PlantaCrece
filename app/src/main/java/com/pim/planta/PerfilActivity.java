@@ -23,9 +23,12 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.Canvas;
@@ -117,6 +120,12 @@ public class PerfilActivity extends AppCompatActivity{
         setupClickListener();
     }
 
+    private void loadWeeklyData(int selectedWeek) {
+        initializeGraph(selectedWeek);
+        updateUsageSummary(selectedWeek);
+    }
+
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -162,6 +171,78 @@ public class PerfilActivity extends AppCompatActivity{
         });
     }
 
+    private void initializeGraph(int selectedWeek) {
+        barChart = findViewById(R.id.bar_chart);
+        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+
+        float[][] appUsagePerDay = new float[7][5];
+
+        String[] daysOfWeek = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+
+        Calendar calendar = Calendar.getInstance();
+        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        currentDayOfWeek = (currentDayOfWeek == 1) ? 6 : currentDayOfWeek - 2;
+
+        for (int i = 0; i < 7; i++) {
+            int dayIndex = (currentDayOfWeek - i + 7) % 7;
+            String day = daysOfWeek[dayIndex];
+
+            for (int j = 0; j < 5; j++) {
+                String appKey = "Week" + selectedWeek + "_" + day + "_" +
+                        (j == 0 ? "Instagram" : j == 1 ? "TikTok" : j == 2 ? "YouTube" : j == 3 ? "Twitter" : "Facebook");
+                appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 3600000f;
+            }
+        }
+
+        ArrayList<BarEntry> barEntries = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            barEntries.add(new BarEntry(i, appUsagePerDay[i]));
+        }
+
+        BarDataSet barDataSet = new BarDataSet(barEntries, "Uso de Aplicaciones");
+        barDataSet.setStackLabels(new String[]{"Insta", "TikTok", "YouTube", "Twitter", "Face"});
+
+        barDataSet.setColors(new int[]{
+                Color.parseColor("#004D40"),
+                Color.parseColor("#2E7D32"),
+                Color.parseColor("#4CAF50"),
+                Color.parseColor("#81C784"),
+                Color.parseColor("#A5D6A7")
+        });
+
+        BarData data = new BarData(barDataSet);
+        data.setBarWidth(0.5f);
+        barChart.setData(data);
+
+        XAxis xAxis = barChart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextSize(12f);
+        xAxis.setTextColor(Color.BLACK);
+        xAxis.setGranularity(1f);
+        xAxis.setDrawGridLines(false);
+
+        YAxis leftAxis = barChart.getAxisLeft();
+        leftAxis.setAxisMinimum(0f);
+        leftAxis.setTextSize(12f);
+        leftAxis.setTextColor(Color.BLACK);
+
+        barChart.getAxisRight().setEnabled(false);
+
+        Legend legend = barChart.getLegend();
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        legend.setDrawInside(false);
+        legend.setTextSize(12f);
+        legend.setTextColor(Color.BLACK);
+
+        barChart.animateY(1000, Easing.EaseInOutCubic);
+        barChart.setFitBars(true);
+        barChart.invalidate();
+    }
+
+/*
     private void initializeGraph() {
         barChart = findViewById(R.id.bar_chart);
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
@@ -233,54 +314,8 @@ public class PerfilActivity extends AppCompatActivity{
         barChart.animateY(1000, Easing.EaseInOutCubic);
         barChart.setFitBars(true);
         barChart.invalidate();
-    }
+    }*/
 
-
-/*
-* private void initializeGraph() {
-        barChart = findViewById(R.id.bar_chart);
-
-        ArrayList<BarEntry> barEntries = new ArrayList<>();
-        barEntries.add(new BarEntry(0, new float[]{2f, 3f, 1f, 4f, 5f}));
-        barEntries.add(new BarEntry(1, new float[]{3f, 1f, 2f, 7f, 1f}));
-        barEntries.add(new BarEntry(2, new float[]{4f, 2f, 3f, 6f, 1f}));
-        barEntries.add(new BarEntry(3, new float[]{5f, 3f, 2f, 4f, 2f}));
-        barEntries.add(new BarEntry(4, new float[]{3f, 4f, 1f, 5f, 2f}));
-        barEntries.add(new BarEntry(5, new float[]{1f, 2f, 3f, 4f, 3f}));
-        barEntries.add(new BarEntry(6, new float[]{2f, 3f, 2f, 5f, 4f}));
-
-        BarDataSet barDataSet = new BarDataSet(barEntries, "App Usage");
-        barDataSet.setStackLabels(new String[]{"WhatsApp", "YouTube", "Instagram", "Facebook", "TikTok"});
-        barDataSet.setColors(new int[]{
-                Color.parseColor("#1B5E20"),
-                Color.parseColor("#388E3C"),
-                Color.parseColor("#66BB6A"),
-                Color.parseColor("#81C784"),
-                Color.parseColor("#A5D6A7")
-        });
-
-        BarData barData = new BarData(barDataSet);
-        barData.setBarWidth(0.5f);
-        barChart.setData(barData);
-
-        XAxis xAxis = barChart.getXAxis();
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(new String[]{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}));
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
-        xAxis.setGranularity(1f);
-        xAxis.setGranularityEnabled(true);
-
-        YAxis yAxisLeft = barChart.getAxisLeft();
-        yAxisLeft.setAxisMinimum(0f);
-        barChart.getAxisRight().setEnabled(false);
-
-        barChart.getDescription().setEnabled(false);
-        barChart.setFitBars(true);
-        barChart.getLegend().setEnabled(true);
-
-        barChart.invalidate();  // Refresca el gráfico
-    }
-* */
 
     private void initializeNameAndProfile(){
         profileImageView = findViewById(R.id.profile_image);
@@ -365,7 +400,7 @@ public class PerfilActivity extends AppCompatActivity{
         return totalTimeToday;
     }
 
-
+/*
     private void trackAppUsage() {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
         if (usageStatsManager == null) {
@@ -412,6 +447,9 @@ public class PerfilActivity extends AppCompatActivity{
             }
         }
 
+        Calendar calendar = Calendar.getInstance();
+        int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
+
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
@@ -453,8 +491,8 @@ public class PerfilActivity extends AppCompatActivity{
 
         initializeGraph();
     }
-
-    private void trackAppUsage2() {
+*/
+    private void trackAppUsage() {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
         if (usageStatsManager == null) {
             Log.e("AppUsage", "UsageStatsManager no está disponible.");
@@ -463,6 +501,7 @@ public class PerfilActivity extends AppCompatActivity{
 
         // Obtén el tiempo total de uso de hoy usando la función
         long totalTimeToday = getTotalUsageToday();
+        Log.d("AppUsage", "Total Time Today: " + totalTimeToday);
 
         // Inicializar el uso de las aplicaciones para hoy
         long instagramUsageTimeToday = 0;
@@ -507,6 +546,8 @@ public class PerfilActivity extends AppCompatActivity{
                     break;
             }
         }
+        Calendar calendar = Calendar.getInstance();
+        int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
 
         // Guarda los datos en SharedPreferences
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
@@ -516,32 +557,40 @@ public class PerfilActivity extends AppCompatActivity{
         String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
         Log.d("AppUsage", "Hoy es: " + today);  // Log para depurar
 
-        editor.putLong(today + "_Total", totalTimeToday);
+        /*editor.putLong(today + "_Total", totalTimeToday);
         editor.putLong(today + "_Instagram", instagramUsageTimeToday);
         editor.putLong(today + "_TikTok", tiktokUsageTimeToday);
         editor.putLong(today + "_YouTube", youtubeUsageTimeToday);
         editor.putLong(today + "_Twitter", twitterUsageTimeToday);
         editor.putLong(today + "_Facebook", facebookUsageTimeToday);
+*/
+        String weekKey = "Week" + currentWeek + "_" + today + "_";
+
+        editor.putLong(weekKey + "Total", totalTimeToday);
+        editor.putLong(weekKey + "Instagram", instagramUsageTimeToday);
+        editor.putLong(weekKey + "TikTok", tiktokUsageTimeToday);
+        editor.putLong(weekKey + "YouTube", youtubeUsageTimeToday);
+        editor.putLong(weekKey + "Twitter", twitterUsageTimeToday);
+        editor.putLong(weekKey + "Facebook", facebookUsageTimeToday);
 
         editor.apply();
 
         // Actualiza la UI con los datos guardados
-        updateUsageSummary();
-        initializeGraph();
+        //updateUsageSummary();
+        //initializeGraph();
     }
 
-    private void updateUsageSummary() {
+    private void updateUsageSummary(int selectedWeek) {
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
 
         String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
 
-        long instagramUsage = prefs.getLong(today + "_Instagram", 0);
-        long tiktokUsage = prefs.getLong(today + "_TikTok", 0);
-        long youtubeUsage = prefs.getLong(today + "_YouTube", 0);
-        long twitterUsage = prefs.getLong(today + "_Twitter", 0);
-        long facebookUsage = prefs.getLong(today + "_Facebook", 0);
+        long instagramUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Instagram", 0);
+        long tiktokUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_TikTok", 0);
+        long youtubeUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_YouTube", 0);
+        long twitterUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Twitter", 0);
+        long facebookUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Facebook", 0);
 
-        // Mostrar el resumen en el TextView
         String usageSummary = String.format(
                 "\n%-15s %s\n" +
                         "%-15s     %s\n" +
@@ -555,7 +604,6 @@ public class PerfilActivity extends AppCompatActivity{
                 "Facebook:", formatTime(facebookUsage)
         );
 
-        // Verifica si el TextView está inicializado y actualiza el texto
         if (textViewPlantoo != null) {
             textViewPlantoo.setText(usageSummary);
         } else {
@@ -563,7 +611,78 @@ public class PerfilActivity extends AppCompatActivity{
         }
     }
 
+    private void trackAppUsage2() {
+        UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
+        if (usageStatsManager == null) {
+            Log.e("AppUsage", "UsageStatsManager no está disponible.");
+            return;
+        }
 
+        long totalTimeToday = getTotalUsageToday();
+
+        long instagramUsageTimeToday = 0;
+        long tiktokUsageTimeToday = 0;
+        long youtubeUsageTimeToday = 0;
+        long twitterUsageTimeToday = 0;
+        long facebookUsageTimeToday = 0;
+
+        long startOfDay = getStartOfDay();
+        long endOfDay = System.currentTimeMillis();
+
+        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
+                UsageStatsManager.INTERVAL_DAILY, startOfDay, endOfDay);
+
+        if (usageStatsList == null || usageStatsList.isEmpty()) {
+            Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
+            return;
+        }
+
+        for (UsageStats usageStats : usageStatsList) {
+            String packageName = usageStats.getPackageName();
+            Log.d("AppUsage", "Paquete encontrado: " + packageName);
+
+            switch (packageName) {
+                case "com.instagram.android":
+                    instagramUsageTimeToday = usageStats.getTotalTimeInForeground();
+                    break;
+                case "com.zhiliaoapp.musically":
+                    tiktokUsageTimeToday = usageStats.getTotalTimeInForeground();
+                    break;
+                case "com.google.android.youtube":
+                    youtubeUsageTimeToday = usageStats.getTotalTimeInForeground();
+                    break;
+                case "com.twitter.android":
+                    twitterUsageTimeToday = usageStats.getTotalTimeInForeground();
+                    break;
+                case "com.facebook.katana":
+                    facebookUsageTimeToday = usageStats.getTotalTimeInForeground();
+                    break;
+            }
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
+
+        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+        Log.d("AppUsage", "Hoy es: " + today);
+
+        String weekKey = "Week" + currentWeek + "_" + today + "_";
+
+        editor.putLong(weekKey + "Total", totalTimeToday);
+        editor.putLong(weekKey + "Instagram", instagramUsageTimeToday);
+        editor.putLong(weekKey + "TikTok", tiktokUsageTimeToday);
+        editor.putLong(weekKey + "YouTube", youtubeUsageTimeToday);
+        editor.putLong(weekKey + "Twitter", twitterUsageTimeToday);
+        editor.putLong(weekKey + "Facebook", facebookUsageTimeToday);
+
+        editor.apply();
+
+        updateUsageSummary(currentWeek); // Pasar la semana actual como parámetro
+        initializeGraph(currentWeek); // Pasar la semana actual como parámetro
+    }
 
     private String getAppNameByIndex(int index) {
         switch (index) {
@@ -643,9 +762,9 @@ public class PerfilActivity extends AppCompatActivity{
 
 
     private String formatTime(long timeInMillis) {
-        long seconds = timeInMillis / 1000;
-        long minutes = (seconds / 60) % 60;
-        long hours = (seconds / 3600);
+        long minutes = (timeInMillis / 1000) / 60;
+        long hours = minutes / 60;
+        minutes = minutes % 60;
 
         return String.format("%d h %02d min", hours, minutes);
     }
