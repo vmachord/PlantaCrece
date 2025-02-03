@@ -225,7 +225,10 @@ public class JardinActivity extends AppCompatActivity {
 
     private void calculatePlantIndex(Plant plant){
         //Formula que calcula el nivel de la planta para saber el indice de la foto
-        int level = (int) Math.floor(Math.sqrt((double) plant.getXp() / plant.getXpMax()) * 5);
+        int level=1;
+        if (plant != null) {
+            level = (int) Math.floor(Math.sqrt((double) plant.getXp() / plant.getXpMax()) * 5);
+        }
 
         setImageBasedOnUsage(plant.getBasePath(),level);
 
