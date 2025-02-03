@@ -182,7 +182,7 @@ public class PerfilActivity extends AppCompatActivity{
 
             for (int j = 0; j < 5; j++) { // Recorrer las 5 aplicaciones
                 String appKey = day + "_" + (j == 0 ? "Instagram" : j == 1 ? "TikTok" : j == 2 ? "YouTube" : j == 3 ? "Twitter" : "Facebook");
-                appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 60f;  // Convertir a minutos
+                appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 3600f; // Convertir a minutos
             }
         }
 

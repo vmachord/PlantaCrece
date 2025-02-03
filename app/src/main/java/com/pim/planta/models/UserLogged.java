@@ -4,6 +4,7 @@ public class UserLogged {
 
     private static UserLogged instance;
     private User currentUser;
+    private long totalTimeUse;
 
     public static synchronized UserLogged getInstance() {
         if (instance == null) {
@@ -19,4 +20,5 @@ public class UserLogged {
     public void setCurrentUser(User user) {
         this.currentUser = user;
     }
+
 }
