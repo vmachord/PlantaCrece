@@ -207,19 +207,23 @@ public class PerfilActivity extends AppCompatActivity{
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.WEEK_OF_YEAR, selectedWeek);
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY); // Asegurar que empieza en lunes
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 
         for (int i = 0; i < 7; i++) {
             String day = daysOfWeek[i];
 
             for (int j = 0; j < 5; j++) {
-                String appKey = "Week" + selectedWeek + "_" + day + "_" +
-                        (j == 0 ? "Instagram" : j == 1 ? "TikTok" : j == 2 ? "YouTube" : j == 3 ? "Twitter" : "Facebook");
+                String appName = (j == 0) ? "Instagram" : (j == 1) ? "TikTok" :
+                        (j == 2) ? "YouTube" : (j == 3) ? "Twitter" : "Facebook";
+
+                String appKey = "Week" + selectedWeek + "_" + day + "_" + appName;
 
                 appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 3600000f;
 
-                Log.d("AppUsage", "Cargando datos para: " + appKey + " -> " + prefs.getLong(appKey, 0));
+                Log.d("AppUsage", "Cargando datos para: " + appKey + " -> " + appUsagePerDay[i][j] + " horas");
             }
+
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
 
         ArrayList<BarEntry> barEntries = new ArrayList<>();
@@ -228,7 +232,7 @@ public class PerfilActivity extends AppCompatActivity{
         }
 
         BarDataSet barDataSet = new BarDataSet(barEntries, "Uso de Aplicaciones");
-        barDataSet.setStackLabels(new String[]{"Insta", "TikTok", "YouTube", "Twitter", "Face"});
+        barDataSet.setStackLabels(new String[]{"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"});
 
         barDataSet.setColors(new int[]{
                 Color.parseColor("#004D40"),
@@ -269,81 +273,6 @@ public class PerfilActivity extends AppCompatActivity{
         barChart.setFitBars(true);
         barChart.invalidate();
     }
-
-
-/*
-    private void initializeGraph() {
-        barChart = findViewById(R.id.bar_chart);
-        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
-
-        float[][] appUsagePerDay = new float[7][5]; // 7 días de la semana, 5 aplicaciones
-
-        String[] daysOfWeek = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-
-        Calendar calendar = Calendar.getInstance();
-        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK); // Domingo = 1, Lunes = 2, ..., Sábado = 7
-        currentDayOfWeek--;  // Ajusta para que Lunes sea 0, ..., Domingo sea 6
-
-        // Llenar los datos de uso de las aplicaciones para los últimos 7 días
-        for (int i = 0; i < 7; i++) {
-            // Calcula el índice para el día actual de la semana, asegurando el ciclo
-            int dayIndex = (currentDayOfWeek - i + 7) % 7;
-            String day = daysOfWeek[dayIndex];
-
-            for (int j = 0; j < 5; j++) { // Recorrer las 5 aplicaciones
-                String appKey = day + "_" + (j == 0 ? "Instagram" : j == 1 ? "TikTok" : j == 2 ? "YouTube" : j == 3 ? "Twitter" : "Facebook");
-                appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 3600f; // Convertir a minutos
-            }
-        }
-
-        ArrayList<BarEntry> barEntries = new ArrayList<>();
-        for (int i = 0; i < 7; i++) {
-            barEntries.add(new BarEntry(i, appUsagePerDay[i]));
-        }
-
-        BarDataSet barDataSet = new BarDataSet(barEntries, "Uso de Aplicaciones");
-        barDataSet.setStackLabels(new String[]{"Insta", "TikTok", "YouTube", "Twitter", "Face"});
-
-        barDataSet.setColors(new int[]{
-                Color.parseColor("#004D40"), // Instagram - Verde muy oscuro (más azulado)
-                Color.parseColor("#2E7D32"), // TikTok - Verde oscuro
-                Color.parseColor("#4CAF50"), // YouTube - Verde brillante
-                Color.parseColor("#81C784"), // Twitter - Verde claro
-                Color.parseColor("#A5D6A7")  // Facebook - Verde muy claro
-        });
-
-        // Crear el objeto de datos y asignarlo al gráfico
-        BarData data = new BarData(barDataSet);
-        data.setBarWidth(0.5f); // Ajuste de ancho de barra
-        barChart.setData(data);
-
-        XAxis xAxis = barChart.getXAxis();
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setTextSize(12f);
-        xAxis.setTextColor(Color.BLACK);
-        xAxis.setGranularity(1f);
-        xAxis.setDrawGridLines(false);
-
-        YAxis leftAxis = barChart.getAxisLeft();
-        leftAxis.setAxisMinimum(0f);
-        leftAxis.setTextSize(12f);
-        leftAxis.setTextColor(Color.BLACK);
-
-        barChart.getAxisRight().setEnabled(false);
-
-        Legend legend = barChart.getLegend();
-        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-        legend.setDrawInside(false);
-        legend.setTextSize(12f);
-        legend.setTextColor(Color.BLACK);
-
-        barChart.animateY(1000, Easing.EaseInOutCubic);
-        barChart.setFitBars(true);
-        barChart.invalidate();
-    }*/
 
 
     private void initializeNameAndProfile(){
@@ -429,98 +358,6 @@ public class PerfilActivity extends AppCompatActivity{
         return totalTimeToday;
     }
 
-/*
-    private void trackAppUsage() {
-        UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
-        if (usageStatsManager == null) {
-            Log.e("AppUsage", "UsageStatsManager no está disponible.");
-            return;
-        }
-
-        long currentTime = System.currentTimeMillis();
-        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY, currentTime - 86400000, currentTime);
-
-        if (usageStatsList == null || usageStatsList.isEmpty()) {
-            Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
-            return;
-        }
-
-        // Inicializar el uso de las aplicaciones para hoy
-        long instagramUsageTimeToday = 0;
-        long tiktokUsageTimeToday = 0;
-        long youtubeUsageTimeToday = 0;
-        long twitterUsageTimeToday = 0;
-        long facebookUsageTimeToday = 0;
-
-        for (UsageStats usageStats : usageStatsList) {
-            String packageName = usageStats.getPackageName();
-            long totalTimeInForeground = usageStats.getTotalTimeInForeground();
-
-            switch (packageName) {
-                case "com.instagram.android":
-                    instagramUsageTimeToday += totalTimeInForeground;
-                    break;
-                case "com.zhiliaoapp.musically":
-                    tiktokUsageTimeToday += totalTimeInForeground;
-                    break;
-                case "com.google.android.youtube":
-                    youtubeUsageTimeToday += totalTimeInForeground;
-                    break;
-                case "com.twitter.android":
-                    twitterUsageTimeToday += totalTimeInForeground;
-                    break;
-                case "com.facebook.katana":
-                    facebookUsageTimeToday += totalTimeInForeground;
-                    break;
-            }
-        }
-
-        Calendar calendar = Calendar.getInstance();
-        int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
-
-        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
-
-        if (instagramUsageTimeToday > 0) {
-            editor.putLong(today + "_Instagram", instagramUsageTimeToday);
-        } else {
-            editor.putLong(today + "_Instagram", 0);
-        }
-
-        if (tiktokUsageTimeToday > 0) {
-            editor.putLong(today + "_TikTok", tiktokUsageTimeToday);
-        } else {
-            editor.putLong(today + "_TikTok", 0);
-        }
-
-        if (youtubeUsageTimeToday > 0) {
-            editor.putLong(today + "_YouTube", youtubeUsageTimeToday);
-        } else {
-            editor.putLong(today + "_YouTube", 0);
-        }
-
-        if (twitterUsageTimeToday > 0) {
-            editor.putLong(today + "_Twitter", twitterUsageTimeToday);
-        } else {
-            editor.putLong(today + "_Twitter", 0);
-        }
-
-        if (facebookUsageTimeToday > 0) {
-            editor.putLong(today + "_Facebook", facebookUsageTimeToday);
-        } else {
-            editor.putLong(today + "_Facebook", 0);
-        }
-
-        editor.apply();
-
-        updateUsageSummary();
-
-        initializeGraph();
-    }
-*/
     private void trackAppUsage() {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
         if (usageStatsManager == null) {
@@ -639,6 +476,28 @@ public class PerfilActivity extends AppCompatActivity{
             Log.e("AppUsage", "TextView no está inicializado.");
         }
     }
+    private void resetTodayUsage(SharedPreferences.Editor editor) {
+        Calendar calendar = Calendar.getInstance();
+        int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
+        String weekKey = "Week" + currentWeek + "_" + today + "_";
+
+        editor.putLong(weekKey + "Instagram", 0);
+        editor.putLong(weekKey + "TikTok", 0);
+        editor.putLong(weekKey + "YouTube", 0);
+        editor.putLong(weekKey + "Twitter", 0);
+        editor.putLong(weekKey + "Facebook", 0);
+    }
+    private long getStartOfDayUTC() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        return calendar.getTimeInMillis();
+    }
 
     private void trackAppUsage2() {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
@@ -668,23 +527,25 @@ public class PerfilActivity extends AppCompatActivity{
 
         for (UsageStats usageStats : usageStatsList) {
             String packageName = usageStats.getPackageName();
-            Log.d("AppUsage", "Paquete encontrado: " + packageName);
+            long totalTime = usageStats.getTotalTimeInForeground();
+
+            Log.d("AppUsage", "Paquete encontrado: " + packageName + " - Uso: " + totalTime);
 
             switch (packageName) {
                 case "com.instagram.android":
-                    instagramUsageTimeToday = usageStats.getTotalTimeInForeground();
+                    instagramUsageTimeToday = totalTime;
                     break;
-                case "com.zhiliaoapp.musically":
-                    tiktokUsageTimeToday = usageStats.getTotalTimeInForeground();
+                case "com.zhiliaoapp.musically": // TikTok
+                    tiktokUsageTimeToday = totalTime;
                     break;
                 case "com.google.android.youtube":
-                    youtubeUsageTimeToday = usageStats.getTotalTimeInForeground();
+                    youtubeUsageTimeToday = totalTime;
                     break;
                 case "com.twitter.android":
-                    twitterUsageTimeToday = usageStats.getTotalTimeInForeground();
+                    twitterUsageTimeToday = totalTime;
                     break;
                 case "com.facebook.katana":
-                    facebookUsageTimeToday = usageStats.getTotalTimeInForeground();
+                    facebookUsageTimeToday = totalTime;
                     break;
             }
         }
@@ -696,6 +557,7 @@ public class PerfilActivity extends AppCompatActivity{
         SharedPreferences.Editor editor = prefs.edit();
 
         String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+
         Log.d("AppUsage", "Hoy es: " + today);
 
         String weekKey = "Week" + currentWeek + "_" + today + "_";
@@ -709,9 +571,11 @@ public class PerfilActivity extends AppCompatActivity{
 
         editor.apply();
 
-        updateUsageSummary(currentWeek); // Pasar la semana actual como parámetro
-        initializeGraph(currentWeek); // Pasar la semana actual como parámetro
+        updateUsageSummary(currentWeek);
+        initializeGraph(currentWeek);
     }
+
+
 
     private String getAppNameByIndex(int index) {
         switch (index) {
