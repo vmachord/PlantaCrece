@@ -16,10 +16,8 @@
         android:background="@drawable/background_plantoo"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintTop_toTopOf="parent">
 
 
         <LinearLayout
@@ -34,10 +32,9 @@
                 android:id="@+id/plant_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/aventa"
                 android:padding="8dp"
                 android:text="Nacho el Tulipán | L.2"
-                android:textColor="@color/dark_green"
+                android:textColor="@color/black"
                 android:textSize="20sp" />
 
             <View
@@ -67,7 +64,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:backgroundTint="#083c24"
-            android:fontFamily="@font/aventa"
             android:text="My cares"
             android:textColor="#FEFEFE"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -82,10 +78,10 @@
             android:layout_height="293dp"
             android:layout_marginStart="32dp"
             android:layout_marginTop="156dp"
-            android:background="@drawable/rounded_background"
             android:orientation="vertical"
             android:padding="16dp"
             android:visibility="invisible"
+            android:background="@drawable/rounded_background"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="MissingConstraints">
@@ -112,14 +108,6 @@
                 android:text="Close"
                 tools:layout_editor_absoluteY="400dp" />
 
-            <ImageView
-                android:id="@+id/pot_image"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:contentDescription="Pot Image"
-                android:scaleType="fitXY"
-                android:src="@drawable/maceta_frontal" />
-
         </LinearLayout>
 
         <TextView
@@ -127,9 +115,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="180dp"
-            android:fontFamily="@font/aventa"
-            android:text="Nivel"
-            android:textColor="@color/dark_green"
+            android:text="Nivel
+"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.92"
@@ -209,7 +196,19 @@
             app:layout_constraintHorizontal_bias="0.416"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/linearLayout2"
-            app:layout_constraintVertical_bias="0.645" />
+            app:layout_constraintVertical_bias="0.7" />
+
+        <ImageView
+            android:id="@+id/pot_image"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="Pot Image"
+            android:src="@drawable/maceta_frontal"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/linearLayout2" />
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/lottie_water_drops"
@@ -230,6 +229,7 @@
             app:lottie_loop="false" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <LinearLayout
         android:id="@+id/bottomNavigation"
