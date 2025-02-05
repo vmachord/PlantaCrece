@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,6 +32,11 @@ public class PlantListActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Get the font
+        Typeface aventaFont = ResourcesCompat.getFont(this, R.font.aventa);
+
+        // Create the adapter and pass the font
+        PlantAdapter adapter = new PlantAdapter(plantList, aventaFont);
         PlantRepository repository = PlantRepository.getInstance(this);
         DAO dao = repository.getPlantaDAO();
 
@@ -49,7 +56,7 @@ public class PlantListActivity extends AppCompatActivity {
         plantListRecyclerView = findViewById(R.id.plant_list_recyclerview);
         plantListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        plantAdapter = new PlantAdapter(plantList);
+        plantAdapter = new PlantAdapter(plantList, aventaFont);
         plantListRecyclerView.setAdapter(plantAdapter);
 
         plantAdapter.setOnItemClickListener(new PlantAdapter.OnItemClickListener() {

@@ -1,5 +1,6 @@
 package com.pim.planta.models;
 
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +18,11 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
 
     private List<Plant> plantList;
     private OnItemClickListener onItemClickListener;
+    private Typeface aventaFont;
 
-    public PlantAdapter(List<Plant> plantList) {
+    public PlantAdapter(List<Plant> plantList, Typeface aventaFont) {
         this.plantList = plantList;
+        this.aventaFont = aventaFont;
     }
 
     @NonNull
@@ -36,6 +39,7 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
         holder.plantImageView.setImageResource(plant.getImageResourceId());
         holder.plantDescriptionTextView.setText(plant.getDescription());
 
+
         holder.itemView.setOnClickListener(v -> {
             if (onItemClickListener != null) {
                 onItemClickListener.onItemClick(plant); // Llamar a la función de la actividad
@@ -48,7 +52,7 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
         return plantList.size();
     }
 
-    public static class PlantViewHolder extends RecyclerView.ViewHolder {
+    public class PlantViewHolder extends RecyclerView.ViewHolder {
         public TextView plantNameTextView;
         public ImageView plantImageView;
         public TextView plantDescriptionTextView;
@@ -58,6 +62,8 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
             plantNameTextView = itemView.findViewById(R.id.plant_name_textview);
             plantImageView = itemView.findViewById(R.id.plant_imageview);
             plantDescriptionTextView = itemView.findViewById(R.id.plant_description_textview);
+            plantNameTextView.setTypeface(aventaFont);
+            plantDescriptionTextView.setTypeface(aventaFont);
         }
     }
     // Interface para el manejo de clic

@@ -10,42 +10,23 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.RectF;
-import android.graphics.Paint;
-import android.graphics.Path;
-
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.graphics.Canvas;
-
-import com.github.mikephil.charting.animation.Easing;
-import com.github.mikephil.charting.buffer.BarBuffer;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.utils.ColorTemplate;
-import com.github.mikephil.charting.utils.Transformer;
-import com.github.mikephil.charting.utils.ViewPortHandler;
-
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
-import com.github.mikephil.charting.animation.ChartAnimator;
+import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -59,11 +40,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import android.view.View;
 
 
 public class PerfilActivity extends AppCompatActivity{
@@ -245,16 +223,19 @@ public class PerfilActivity extends AppCompatActivity{
         BarData data = new BarData(barDataSet);
         data.setBarWidth(0.5f);
         barChart.setData(data);
+        Typeface aventaFont = ResourcesCompat.getFont(this, R.font.aventa);
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextSize(12f);
+        xAxis.setTypeface(aventaFont);
         xAxis.setTextColor(Color.BLACK);
         xAxis.setGranularity(1f);
         xAxis.setDrawGridLines(false);
 
         YAxis leftAxis = barChart.getAxisLeft();
+        leftAxis.setTypeface(aventaFont);
         leftAxis.setAxisMinimum(0f);
         leftAxis.setTextSize(12f);
         leftAxis.setTextColor(Color.BLACK);
@@ -267,6 +248,7 @@ public class PerfilActivity extends AppCompatActivity{
         legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
         legend.setDrawInside(false);
         legend.setTextSize(12f);
+        legend.setTypeface(aventaFont);
         legend.setTextColor(Color.BLACK);
 
         barChart.animateY(1000, Easing.EaseInOutCubic);
