@@ -77,6 +77,8 @@ dependencies {
 
     implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
 
+    implementation ("com.airbnb.android:lottie:6.0.0")
+
 
     debugImplementation ("androidx.compose.ui:ui-tooling:1.5.3")
 

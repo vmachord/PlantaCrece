@@ -446,6 +446,8 @@ public class PerfilActivity extends AppCompatActivity{
         //initializeGraph();
     }
 
+
+
     private void updateUsageSummary(int selectedWeek) {
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
 

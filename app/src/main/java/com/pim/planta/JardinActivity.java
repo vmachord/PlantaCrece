@@ -1,6 +1,8 @@
 package com.pim.planta;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.AppOpsManager;
@@ -37,6 +39,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.pim.planta.db.DAO;
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
@@ -85,7 +88,7 @@ public class JardinActivity extends AppCompatActivity {
     private boolean canPad = true;
     private long remainingTimeMillisPad = 0;
     private static final long FIVE_MIN_MILLIS = 5 * 60 * 1000;
-    private static String filePathDataCSV = Paths.get("C:", "Users", "PauGa12", "AndroidStudioProjects", "PlantaCrece", "app", "src", "main", "java", "com", "pim", "planta", "sampledata", "Data.csv").toString();
+    private long totalTimeUsage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,9 +172,29 @@ public class JardinActivity extends AppCompatActivity {
 
         getPlantFromDB();
 
-        //android:background="@drawable/background_plantoo"
-
+        totalTimeUsage = getTotalUsage();
     }
+
+    //VANESSAAAAAAAAAAAAAA
+    private long getTotalUsage(){
+        //creo que lo mas importante es esta variable, quiero que la variable siempre sea la de nuestra semana actual, es decir semana 1 de febrero, no se como lo tienes programado
+        int selectedWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);;
+        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+
+        String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+
+        long instagramUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Instagram", 0);
+        long tiktokUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_TikTok", 0);
+        long youtubeUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_YouTube", 0);
+        long twitterUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Twitter", 0);
+        long facebookUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Facebook", 0);
+
+        long totalTime = instagramUsage + tiktokUsage + youtubeUsage + twitterUsage + facebookUsage;
+
+        return totalTime;
+    }
+
+
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -220,7 +243,15 @@ public class JardinActivity extends AppCompatActivity {
             calculatePlantIndex(plant);
             calculateXPprogress(plant);
         });
+    }
 
+    private void updatePlantFromDB(){
+        PlantRepository plantaRepo = PlantRepository.getInstance(this);
+        DAO dao = plantaRepo.getPlantaDAO();
+
+        DatabaseExecutor.execute(() -> {
+            dao.update(plant);
+        });
     }
 
     private void showDescriptionPopup() {
@@ -234,9 +265,9 @@ public class JardinActivity extends AppCompatActivity {
 
         TextView plantDesc = findViewById(R.id.plant_desc);
 
-        String desc = "\n\n" + plant.getDescription() + "\n\n" +
+        String desc = "\n\n" + plant.getDescription() + "\n\n\n\n" +
                 "XP actual de la planta : " + plant.getXp() + "\n" +
-                "XP máxima de la planta : " + plant.getXpMax() + "\n\n\n\n";
+                "XP máxima de la planta : " + plant.getXpMax() + "\n\n\n";
         plantDesc.setText(desc);
     }
 
@@ -290,8 +321,27 @@ public class JardinActivity extends AppCompatActivity {
             calculateXPprogress(plant);
             calculatePlantIndex(plant);
             startWateringCooldown();
+
+            playWaterAnimation();
         }
+
+        updatePlantFromDB();
     }
+
+    private void playWaterAnimation() {
+        LottieAnimationView lottieView = findViewById(R.id.lottie_water_drops);
+        lottieView.setVisibility(View.VISIBLE);
+        lottieView.playAnimation();
+
+        // Ocultar la animación después de reproducirse una vez
+        lottieView.addAnimatorListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                lottieView.setVisibility(View.GONE);
+            }
+        });
+    }
+
     private void padPlant(){
         if ((plant.getXp() + 5) > plant.getXpMax()){
             int xp_needed = plant.getXpMax() - plant.getXp();
@@ -305,6 +355,8 @@ public class JardinActivity extends AppCompatActivity {
             calculatePlantIndex(plant);
             startPadCooldown();
         }
+
+        updatePlantFromDB();
     }
     private void startWateringCooldown() {
         canWater = false;
@@ -394,16 +446,12 @@ public class JardinActivity extends AppCompatActivity {
                     long tiempoCSV = Long.parseLong(tiempototal);
                     Log.d("PRUEBA", "Prueba tiempo que hay en el csv : " + tiempoCSV);
                     if (horaFormat.isBefore(LocalTime.now())) {
-                        long tiempoTotalAhora = 20000; // Este valor debería ser calculado dinámicamente
+                        long tiempoTotalAhora = totalTimeUsage; // Este valor debería ser calculado dinámicamente
                         long difference = tiempoTotalAhora - tiempoCSV;
                         Log.d("PRUEBA", "Ha entrado a la comprobacion de que el tiempo de ahora es mayor que el de antes : " + difference);
-                        // Asegurarnos de que 'plant' no es null antes de intentar modificarlo
-                        if (plant != null) {
-                            // Aquí se llamaría el método para añadir XP, por ejemplo
-                            plant.addXp((int) -difference / 100); // Actualizar XP de la planta
-                        } else {
-                            Log.e("JardinActivity", "La planta no está inicializada.");
-                        }
+                        //Cada segundo de uso de aplicaciones = te quita 1 xp
+
+                        penalizeIfUsageIncreased(-difference/1000);
 
                         // Actualizar el CSV con la nueva hora y tiempo total
                         updateCSV(filePathDataCSV, id, 1, LocalTime.now().toString());
@@ -421,7 +469,7 @@ public class JardinActivity extends AppCompatActivity {
             String[] lista = {
                     LocalDate.now().toString(),
                     LocalTime.now().toString(),
-                    "5555" // Este valor debería ser calculado dinámicamente
+                    "" + totalTimeUsage // Este valor debería ser calculado dinámicamente
             };
             Log.d("ELSE", "Ha entrado al else");
             writeCSV(filePathDataCSV, lista);
@@ -574,15 +622,11 @@ public class JardinActivity extends AppCompatActivity {
     }
 
 
-    private void penalizeIfUsageIncreased() {
-        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
-        String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
-
-        long currentTime = prefs.getLong(today+"_Total",0);
-
-        if (currentTime > 0) {
-            long difference = currentTime - 0;
-            Toast.makeText(this, "Se te ha quitado " + difference + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
+    private void penalizeIfUsageIncreased(float xp) {
+        if (plant != null) {
+            // Aquí se llamaría el método para añadir XP, por ejemplo
+            plant.addXp((int) -xp); // Actualizar XP de la planta
+            Toast.makeText(this, "Se te ha quitado " + xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
         }
     }
 
