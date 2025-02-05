@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -35,6 +36,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
@@ -54,13 +56,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -68,8 +69,6 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.io.*;
-import java.util.*;
 
 public class JardinActivity extends AppCompatActivity {
 
@@ -89,6 +88,7 @@ public class JardinActivity extends AppCompatActivity {
     private long remainingTimeMillisPad = 0;
     private static final long FIVE_MIN_MILLIS = 5 * 60 * 1000;
     private long totalTimeUsage;
+    private Typeface aventaFont;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +104,9 @@ public class JardinActivity extends AppCompatActivity {
         WorkManager.getInstance(this).enqueue(notificationWorkRequest);
 
         setUpBottom();
+
+        // Get the font
+        Typeface aventaFont = ResourcesCompat.getFont(this, R.font.aventa);
 
         if (Build.VERSION.SDK_INT >= 33) {  // También puedes usar Build.VERSION_CODES.TIRAMISU
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -264,7 +267,8 @@ public class JardinActivity extends AppCompatActivity {
 
 
         TextView plantDesc = findViewById(R.id.plant_desc);
-
+        plantTitle.setTypeface(aventaFont);
+        plantDesc.setTypeface(aventaFont);
         String desc = "\n\n" + plant.getDescription() + "\n\n\n\n" +
                 "XP actual de la planta : " + plant.getXp() + "\n" +
                 "XP máxima de la planta : " + plant.getXpMax() + "\n\n\n";

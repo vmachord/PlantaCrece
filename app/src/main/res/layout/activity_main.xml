@@ -29,7 +29,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="236dp"
         android:text="plantoo"
-        android:fontFamily="@font/relay_fredoka_regular"
+        android:fontFamily="@font/relay_fredoka_light"
         android:textColor="#38d48c"
         android:textSize="96sp"
         android:textStyle="bold"
