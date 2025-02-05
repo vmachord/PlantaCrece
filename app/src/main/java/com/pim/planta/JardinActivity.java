@@ -407,6 +407,7 @@ public class JardinActivity extends AppCompatActivity {
     //Se llama cada vez que la actividad vuelve a ser visible
     @Override
     protected void onResume() {
+        updatePlantFromDB();
         super.onResume();
 
         // Ruta del archivo en el almacenamiento interno
@@ -625,7 +626,7 @@ public class JardinActivity extends AppCompatActivity {
     private void penalizeIfUsageIncreased(float xp) {
         if (plant != null) {
             // Aquí se llamaría el método para añadir XP, por ejemplo
-            plant.addXp((int) -xp); // Actualizar XP de la planta
+            plant.addXp((int) xp); // Actualizar XP de la planta
             Toast.makeText(this, "Se te ha quitado " + xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
         }
     }
