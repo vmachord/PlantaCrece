@@ -106,7 +106,7 @@ public class JardinActivity extends AppCompatActivity {
         setUpBottom();
 
         // Get the font
-        Typeface aventaFont = ResourcesCompat.getFont(this, R.font.aventa);
+        aventaFont = ResourcesCompat.getFont(this, R.font.aventa);
 
         if (Build.VERSION.SDK_INT >= 33) {  // También puedes usar Build.VERSION_CODES.TIRAMISU
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)

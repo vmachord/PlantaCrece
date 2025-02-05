@@ -34,7 +34,8 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:text="Nacho el Tulipán | L.2"
-                android:textColor="@color/black"
+                android:fontFamily="@font/aventa"
+                android:textColor="@color/dark_green"
                 android:textSize="20sp" />
 
             <View
@@ -63,8 +64,9 @@
             android:layout_width="265dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:backgroundTint="#083c24"
             android:text="My cares"
+            android:fontFamily="@font/aventa"
+            android:backgroundTint="@color/dark_green"
             android:textColor="#FEFEFE"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -91,6 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:fontFamily="@font/aventa"
                 android:text="Escribe una descripción"
                 android:textSize="18sp" />
 
@@ -99,6 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Descripción"
+                android:fontFamily="@font/aventa"
                 android:inputType="textMultiLine" />
 
             <Button
@@ -106,6 +110,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Close"
+                android:fontFamily="@font/aventa"
+                android:backgroundTint="@color/dark_green"
+                android:textColor="@color/white"
                 tools:layout_editor_absoluteY="400dp" />
 
         </LinearLayout>
@@ -115,8 +122,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="180dp"
-            android:text="Nivel
-"
+            android:text="Nivel"
+            android:fontFamily="@font/aventa"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.92"
