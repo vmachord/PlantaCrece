@@ -1,19 +1,15 @@
 package com.pim.planta;
 
-import static java.lang.Thread.sleep;
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+import android.view.KeyEvent;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -147,6 +143,18 @@ public class InvernaderoActivity extends AppCompatActivity {
         });
         dialog.show();
     }
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_T) {
+            incrementGrowCountInBackground(UserLogged.getInstance().getCurrentUser().getId(), "Tulipan", PlantRepository.getInstance(this).getPlantaDAO());
+        }
+        if (keyCode == KeyEvent.KEYCODE_R) {
+            incrementGrowCountInBackground(UserLogged.getInstance().getCurrentUser().getId(), "Rosa", PlantRepository.getInstance(this).getPlantaDAO());
+        }
+        if (keyCode == KeyEvent.KEYCODE_M) {
+            incrementGrowCountInBackground(UserLogged.getInstance().getCurrentUser().getId(), "Margarita", PlantRepository.getInstance(this).getPlantaDAO());
+        }
+        return true;
+    }
 
     private void setImage(DAO dao) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -231,7 +239,8 @@ public class InvernaderoActivity extends AppCompatActivity {
         if (resID != 0) {
             imageView2.setImageResource(resID);
         }else{
-            String imageName2 = "image_" + JardinActivity.currentImageIndex; // Accede a la variable estática para la imagen
+            String imageName2 = "image_" + JardinActivity.currentImageIndex;
+            // Accede a la variable estática para la imagen
             int resID2 = getResources().getIdentifier(imageName2, "drawable", getPackageName());
             imageView2.setImageResource(resID2);
         }

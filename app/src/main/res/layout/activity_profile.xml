@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="80dp"
                 android:layout_marginTop="16dp"
-                android:fontFamily="@font/relay_kumbh_sans_regular"
+                android:fontFamily="@font/aventa"
                 android:text="TextView"
                 android:textSize="18sp" />
 
@@ -134,7 +134,7 @@
         android:background="@drawable/circle_border"
         android:clipToOutline="true"
         android:scaleType="centerCrop"
-        android:src="@drawable/tulipan5"
+        android:src="@drawable/image_tulipan5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -196,7 +196,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
         android:layout_marginTop="80dp"
-        android:fontFamily="@font/relay_kumbh_sans_medium"
+        android:fontFamily="@font/aventa"
         android:text="TextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/user_name" />
@@ -207,7 +207,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="124dp"
         android:layout_marginTop="24dp"
-        android:fontFamily="@font/relay_kumbh_sans_regular"
+        android:fontFamily="@font/aventa"
         android:text="TextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/textView8" />

@@ -197,7 +197,7 @@
             android:layout_height="362dp"
             android:layout_gravity="center"
             android:contentDescription="Plant Image"
-            android:src="@drawable/tulipan5"
+            android:src="@drawable/image_tulipan5"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.416"

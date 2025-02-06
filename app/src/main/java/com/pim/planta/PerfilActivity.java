@@ -89,7 +89,7 @@ public class PerfilActivity extends AppCompatActivity{
         textViewText = findViewById(R.id.textView8);
         textViewText.setText("Bloomed on 14th November 2024");
         textViewText2 = findViewById(R.id.textView9);
-        textViewText2.setText("Scientific plant name: Tulipa\n Nicname: Nacho de Tulipán.");
+        textViewText2.setText("Scientific plant name: Tulipa\n Nickname: Nacho de Tulipán.");
         imageView12 = findViewById(R.id.imageView12);
         frame = findViewById(R.id.frame);
         profileImage = findViewById(R.id.profile_image);
