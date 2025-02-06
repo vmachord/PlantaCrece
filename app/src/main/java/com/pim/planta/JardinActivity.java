@@ -631,6 +631,7 @@ public class JardinActivity extends AppCompatActivity {
         if (plant != null) {
             // Aquí se llamaría el método para añadir XP, por ejemplo
             plant.addXp((int) xp); // Actualizar XP de la planta
+            if (plant.getXp() < 0) plant.setXp(0);
             Toast.makeText(this, "Se te ha quitado " + xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
         }
     }

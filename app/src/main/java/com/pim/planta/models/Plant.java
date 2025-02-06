@@ -53,4 +53,8 @@ public class Plant {
         this.id = id;
     }
     public void addXp(int xp){ this.xp = this.xp + xp;}
+
+    public void setXp(int i) {
+        this.xp = i;
+    }
 }

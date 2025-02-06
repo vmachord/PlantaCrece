@@ -229,13 +229,11 @@ public class PerfilActivity extends AppCompatActivity{
         xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextSize(12f);
-        xAxis.setTypeface(aventaFont);
         xAxis.setTextColor(Color.BLACK);
         xAxis.setGranularity(1f);
         xAxis.setDrawGridLines(false);
 
         YAxis leftAxis = barChart.getAxisLeft();
-        leftAxis.setTypeface(aventaFont);
         leftAxis.setAxisMinimum(0f);
         leftAxis.setTextSize(12f);
         leftAxis.setTextColor(Color.BLACK);
@@ -248,7 +246,6 @@ public class PerfilActivity extends AppCompatActivity{
         legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
         legend.setDrawInside(false);
         legend.setTextSize(12f);
-        legend.setTypeface(aventaFont);
         legend.setTextColor(Color.BLACK);
 
         barChart.animateY(1000, Easing.EaseInOutCubic);
