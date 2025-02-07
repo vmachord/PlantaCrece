@@ -14,7 +14,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
-import com.pim.planta.models.User;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,11 +37,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Poblar la base de datos en caso de que no lo este
         DatabaseExecutor.execute(() -> {
-            if (plantaRepo.getPlantaDAO().getAllUsuarios().isEmpty()){
-                User user_prueba = new User ("Laura Martín", "admin@gmail.com", "1234");
-                plantaRepo.getPlantaDAO().insert(user_prueba);
-            }
-
             if (plantaRepo.getPlantaDAO().getAllPlantas().isEmpty()){
                 Plant nuevaPlanta1 = new Plant("Rosa","image_rosa", R.drawable.image_rosa, 0, 10000, "Perfecta para regalo entre enamorados", "Rosa");
                 Plant nuevaPlanta2 = new Plant("Margarita","image_margarita", R.drawable.image_margarita,0, 10000, "Simple y bonita, como tu <3","Bellis perennis");
