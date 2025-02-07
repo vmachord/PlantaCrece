@@ -32,11 +32,9 @@ public class NotificationWorker extends Worker {
             "com.facebook.katana", // Facebook
             "com.instagram.android", // Instagram
             "com.twitter.android", // Twitter
-            "com.snapchat.android", // Snapchat
-            "com.whatsapp", // Whatsapp
             "com.zhiliaoapp.musically", // Tiktok
             "com.google.android.youtube" // Youtube
-            // Add more social media packages here
+            // More to add here
     );
 
     public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -80,6 +78,10 @@ public class NotificationWorker extends Worker {
 
         Map<String, Long> appUsageMap = new HashMap<>();
         UsageEvents usageEvents = usageStatsManager.queryEvents(beginTime, currentTime);
+        if (usageEvents == null) {
+            Log.e("NotificationWorker", "Error al obtener los eventos de uso");
+            return 0;
+        }
         while (usageEvents.hasNextEvent()) {
             UsageEvents.Event event = new UsageEvents.Event();
             usageEvents.getNextEvent(event);
@@ -87,7 +89,7 @@ public class NotificationWorker extends Worker {
                 String packageName = event.getPackageName();
                 if (SOCIAL_MEDIA_PACKAGES.contains(packageName)) {
                     long usageTime = appUsageMap.getOrDefault(packageName, 0L);
-                    appUsageMap.put(packageName, usageTime + (currentTime - event.getTimeStamp()));
+                    appUsageMap.put(packageName, usageTime + event.getTimeStamp());
                 }
             }
         }

@@ -6,10 +6,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.AppOpsManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,7 +32,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.work.PeriodicWorkRequest;
@@ -75,18 +70,10 @@ import java.util.concurrent.TimeUnit;
 public class JardinActivity extends AppCompatActivity {
 
     public static int currentImageIndex = 1;
-    private int previousImageIndex = -1;
-    private static final String CHANNEL_ID = "default";
     private static final int NOTIFICATION_PERMISSION_CODE = 100;
     private PopupWindow tooltipWindow;
 
     private Plant plant;
-    //Variables watering plant
-    private long remainingTimeMillisWatering = 0;
-    private static final long ONE_DAY_MILLIS = 20 * 60 * 60 * 1000;
-    //Variables pad plant
-    private long remainingTimeMillisPad = 0;
-    private static final long FIVE_MIN_MILLIS = 5 * 60 * 1000;
     private long totalTimeUsage;
     private Typeface aventaFont;
     private CooldownManager cooldownManager;
@@ -196,8 +183,6 @@ public class JardinActivity extends AppCompatActivity {
 
         return totalTime;
     }
-
-
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -494,19 +479,6 @@ public class JardinActivity extends AppCompatActivity {
         }
     }
 
-
-
-    public static void readCSV(String filePath) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static List<String> getColumnValues(String filePath, int columnIndex) {
         List<String> values = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -534,8 +506,6 @@ public class JardinActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
-
 
     public static void updateCSV(String filePath, String id, int columnIndex, String newValue) {
         List<String> lines = new ArrayList<>();
@@ -593,8 +563,6 @@ public class JardinActivity extends AppCompatActivity {
         return ""; // Si no se encuentra, devolver cadena vacía
     }
 
-
-
     //Verifica si la aplicación tiene permiso para acceder a las estadísticas de uso del dispositivo
     private boolean hasUsageStatsPermission() {
         AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
@@ -602,43 +570,6 @@ public class JardinActivity extends AppCompatActivity {
                 android.os.Process.myUid(), getPackageName());
         return mode == AppOpsManager.MODE_ALLOWED;
     }
-
-    private void saveAppUsageTimes(SharedPreferences sharedPreferences,
-                                   long instagramUsageTime,
-                                   long tiktokUsageTime,
-                                   long youtubeUsageTime,
-                                   long twitterUsageTime,
-                                   long facebookUsageTime) {
-        String todayKey = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putLong(todayKey + "_Instagram", instagramUsageTime);
-        editor.putLong(todayKey + "_TikTok", tiktokUsageTime);
-        editor.putLong(todayKey + "_YouTube", youtubeUsageTime);
-        editor.putLong(todayKey + "_Twitter", twitterUsageTime);
-        editor.putLong(todayKey + "_Facebook", facebookUsageTime);
-        editor.apply();
-    }
-
-    private long getPreviousAppUsage(SharedPreferences sharedPreferences, String dayKey) {
-        // Lista de claves de las aplicaciones a sumar
-        String[] appKeys = {
-                "_Instagram",
-                "_TikTok",
-                "_YouTube",
-                "_Twitter",
-                "_Facebook"
-        };
-
-        long totalUsage = 0;
-
-        // Sumar los tiempos de todas las aplicaciones con el token del día
-        for (String key : appKeys) {
-            totalUsage += sharedPreferences.getLong(dayKey + key, 0);
-        }
-
-        return totalUsage; // Retorna el total de uso acumulado para el día
-    }
-
 
     private void penalizeIfUsageIncreased(float xp) {
         if (plant != null) {
@@ -648,132 +579,9 @@ public class JardinActivity extends AppCompatActivity {
             if (plant.getXp() < 0) plant.setXp(0);
             calculateXPprogress(plant);
             calculatePlantIndex(plant);
+            updatePlantFromDB();
             Toast.makeText(this, "Se te ha quitado " + xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
         }
-    }
-
-    private void trackAppUsage() {
-        UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
-        long currentTime = System.currentTimeMillis();
-        // Obtén el uso de las aplicaciones de los últimos 1 día (86400000 ms)
-        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY, currentTime - 86400000, currentTime);
-
-        SharedPreferences sharedPreferencesUsage = getSharedPreferences("AppUsageData", MODE_PRIVATE);
-        String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
-
-        //TO DO
-        long instagramUsageTime = 0;
-        long tiktokUsageTime = 0;
-        long youtubeUsageTime = 0;
-        long twitterUsageTime = 0;
-        long facebookUsageTime = 0;
-
-        long totalTimeInForeground = 0;
-
-        if (usageStatsList != null && !usageStatsList.isEmpty()) {
-            for (UsageStats usageStats : usageStatsList) { // Recorre la lista de uso de aplicaciones
-                String packageName = usageStats.getPackageName();
-                totalTimeInForeground = usageStats.getTotalTimeInForeground();
-
-                switch (packageName) {
-                    case "com.instagram.android":
-                        instagramUsageTime += totalTimeInForeground;
-                        break;
-                    case "com.zhiliaoapp.musically":
-                        tiktokUsageTime += totalTimeInForeground;
-                        break;
-                    case "com.google.android.youtube":
-                        youtubeUsageTime += totalTimeInForeground;
-                        break;
-                    case "com.twitter.android":
-                        twitterUsageTime += totalTimeInForeground;
-                        break;
-                    case "com.facebook.katana":
-                        facebookUsageTime += totalTimeInForeground;
-                        break;
-                }
-                // Para depuración: imprime el uso de cada aplicación
-                Log.d("AppUsage", "Uso de " + packageName + ": " + totalTimeInForeground + " milisegundos");
-            }
-        } else {
-            Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
-        }
-
-
-        // Calcular la media del tiempo de uso (excluyendo Google)
-        int appCount = 5; // Cinco aplicaciones: Instagram, TikTok, YouTube, Twitter y Facebook
-        long totalUsageTime = instagramUsageTime + tiktokUsageTime + youtubeUsageTime + twitterUsageTime + facebookUsageTime;
-        long averageUsageTime = totalUsageTime / appCount;
-
-        // Mostrar la imagen adecuada según la media
-        int imageIndex = getImageBasedOnAverageTime(averageUsageTime);
-
-        if(previousImageIndex == -1)
-            previousImageIndex = imageIndex;
-
-        SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
-
-        String selectedPlant = sharedPreferences.getString("selectedPlant", null);
-        if (selectedPlant == null) {
-            selectedPlant = "girasol";
-        }
-        setImageBasedOnUsage(selectedPlant,imageIndex);
-    }
-
-    // Función para calcular el índice de la imagen según la media de tiempo de uso
-    private int getImageBasedOnAverageTime(long averageUsageTime) {
-        if (averageUsageTime < 60000) { // menos de 1 minuto
-            return 5;
-        } else if (averageUsageTime < 300000) { // menos de 5 minutos
-            return 4;
-        } else if (averageUsageTime < 900000) { // menos de 15 minutos
-            return 3;
-        } else if (averageUsageTime < 1800000) { // menos de 30 minutos
-            return 2;
-        } else {
-            return 1; // más de 30 minutos
-        }
-    }
-
-    private void createNotificationChannel() {
-        // Verifica si el dispositivo está ejecutando Android Oreo (API 26) o superior
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Define un ID único para el canal
-            String channelId = "usage_channel";
-            CharSequence channelName = "App Usage Alerts"; // Nombre que se mostrará en la configuración
-            String channelDescription = "Canal para alertas de seguimiento del uso de las aplicaciones"; // Descripción opcional
-
-            // Crea el canal con las configuraciones necesarias
-            NotificationChannel channel = new NotificationChannel(
-                    channelId,          // ID del canal
-                    channelName,        // Nombre visible del canal
-                    NotificationManager.IMPORTANCE_DEFAULT // Nivel de importancia
-            );
-
-            // Configura la descripción del canal (opcional)
-            channel.setDescription(channelDescription);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
-    private void sendUsageNotification(String message) {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // Configuración para Android O y superior
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel();  // Asegúrate de que el canal esté creado antes de enviar la notificación
-        }
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "usage_channel")
-                .setSmallIcon(R.drawable.alerta_icon) // Asegúrate de que tienes un icono pequeño válido
-                .setContentTitle("Alerta")
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-        // Mostrar la notificación
-        notificationManager.notify(1, builder.build());
     }
 
     //Este metodo tiene como entries, el nombre de la planta y el indice de su crecimiento
@@ -799,15 +607,6 @@ public class JardinActivity extends AppCompatActivity {
 
         // Actualizar el índice de la imagen actual
         currentImageIndex = imageIndex;
-    }
-
-    private String removeAccents(String str) {
-        return str.replaceAll("[áàäâ]", "a")
-                .replaceAll("[éèëê]", "e")
-                .replaceAll("[íìïî]", "i")
-                .replaceAll("[óòöô]", "o")
-                .replaceAll("[úùüû]", "u")
-                .replaceAll("[ç]", "c");
     }
 
     private String formatTime(long milliseconds) {
@@ -837,6 +636,7 @@ public class JardinActivity extends AppCompatActivity {
         // Muestra el PopupWindow
         tooltipWindow.showAsDropDown(anchorView, 0, -anchorView.getHeight() - 20);
     }
+
     public void setUpBottom(){
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
@@ -862,5 +662,4 @@ public class JardinActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
-
 }

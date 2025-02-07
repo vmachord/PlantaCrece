@@ -2,7 +2,6 @@ package com.pim.planta;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
@@ -10,10 +9,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
+
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,12 +57,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(intent);
-            }
+        buttonLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
         });
+    }
+    private void scheduleNotificationWorker() {
+        // Define constraints (optional)
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.NOT_REQUIRED) // Example: No network required
+                .build();
+
+        // Create a PeriodicWorkRequest
+        PeriodicWorkRequest notificationWorkRequest = new PeriodicWorkRequest.Builder(
+                NotificationWorker.class,
+                15, // Repeat interval
+                TimeUnit.MINUTES
+        )
+                .setConstraints(constraints) // Add constraints (optional)
+                .build();
+
+        // Enqueue the work request
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "NotificationWork", // Unique work name
+                ExistingPeriodicWorkPolicy.KEEP, // Keep existing work if it exists
+                notificationWorkRequest
+        );
     }
 }
