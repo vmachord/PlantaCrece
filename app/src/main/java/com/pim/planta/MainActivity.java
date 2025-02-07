@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 Plant nuevaPlanta1 = new Plant("Rosa","image_rosa", R.drawable.image_rosa, 0, 10000, "Perfecta para regalo entre enamorados");
                 Plant nuevaPlanta2 = new Plant("Margarita","image_margarita", R.drawable.image_margarita,0, 10000, "Simple y bonita, como tu <3");
                 Plant nuevaPlanta3 = new Plant("Girasol","image_girasol", R.drawable.image_girasol, 0, 10000, "Persiguiendo la estrella más grande");
-                Plant nuevaPlanta4 = new Plant("Tulipan","tulipan", R.drawable.image_tulipan5, 0, 10000, "De diversos y vivos colores");
+                Plant nuevaPlanta4 = new Plant("Tulipan","image_tulipan", R.drawable.image_tulipan, 0, 10000, "De diversos y vivos colores");
                 Plant nuevaPlanta5 = new Plant("Diente de León","image_diente_de_leon", R.drawable.image_diente_de_leon, 0, 10000, "Una metomorfosis unica");
                 plantaRepo.getPlantaDAO().insert(nuevaPlanta1);
                 plantaRepo.getPlantaDAO().insert(nuevaPlanta2);

@@ -778,7 +778,7 @@ public class JardinActivity extends AppCompatActivity {
         if (resID != 0) {
             imageView.setImageResource(resID);
         } else {
-            int fallbackResID = getResources().getIdentifier("tulipan", "drawable", getPackageName());
+            int fallbackResID = getResources().getIdentifier("Tulipan", "drawable", getPackageName());
             imageView.setImageResource(fallbackResID);
         }
 
