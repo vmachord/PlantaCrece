@@ -1,9 +1,12 @@
 package com.pim.planta;
+
+import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.usage.UsageStats;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 
@@ -12,13 +15,29 @@ import androidx.core.app.NotificationCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NotificationWorker extends Worker {
 
     private static final String CHANNEL_ID = "notification_channel";
     private static final int NOTIFICATION_ID = 1;
-    private int previousImageIndex = 10;
+    private static final String PREFS_NAME = "app_prefs";
+    private static final String TOTAL_USAGE_TIME_KEY = "total_usage_time";
+    private static final long THIRTY_MINUTES_IN_MILLIS = 30 * 60 * 1000; // 30 minutes
+    private static final long TWO_HOURS_IN_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
+    private static final List<String> SOCIAL_MEDIA_PACKAGES = Arrays.asList(
+            "com.facebook.katana", // Facebook
+            "com.instagram.android", // Instagram
+            "com.twitter.android", // Twitter
+            "com.snapchat.android", // Snapchat
+            "com.whatsapp", // Whatsapp
+            "com.zhiliaoapp.musically", // Tiktok
+            "com.google.android.youtube" // Youtube
+            // Add more social media packages here
+    );
 
     public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -27,27 +46,21 @@ public class NotificationWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        sendNotification();
+        if (!hasUsageStatsPermission()) {
+            Log.e("NotificationWorker", "No tiene permisos");
+            return Result.failure();
+        }
+        long totalUsageTime = trackAppUsage();
+        if (totalUsageTime >= TWO_HOURS_IN_MILLIS) {
+            sendUsageNotification("¡La planta no aguantara mucho mas si sigues asi!");
+        } else if (totalUsageTime >= THIRTY_MINUTES_IN_MILLIS) {
+            sendUsageNotification("¡El uso de las redes está marchitando tu jardín!");
+        }
         return Result.success();
     }
 
-    private void sendNotification() {
-        // Crear el canal de notificación para Android 8.0 o superior
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Notificaciones de la App",
-                    NotificationManager.IMPORTANCE_DEFAULT
-            );
-            NotificationManager manager = (NotificationManager) getApplicationContext()
-                    .getSystemService(Context.NOTIFICATION_SERVICE);
-            manager.createNotificationChannel(channel);
-        }
-
-        trackAppUsage();
-    }
-
     private void sendUsageNotification(String message) {
+        createNotificationChannel();
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                 .setSmallIcon(R.drawable.alerta_icon) // Icono de la notificación
                 .setContentTitle("Alerta")
@@ -59,90 +72,56 @@ public class NotificationWorker extends Worker {
         manager.notify(NOTIFICATION_ID, builder.build());
     }
 
-
-    private void trackAppUsage() {
+    private long trackAppUsage() {
         Context context = getApplicationContext();
         UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
         long currentTime = System.currentTimeMillis();
+        long beginTime = currentTime - 900000; // 15 minutes
 
-        // Obtiene estadísticas de uso de los últimos 1 día (86400000 ms)
-        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY, currentTime - 86400000, currentTime);
-
-        long instagramUsageTime = 0;
-        long tiktokUsageTime = 0;
-        long youtubeUsageTime = 0;
-        long twitterUsageTime = 0;
-        long facebookUsageTime = 0;
-
-        if (usageStatsList != null && !usageStatsList.isEmpty()) {
-            for (UsageStats usageStats : usageStatsList) {
-                String packageName = usageStats.getPackageName();
-                long totalTimeInForeground = usageStats.getTotalTimeInForeground();
-
-                switch (packageName) {
-                    case "com.instagram.android":
-                        instagramUsageTime += totalTimeInForeground;
-                        break;
-                    case "com.zhiliaoapp.musically":
-                        tiktokUsageTime += totalTimeInForeground;
-                        break;
-                    case "com.google.android.youtube":
-                        youtubeUsageTime += totalTimeInForeground;
-                        break;
-                    case "com.twitter.android":
-                        twitterUsageTime += totalTimeInForeground;
-                        break;
-                    case "com.facebook.katana":
-                        facebookUsageTime += totalTimeInForeground;
-                        break;
+        Map<String, Long> appUsageMap = new HashMap<>();
+        UsageEvents usageEvents = usageStatsManager.queryEvents(beginTime, currentTime);
+        while (usageEvents.hasNextEvent()) {
+            UsageEvents.Event event = new UsageEvents.Event();
+            usageEvents.getNextEvent(event);
+            if (event.getEventType() == UsageEvents.Event.ACTIVITY_RESUMED) {
+                String packageName = event.getPackageName();
+                if (SOCIAL_MEDIA_PACKAGES.contains(packageName)) {
+                    long usageTime = appUsageMap.getOrDefault(packageName, 0L);
+                    appUsageMap.put(packageName, usageTime + (currentTime - event.getTimeStamp()));
                 }
-                Log.d("AppUsage", "Uso de " + packageName + ": " + totalTimeInForeground + " ms");
             }
-        } else {
-            Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
         }
 
-        int appCount = 5;
-        long totalUsageTime = instagramUsageTime + tiktokUsageTime + youtubeUsageTime + twitterUsageTime + facebookUsageTime;
-        long averageUsageTime = totalUsageTime / appCount;
+        long totalUsageTime = 0;
+        for (long usageTime : appUsageMap.values()) {
+            totalUsageTime += usageTime;
+        }
 
-        // Calcula el índice de imagen basado en el tiempo medio de uso
-        int imageIndex = getImageBasedOnAverageTime(averageUsageTime);
-        Log.d("AppUsage", "imageIndex calculado: " + imageIndex);
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        long previousTotalUsageTime = prefs.getLong(TOTAL_USAGE_TIME_KEY, 0);
+        long newTotalUsageTime = previousTotalUsageTime + totalUsageTime;
 
-        if (imageIndex != previousImageIndex) {
-            if (imageIndex > previousImageIndex) {
-                previousImageIndex = imageIndex;
-                sendUsageNotification("¡Felicidades, tu jardín ha crecido!");
-            } else {
-                previousImageIndex = imageIndex;
-                sendUsageNotification("¡El uso de las redes está marchitando tu jardín!" );
-            }
+        prefs.edit().putLong(TOTAL_USAGE_TIME_KEY, newTotalUsageTime).apply();
+
+        return newTotalUsageTime;
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Notificaciones de la App",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            NotificationManager manager = (NotificationManager) getApplicationContext()
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.createNotificationChannel(channel);
         }
     }
 
-    private int getImageBasedOnAverageTime(long averageUsageTime) {
-        if (averageUsageTime < 60000) { // menos de 1 minuto
-            return 10;
-        } else if (averageUsageTime < 300000) { // menos de 5 minutos
-            return 9;
-        } else if (averageUsageTime < 900000) { // menos de 15 minutos
-            return 8;
-        } else if (averageUsageTime < 1800000) { // menos de 30 minutos
-            return 7;
-        } else if (averageUsageTime < 3600000) { // menos de 1 hora
-            return 6;
-        } else if (averageUsageTime < 7200000) { // menos de 2 horas
-            return 5;
-        } else if (averageUsageTime < 10800000) { // menos de 3 horas
-            return 4;
-        } else if (averageUsageTime < 14400000) { // menos de 4 horas
-            return 3;
-        } else if (averageUsageTime < 18000000) { // menos de 5 horas
-            return 2;
-        } else {
-            return 1; // más de 5 horas
-        }
+    private boolean hasUsageStatsPermission() {
+        AppOpsManager appOps = (AppOpsManager) getApplicationContext().getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getApplicationContext().getPackageName());
+        return mode == AppOpsManager.MODE_ALLOWED;
     }
 }

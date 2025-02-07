@@ -27,6 +27,7 @@ public class UserPlantRelation {
         this.plantId = plantId;
         this.growCount = 0; // Initialize growCount to 0
     }
-
-
+    public int getGrowCount() {
+        return growCount;
+    }
 }

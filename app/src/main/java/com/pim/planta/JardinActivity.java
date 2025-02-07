@@ -14,12 +14,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,15 +82,14 @@ public class JardinActivity extends AppCompatActivity {
 
     private Plant plant;
     //Variables watering plant
-    private boolean canWater = true;
     private long remainingTimeMillisWatering = 0;
-    private static final long ONE_DAY_MILLIS = 24 * 60 * 60 * 1000;
+    private static final long ONE_DAY_MILLIS = 20 * 60 * 60 * 1000;
     //Variables pad plant
-    private boolean canPad = true;
     private long remainingTimeMillisPad = 0;
     private static final long FIVE_MIN_MILLIS = 5 * 60 * 1000;
     private long totalTimeUsage;
     private Typeface aventaFont;
+    private CooldownManager cooldownManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +97,6 @@ public class JardinActivity extends AppCompatActivity {
         setContentView(R.layout.plantoo);
         PlantRepository plantaRepo = PlantRepository.getInstance(this);
         DAO dao = plantaRepo.getPlantaDAO();
-
         WorkRequest notificationWorkRequest =
                 new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
                         .build();
@@ -151,12 +151,12 @@ public class JardinActivity extends AppCompatActivity {
             Intent intent = new Intent(JardinActivity.this, InvernaderoActivity.class);
             startActivity(intent);
         });
-
+        cooldownManager = new CooldownManager(this);
         //Boton regar planta
         ImageButton imageWater = findViewById(R.id.icon_water);
         imageWater.setOnClickListener(v -> {
-            if (!canWater) {
-                showTooltip(v, "Next water in : " + formatTime(remainingTimeMillisWatering));
+            if (cooldownManager.isWateringCooldownActive()) {
+                showTooltip(v, "Next watering in : " + cooldownManager.getRemainingWateringCooldownTime());
             } else {
                 wateringPlant(300);
             }
@@ -165,17 +165,17 @@ public class JardinActivity extends AppCompatActivity {
         //Boton pad planta
         ImageButton imagePad = findViewById(R.id.icon_gesture);
         imagePad.setOnClickListener(v -> {
-            if (!canPad) {
-                showTooltip(v, "Next pad in : " + formatTime(remainingTimeMillisPad));
+            if (cooldownManager.isPadCooldownActive()) {
+                showTooltip(v, "Next pad in : " + cooldownManager.getRemainingPadCooldownTime());
             } else {
                 padPlant();
             }
         });
 
-
         getPlantFromDB();
-
         totalTimeUsage = getTotalUsage();
+        if (plant.getXp() == plant.getXpMax())
+            showPlantGrownPopup();
     }
 
     //VANESSAAAAAAAAAAAAAA
@@ -206,7 +206,7 @@ public class JardinActivity extends AppCompatActivity {
             return true;
         }
         if (keyCode == KeyEvent.KEYCODE_P) {
-            wateringPlant(-300);
+            penalizeIfUsageIncreased(-300);
             return true;
         }
 
@@ -241,7 +241,7 @@ public class JardinActivity extends AppCompatActivity {
         PlantRepository plantaRepo = PlantRepository.getInstance(this);
         DAO dao = plantaRepo.getPlantaDAO();
 
-        DatabaseExecutor.execute(() -> {
+        DatabaseExecutor.executeAndWait(() -> {
             plant = dao.getPlantaByName(sharedPreferences.getString("selectedPlant", ""));
             calculatePlantIndex(plant);
             calculateXPprogress(plant);
@@ -252,8 +252,9 @@ public class JardinActivity extends AppCompatActivity {
         PlantRepository plantaRepo = PlantRepository.getInstance(this);
         DAO dao = plantaRepo.getPlantaDAO();
 
-        DatabaseExecutor.execute(() -> {
+        DatabaseExecutor.executeAndWait(() -> {
             dao.update(plant);
+            Log.d("XPDebug", "updatePlantFromDB: After update - plant.getXp() = " + plant.getXp());
         });
     }
 
@@ -310,25 +311,22 @@ public class JardinActivity extends AppCompatActivity {
         }
 
         TextView plant_name  = findViewById(R.id.plant_name);
-        plant_name.setText(plant.getName() + " | L."  + level);
+        plant_name.setText(plant.getNickname() + " | L."  + level);
     }
 
-    private void wateringPlant(int xp){
-        if ((plant.getXp() + xp) > plant.getXpMax()){
+    private void wateringPlant(int xp) {
+        if ((plant.getXp() + xp) > plant.getXpMax()) {
             int xp_needed = plant.getXpMax() - plant.getXp();
             plant.addXp(xp_needed);
-            calculateXPprogress(plant);
-            calculatePlantIndex(plant);
-            startWateringCooldown();
-        } else{
+        } else {
             plant.addXp(xp);
-            calculateXPprogress(plant);
-            calculatePlantIndex(plant);
-            startWateringCooldown();
-
             playWaterAnimation();
         }
-
+        if (plant.getXp() == plant.getXpMax())
+            showPlantGrownPopup();
+        calculateXPprogress(plant);
+        calculatePlantIndex(plant);
+        cooldownManager.recordWateringUsage();
         updatePlantFromDB();
     }
 
@@ -346,57 +344,70 @@ public class JardinActivity extends AppCompatActivity {
         });
     }
 
-    private void padPlant(){
-        if ((plant.getXp() + 5) > plant.getXpMax()){
+    private void padPlant() {
+        if ((plant.getXp() + 5) > plant.getXpMax()) {
             int xp_needed = plant.getXpMax() - plant.getXp();
             plant.addXp(xp_needed);
-            calculateXPprogress(plant);
-            calculatePlantIndex(plant);
-            startPadCooldown();
-        } else{
+        } else {
             plant.addXp(5);
-            calculateXPprogress(plant);
-            calculatePlantIndex(plant);
-            startPadCooldown();
         }
-
+        if (plant.getXp() == plant.getXpMax())
+            showPlantGrownPopup();
+        calculateXPprogress(plant);
+        calculatePlantIndex(plant);
+        cooldownManager.recordPadUsage();
         updatePlantFromDB();
     }
-    private void startWateringCooldown() {
-        canWater = false;
-        remainingTimeMillisWatering = ONE_DAY_MILLIS;
 
-        new CountDownTimer(remainingTimeMillisWatering, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                remainingTimeMillisWatering = millisUntilFinished;
-            }
+    private void showPlantGrownPopup() {
+        // Inflate the popup layout
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_plant_grown, null);
 
-            @Override
-            public void onFinish() {
-                canWater = true;
-                remainingTimeMillisWatering = 0;
-            }
-        }.start();
+        // Create the popup window
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
+
+        // Set background just in case the rounded corners are not visible
+        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        // Set elevation for shadow effect
+        popupWindow.setElevation(20);
+
+        // Get references to the views in the popup
+        TextView popupTitle = popupView.findViewById(R.id.popup_title);
+        TextView popupMessage = popupView.findViewById(R.id.popup_message);
+        Button viewPlantsButton = popupView.findViewById(R.id.popup_button_view_plants);
+
+        // Set the text of the popup
+        popupTitle.setText("Congratulations!");
+        popupMessage.setText("Your plant has fully grown!\nSave it before it's level drops again!");
+
+        // Set the click listener for the button
+        viewPlantsButton.setOnClickListener(v -> {
+            // Clear the selected plant from SharedPreferences
+            SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove("selectedPlant");
+            editor.apply();
+            // Reset plant progress
+            plant.setXp(0);
+            plant.setNickname(null);
+            updatePlantFromDB();
+            InvernaderoActivity.incrementGrowCountInBackground(UserLogged.getInstance().getCurrentUser().getId(), plant.getName(), PlantRepository.getInstance(this).getPlantaDAO());
+
+            // Go to PlantListActivity
+            Intent intent = new Intent(JardinActivity.this, PlantListActivity.class);
+            startActivity(intent);
+
+            // Close the popup
+            popupWindow.dismiss();
+        });
+
+        // Show the popup
+        popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
     }
-    private void startPadCooldown() {
-        canPad = false;
-        remainingTimeMillisPad = FIVE_MIN_MILLIS;
-
-        new CountDownTimer(remainingTimeMillisPad, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                remainingTimeMillisPad = millisUntilFinished;
-            }
-
-            @Override
-            public void onFinish() {
-                canWater = true;
-                remainingTimeMillisPad = 0;
-            }
-        }.start();
-    }
-
 
     private void animateButton(View view) {
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
@@ -411,6 +422,8 @@ public class JardinActivity extends AppCompatActivity {
     //Se llama cada vez que la actividad vuelve a ser visible
     @Override
     protected void onResume() {
+        if (plant.getXp() == plant.getXpMax())
+            showPlantGrownPopup();
         updatePlantFromDB();
         super.onResume();
 
@@ -456,7 +469,7 @@ public class JardinActivity extends AppCompatActivity {
                         Log.d("PRUEBA", "Ha entrado a la comprobacion de que el tiempo de ahora es mayor que el de antes : " + difference);
                         //Cada segundo de uso de aplicaciones = te quita 1 xp
 
-                        penalizeIfUsageIncreased(-difference/1000);
+                        penalizeIfUsageIncreased(-difference/30000);
 
                         // Actualizar el CSV con la nueva hora y tiempo total
                         updateCSV(filePathDataCSV, id, 1, LocalTime.now().toString());
@@ -629,9 +642,12 @@ public class JardinActivity extends AppCompatActivity {
 
     private void penalizeIfUsageIncreased(float xp) {
         if (plant != null) {
+            if (xp == 0) return;
             // Aquí se llamaría el método para añadir XP, por ejemplo
             plant.addXp((int) xp); // Actualizar XP de la planta
             if (plant.getXp() < 0) plant.setXp(0);
+            calculateXPprogress(plant);
+            calculatePlantIndex(plant);
             Toast.makeText(this, "Se te ha quitado " + xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
         }
     }
@@ -765,10 +781,9 @@ public class JardinActivity extends AppCompatActivity {
         // Crear el nombre del recurso de la imagen usando el basepath de la planta y el índice
         String imageName;
         if (imageIndex == 0){
-            imageName = basePath;
+            imageName = basePath + 0;
         }else {
             imageName = basePath + imageIndex;
-
         }
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
 
@@ -778,7 +793,7 @@ public class JardinActivity extends AppCompatActivity {
         if (resID != 0) {
             imageView.setImageResource(resID);
         } else {
-            int fallbackResID = getResources().getIdentifier("tulipan", "drawable", getPackageName());
+            int fallbackResID = getResources().getIdentifier("image_tulipan", "drawable", getPackageName());
             imageView.setImageResource(fallbackResID);
         }
 

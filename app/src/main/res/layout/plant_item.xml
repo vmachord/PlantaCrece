@@ -30,6 +30,16 @@
         android:text="Descripción de la planta"
         android:textSize="14sp"
         android:textColor="@android:color/darker_gray"/>
+    <TextView
+        android:id="@+id/plant_growth_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_below="@id/plant_description_textview"
+        android:layout_toEndOf="@id/plant_imageview"
+        android:text="Growth count"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray"/>
 
 </RelativeLayout>
 

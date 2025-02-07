@@ -4,7 +4,6 @@ public class UserLogged {
 
     private static UserLogged instance;
     private User currentUser;
-    private long totalTimeUse;
 
     public static synchronized UserLogged getInstance() {
         if (instance == null) {

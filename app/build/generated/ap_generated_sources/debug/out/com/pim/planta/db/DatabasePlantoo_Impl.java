@@ -34,17 +34,17 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
 
   @Override
   protected SupportSQLiteOpenHelper createOpenHelper(DatabaseConfiguration configuration) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(configuration, new RoomOpenHelper.Delegate(9) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(configuration, new RoomOpenHelper.Delegate(11) {
       @Override
       public void createAllTables(SupportSQLiteDatabase _db) {
-        _db.execSQL("CREATE TABLE IF NOT EXISTS `plants` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `basePath` TEXT, `imageResourceId` INTEGER NOT NULL, `xp` INTEGER NOT NULL, `xpMax` INTEGER NOT NULL, `description` TEXT)");
-        _db.execSQL("CREATE TABLE IF NOT EXISTS `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `password` TEXT, `email` TEXT)");
+        _db.execSQL("CREATE TABLE IF NOT EXISTS `plants` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `basePath` TEXT, `imageResourceId` INTEGER NOT NULL, `xp` INTEGER NOT NULL, `xpMax` INTEGER NOT NULL, `description` TEXT, `scientificName` TEXT, `nickname` TEXT)");
+        _db.execSQL("CREATE TABLE IF NOT EXISTS `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `password` TEXT, `email` TEXT, `creationDate` INTEGER)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS `calendar` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fechas` TEXT, `anotaciones` TEXT, `emociones` INTEGER NOT NULL)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS `diary-entries` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `highlight` TEXT, `annotation` TEXT, `emotion` INTEGER NOT NULL, `user_id` INTEGER NOT NULL, `date` INTEGER NOT NULL)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS `user_plant_relation` (`userId` INTEGER NOT NULL, `plantId` INTEGER NOT NULL, `growCount` INTEGER NOT NULL, PRIMARY KEY(`userId`, `plantId`), FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`plantId`) REFERENCES `plants`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
         _db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_user_plant_relation_userId_plantId` ON `user_plant_relation` (`userId`, `plantId`)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6463831e8f3b20bc6153afbfe1fab572')");
+        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ca417fb782568b3314921d592cfc08b9')");
       }
 
       @Override
@@ -93,7 +93,7 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
 
       @Override
       public RoomOpenHelper.ValidationResult onValidateSchema(SupportSQLiteDatabase _db) {
-        final HashMap<String, TableInfo.Column> _columnsPlants = new HashMap<String, TableInfo.Column>(7);
+        final HashMap<String, TableInfo.Column> _columnsPlants = new HashMap<String, TableInfo.Column>(9);
         _columnsPlants.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsPlants.put("name", new TableInfo.Column("name", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsPlants.put("basePath", new TableInfo.Column("basePath", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -101,6 +101,8 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
         _columnsPlants.put("xp", new TableInfo.Column("xp", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsPlants.put("xpMax", new TableInfo.Column("xpMax", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsPlants.put("description", new TableInfo.Column("description", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsPlants.put("scientificName", new TableInfo.Column("scientificName", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsPlants.put("nickname", new TableInfo.Column("nickname", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysPlants = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesPlants = new HashSet<TableInfo.Index>(0);
         final TableInfo _infoPlants = new TableInfo("plants", _columnsPlants, _foreignKeysPlants, _indicesPlants);
@@ -110,11 +112,12 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
                   + " Expected:\n" + _infoPlants + "\n"
                   + " Found:\n" + _existingPlants);
         }
-        final HashMap<String, TableInfo.Column> _columnsUsers = new HashMap<String, TableInfo.Column>(4);
+        final HashMap<String, TableInfo.Column> _columnsUsers = new HashMap<String, TableInfo.Column>(5);
         _columnsUsers.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsUsers.put("username", new TableInfo.Column("username", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsUsers.put("password", new TableInfo.Column("password", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsUsers.put("email", new TableInfo.Column("email", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsUsers.put("creationDate", new TableInfo.Column("creationDate", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysUsers = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesUsers = new HashSet<TableInfo.Index>(0);
         final TableInfo _infoUsers = new TableInfo("users", _columnsUsers, _foreignKeysUsers, _indicesUsers);
@@ -172,7 +175,7 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "6463831e8f3b20bc6153afbfe1fab572", "1500b8fb1ff8c92b5880675641412cb5");
+    }, "ca417fb782568b3314921d592cfc08b9", "97a39d3b95c9683753af696cb809d80c");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(configuration.context)
         .name(configuration.name)
         .callback(_openCallback)

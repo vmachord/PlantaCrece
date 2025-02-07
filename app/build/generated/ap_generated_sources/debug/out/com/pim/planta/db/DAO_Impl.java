@@ -16,6 +16,7 @@ import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserPlantRelation;
 import java.lang.Class;
+import java.lang.Long;
 import java.lang.Override;
 import java.lang.Runnable;
 import java.lang.String;
@@ -70,7 +71,7 @@ public final class DAO_Impl implements DAO {
     this.__insertionAdapterOfPlant = new EntityInsertionAdapter<Plant>(__db) {
       @Override
       public String createQuery() {
-        return "INSERT OR ABORT INTO `plants` (`id`,`name`,`basePath`,`imageResourceId`,`xp`,`xpMax`,`description`) VALUES (nullif(?, 0),?,?,?,?,?,?)";
+        return "INSERT OR ABORT INTO `plants` (`id`,`name`,`basePath`,`imageResourceId`,`xp`,`xpMax`,`description`,`scientificName`,`nickname`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -93,6 +94,16 @@ public final class DAO_Impl implements DAO {
           stmt.bindNull(7);
         } else {
           stmt.bindString(7, value.getDescription());
+        }
+        if (value.getScientificName() == null) {
+          stmt.bindNull(8);
+        } else {
+          stmt.bindString(8, value.getScientificName());
+        }
+        if (value.getNickname() == null) {
+          stmt.bindNull(9);
+        } else {
+          stmt.bindString(9, value.getNickname());
         }
       }
     };
@@ -123,7 +134,7 @@ public final class DAO_Impl implements DAO {
     this.__insertionAdapterOfUser = new EntityInsertionAdapter<User>(__db) {
       @Override
       public String createQuery() {
-        return "INSERT OR ABORT INTO `users` (`id`,`username`,`password`,`email`) VALUES (nullif(?, 0),?,?,?)";
+        return "INSERT OR ABORT INTO `users` (`id`,`username`,`password`,`email`,`creationDate`) VALUES (nullif(?, 0),?,?,?,?)";
       }
 
       @Override
@@ -143,6 +154,12 @@ public final class DAO_Impl implements DAO {
           stmt.bindNull(4);
         } else {
           stmt.bindString(4, value.getEmail());
+        }
+        final Long _tmp = Converters.toTimestamp(value.getCreationDate());
+        if (_tmp == null) {
+          stmt.bindNull(5);
+        } else {
+          stmt.bindLong(5, _tmp);
         }
       }
     };
@@ -255,7 +272,7 @@ public final class DAO_Impl implements DAO {
     this.__updateAdapterOfPlant = new EntityDeletionOrUpdateAdapter<Plant>(__db) {
       @Override
       public String createQuery() {
-        return "UPDATE OR ABORT `plants` SET `id` = ?,`name` = ?,`basePath` = ?,`imageResourceId` = ?,`xp` = ?,`xpMax` = ?,`description` = ? WHERE `id` = ?";
+        return "UPDATE OR ABORT `plants` SET `id` = ?,`name` = ?,`basePath` = ?,`imageResourceId` = ?,`xp` = ?,`xpMax` = ?,`description` = ?,`scientificName` = ?,`nickname` = ? WHERE `id` = ?";
       }
 
       @Override
@@ -279,7 +296,17 @@ public final class DAO_Impl implements DAO {
         } else {
           stmt.bindString(7, value.getDescription());
         }
-        stmt.bindLong(8, value.getId());
+        if (value.getScientificName() == null) {
+          stmt.bindNull(8);
+        } else {
+          stmt.bindString(8, value.getScientificName());
+        }
+        if (value.getNickname() == null) {
+          stmt.bindNull(9);
+        } else {
+          stmt.bindString(9, value.getNickname());
+        }
+        stmt.bindLong(10, value.getId());
       }
     };
     this.__updateAdapterOfDiaryEntry = new EntityDeletionOrUpdateAdapter<DiaryEntry>(__db) {
@@ -310,7 +337,7 @@ public final class DAO_Impl implements DAO {
     this.__updateAdapterOfUser = new EntityDeletionOrUpdateAdapter<User>(__db) {
       @Override
       public String createQuery() {
-        return "UPDATE OR ABORT `users` SET `id` = ?,`username` = ?,`password` = ?,`email` = ? WHERE `id` = ?";
+        return "UPDATE OR ABORT `users` SET `id` = ?,`username` = ?,`password` = ?,`email` = ?,`creationDate` = ? WHERE `id` = ?";
       }
 
       @Override
@@ -331,7 +358,13 @@ public final class DAO_Impl implements DAO {
         } else {
           stmt.bindString(4, value.getEmail());
         }
-        stmt.bindLong(5, value.getId());
+        final Long _tmp = Converters.toTimestamp(value.getCreationDate());
+        if (_tmp == null) {
+          stmt.bindNull(5);
+        } else {
+          stmt.bindLong(5, _tmp);
+        }
+        stmt.bindLong(6, value.getId());
       }
     };
     this.__updateAdapterOfCalendar = new EntityDeletionOrUpdateAdapter<Calendar>(__db) {
@@ -643,6 +676,8 @@ public final class DAO_Impl implements DAO {
       final int _cursorIndexOfXp = CursorUtil.getColumnIndexOrThrow(_cursor, "xp");
       final int _cursorIndexOfXpMax = CursorUtil.getColumnIndexOrThrow(_cursor, "xpMax");
       final int _cursorIndexOfDescription = CursorUtil.getColumnIndexOrThrow(_cursor, "description");
+      final int _cursorIndexOfScientificName = CursorUtil.getColumnIndexOrThrow(_cursor, "scientificName");
+      final int _cursorIndexOfNickname = CursorUtil.getColumnIndexOrThrow(_cursor, "nickname");
       final List<Plant> _result = new ArrayList<Plant>(_cursor.getCount());
       while(_cursor.moveToNext()) {
         final Plant _item;
@@ -670,10 +705,23 @@ public final class DAO_Impl implements DAO {
         } else {
           _tmpDescription = _cursor.getString(_cursorIndexOfDescription);
         }
-        _item = new Plant(_tmpName,_tmpBasePath,_tmpImageResourceId,_tmpXp,_tmpXpMax,_tmpDescription);
+        final String _tmpScientificName;
+        if (_cursor.isNull(_cursorIndexOfScientificName)) {
+          _tmpScientificName = null;
+        } else {
+          _tmpScientificName = _cursor.getString(_cursorIndexOfScientificName);
+        }
+        _item = new Plant(_tmpName,_tmpBasePath,_tmpImageResourceId,_tmpXp,_tmpXpMax,_tmpDescription,_tmpScientificName);
         final int _tmpId;
         _tmpId = _cursor.getInt(_cursorIndexOfId);
         _item.setId(_tmpId);
+        final String _tmpNickname;
+        if (_cursor.isNull(_cursorIndexOfNickname)) {
+          _tmpNickname = null;
+        } else {
+          _tmpNickname = _cursor.getString(_cursorIndexOfNickname);
+        }
+        _item.setNickname(_tmpNickname);
         _result.add(_item);
       }
       return _result;
@@ -741,6 +789,7 @@ public final class DAO_Impl implements DAO {
       final int _cursorIndexOfUsername = CursorUtil.getColumnIndexOrThrow(_cursor, "username");
       final int _cursorIndexOfPassword = CursorUtil.getColumnIndexOrThrow(_cursor, "password");
       final int _cursorIndexOfEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "email");
+      final int _cursorIndexOfCreationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "creationDate");
       final List<User> _result = new ArrayList<User>(_cursor.getCount());
       while(_cursor.moveToNext()) {
         final User _item;
@@ -766,6 +815,15 @@ public final class DAO_Impl implements DAO {
         final int _tmpId;
         _tmpId = _cursor.getInt(_cursorIndexOfId);
         _item.setId(_tmpId);
+        final Date _tmpCreationDate;
+        final Long _tmp;
+        if (_cursor.isNull(_cursorIndexOfCreationDate)) {
+          _tmp = null;
+        } else {
+          _tmp = _cursor.getLong(_cursorIndexOfCreationDate);
+        }
+        _tmpCreationDate = Converters.toDate(_tmp);
+        _item.setCreationDate(_tmpCreationDate);
         _result.add(_item);
       }
       return _result;
@@ -836,6 +894,8 @@ public final class DAO_Impl implements DAO {
       final int _cursorIndexOfXp = CursorUtil.getColumnIndexOrThrow(_cursor, "xp");
       final int _cursorIndexOfXpMax = CursorUtil.getColumnIndexOrThrow(_cursor, "xpMax");
       final int _cursorIndexOfDescription = CursorUtil.getColumnIndexOrThrow(_cursor, "description");
+      final int _cursorIndexOfScientificName = CursorUtil.getColumnIndexOrThrow(_cursor, "scientificName");
+      final int _cursorIndexOfNickname = CursorUtil.getColumnIndexOrThrow(_cursor, "nickname");
       final Plant _result;
       if(_cursor.moveToFirst()) {
         final String _tmpName;
@@ -862,10 +922,23 @@ public final class DAO_Impl implements DAO {
         } else {
           _tmpDescription = _cursor.getString(_cursorIndexOfDescription);
         }
-        _result = new Plant(_tmpName,_tmpBasePath,_tmpImageResourceId,_tmpXp,_tmpXpMax,_tmpDescription);
+        final String _tmpScientificName;
+        if (_cursor.isNull(_cursorIndexOfScientificName)) {
+          _tmpScientificName = null;
+        } else {
+          _tmpScientificName = _cursor.getString(_cursorIndexOfScientificName);
+        }
+        _result = new Plant(_tmpName,_tmpBasePath,_tmpImageResourceId,_tmpXp,_tmpXpMax,_tmpDescription,_tmpScientificName);
         final int _tmpId;
         _tmpId = _cursor.getInt(_cursorIndexOfId);
         _result.setId(_tmpId);
+        final String _tmpNickname;
+        if (_cursor.isNull(_cursorIndexOfNickname)) {
+          _tmpNickname = null;
+        } else {
+          _tmpNickname = _cursor.getString(_cursorIndexOfNickname);
+        }
+        _result.setNickname(_tmpNickname);
       } else {
         _result = null;
       }
@@ -896,6 +969,8 @@ public final class DAO_Impl implements DAO {
       final int _cursorIndexOfXp = CursorUtil.getColumnIndexOrThrow(_cursor, "xp");
       final int _cursorIndexOfXpMax = CursorUtil.getColumnIndexOrThrow(_cursor, "xpMax");
       final int _cursorIndexOfDescription = CursorUtil.getColumnIndexOrThrow(_cursor, "description");
+      final int _cursorIndexOfScientificName = CursorUtil.getColumnIndexOrThrow(_cursor, "scientificName");
+      final int _cursorIndexOfNickname = CursorUtil.getColumnIndexOrThrow(_cursor, "nickname");
       final Plant _result;
       if(_cursor.moveToFirst()) {
         final String _tmpName;
@@ -922,10 +997,23 @@ public final class DAO_Impl implements DAO {
         } else {
           _tmpDescription = _cursor.getString(_cursorIndexOfDescription);
         }
-        _result = new Plant(_tmpName,_tmpBasePath,_tmpImageResourceId,_tmpXp,_tmpXpMax,_tmpDescription);
+        final String _tmpScientificName;
+        if (_cursor.isNull(_cursorIndexOfScientificName)) {
+          _tmpScientificName = null;
+        } else {
+          _tmpScientificName = _cursor.getString(_cursorIndexOfScientificName);
+        }
+        _result = new Plant(_tmpName,_tmpBasePath,_tmpImageResourceId,_tmpXp,_tmpXpMax,_tmpDescription,_tmpScientificName);
         final int _tmpId;
         _tmpId = _cursor.getInt(_cursorIndexOfId);
         _result.setId(_tmpId);
+        final String _tmpNickname;
+        if (_cursor.isNull(_cursorIndexOfNickname)) {
+          _tmpNickname = null;
+        } else {
+          _tmpNickname = _cursor.getString(_cursorIndexOfNickname);
+        }
+        _result.setNickname(_tmpNickname);
       } else {
         _result = null;
       }
@@ -1098,6 +1186,7 @@ public final class DAO_Impl implements DAO {
       final int _cursorIndexOfUsername = CursorUtil.getColumnIndexOrThrow(_cursor, "username");
       final int _cursorIndexOfPassword = CursorUtil.getColumnIndexOrThrow(_cursor, "password");
       final int _cursorIndexOfEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "email");
+      final int _cursorIndexOfCreationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "creationDate");
       final User _result;
       if(_cursor.moveToFirst()) {
         final String _tmpUsername;
@@ -1122,6 +1211,15 @@ public final class DAO_Impl implements DAO {
         final int _tmpId;
         _tmpId = _cursor.getInt(_cursorIndexOfId);
         _result.setId(_tmpId);
+        final Date _tmpCreationDate;
+        final Long _tmp;
+        if (_cursor.isNull(_cursorIndexOfCreationDate)) {
+          _tmp = null;
+        } else {
+          _tmp = _cursor.getLong(_cursorIndexOfCreationDate);
+        }
+        _tmpCreationDate = Converters.toDate(_tmp);
+        _result.setCreationDate(_tmpCreationDate);
       } else {
         _result = null;
       }
@@ -1196,6 +1294,7 @@ public final class DAO_Impl implements DAO {
       final int _cursorIndexOfUsername = CursorUtil.getColumnIndexOrThrow(_cursor, "username");
       final int _cursorIndexOfPassword = CursorUtil.getColumnIndexOrThrow(_cursor, "password");
       final int _cursorIndexOfEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "email");
+      final int _cursorIndexOfCreationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "creationDate");
       final User _result;
       if(_cursor.moveToFirst()) {
         final String _tmpUsername;
@@ -1220,6 +1319,15 @@ public final class DAO_Impl implements DAO {
         final int _tmpId;
         _tmpId = _cursor.getInt(_cursorIndexOfId);
         _result.setId(_tmpId);
+        final Date _tmpCreationDate;
+        final Long _tmp;
+        if (_cursor.isNull(_cursorIndexOfCreationDate)) {
+          _tmp = null;
+        } else {
+          _tmp = _cursor.getLong(_cursorIndexOfCreationDate);
+        }
+        _tmpCreationDate = Converters.toDate(_tmp);
+        _result.setCreationDate(_tmpCreationDate);
       } else {
         _result = null;
       }

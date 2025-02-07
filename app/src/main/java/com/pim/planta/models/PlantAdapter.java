@@ -1,6 +1,7 @@
 package com.pim.planta.models;
 
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pim.planta.R;
+import com.pim.planta.db.DAO;
+import com.pim.planta.db.DatabaseExecutor;
 
 import java.util.List;
 
@@ -19,10 +22,14 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
     private List<Plant> plantList;
     private OnItemClickListener onItemClickListener;
     private Typeface aventaFont;
+    private DAO dao;
+    private User user;
 
-    public PlantAdapter(List<Plant> plantList, Typeface aventaFont) {
+    public PlantAdapter(List<Plant> plantList, Typeface aventaFont, DAO dao, User user) {
         this.plantList = plantList;
         this.aventaFont = aventaFont;
+        this.dao = dao;
+        this.user = user;
     }
 
     @NonNull
@@ -35,11 +42,24 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
     @Override
     public void onBindViewHolder(@NonNull PlantViewHolder holder, int position) {
         Plant plant = plantList.get(position);
-        holder.plantNameTextView.setText(plant.getName());
+        if (plant.getNickname() != null && !plant.getNickname().isEmpty())
+            holder.plantNameTextView.setText(plant.getNickname() + " XP: " + plant.getXp() + "/" + plant.getXpMax());
+        else
+            holder.plantNameTextView.setText(plant.getName());
         holder.plantImageView.setImageResource(plant.getImageResourceId());
         holder.plantDescriptionTextView.setText(plant.getDescription());
-
-
+        if (user != null) {
+            DatabaseExecutor.executeAndWait(() -> {
+                try {
+                    int growthCount = Math.max(0, dao.getGrowCount(user.getId(), dao.getPlantaByName(plant.getName()).getId()));
+                    holder.plantGrowthCountTextView.setText("Growth count: " + growthCount);
+                } catch (Exception e) {
+                    Log.e("PlantAdapter", "Error getting growth count", e);
+                }
+            });
+        } else {
+            Log.e("PlantAdapter", "User is null");
+        }
         holder.itemView.setOnClickListener(v -> {
             if (onItemClickListener != null) {
                 onItemClickListener.onItemClick(plant); // Llamar a la función de la actividad
@@ -56,14 +76,17 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
         public TextView plantNameTextView;
         public ImageView plantImageView;
         public TextView plantDescriptionTextView;
+        public TextView plantGrowthCountTextView;
 
         public PlantViewHolder(View itemView) {
             super(itemView);
             plantNameTextView = itemView.findViewById(R.id.plant_name_textview);
             plantImageView = itemView.findViewById(R.id.plant_imageview);
             plantDescriptionTextView = itemView.findViewById(R.id.plant_description_textview);
+            plantGrowthCountTextView = itemView.findViewById(R.id.plant_growth_count);
             plantNameTextView.setTypeface(aventaFont);
             plantDescriptionTextView.setTypeface(aventaFont);
+            plantGrowthCountTextView.setTypeface(aventaFont);
         }
     }
     // Interface para el manejo de clic

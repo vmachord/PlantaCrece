@@ -2,14 +2,19 @@ package com.pim.planta;
 
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
@@ -21,6 +26,7 @@ import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.PlantAdapter;
+import com.pim.planta.models.UserLogged;
 
 import java.util.List;
 
@@ -29,16 +35,18 @@ public class PlantListActivity extends AppCompatActivity {
     private RecyclerView plantListRecyclerView;
     private PlantAdapter plantAdapter;
     private List<Plant> plantList;
+    private DAO dao;
+    private ImageView imageView6;
+    private TextView plantaElegidaTextView;
+    private Plant selectedPlant;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Get the font
         Typeface aventaFont = ResourcesCompat.getFont(this, R.font.aventa);
 
-        // Create the adapter and pass the font
-        PlantAdapter adapter = new PlantAdapter(plantList, aventaFont);
         PlantRepository repository = PlantRepository.getInstance(this);
-        DAO dao = repository.getPlantaDAO();
+        dao = repository.getPlantaDAO();
 
         DatabaseExecutor.execute(() -> {
             plantList = dao.getAllPlantas();
@@ -49,50 +57,72 @@ public class PlantListActivity extends AppCompatActivity {
         setupBottom();
 
         // Referencia al TextView donde se mostrará la planta elegida
-        final TextView plantaElegidaTextView = findViewById(R.id.textView3);
-        final ImageView imageView6 = findViewById(R.id.imageView6);
+        plantaElegidaTextView = findViewById(R.id.textView3);
+        imageView6 = findViewById(R.id.imageView6);
         imageView6.setVisibility(View.INVISIBLE);
 
         plantListRecyclerView = findViewById(R.id.plant_list_recyclerview);
         plantListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        plantAdapter = new PlantAdapter(plantList, aventaFont);
+        Log.d("PlantListActivity", "User logged: " + UserLogged.getInstance().getCurrentUser().getEmail());
+        plantAdapter = new PlantAdapter(plantList, aventaFont, dao, UserLogged.getInstance().getCurrentUser());
         plantListRecyclerView.setAdapter(plantAdapter);
 
-        plantAdapter.setOnItemClickListener(new PlantAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Plant plant) {
-                // Actualizar el texto y mostrar la imagen
-                plantaElegidaTextView.setText("Planta Elegida: " + plant.getName());
-                imageView6.setVisibility(View.VISIBLE);
-
-                // Animación de desvanecimiento
-                plantaElegidaTextView.setAlpha(0f);
-                plantaElegidaTextView.animate().alpha(1f).setDuration(300).start();
-
-                imageView6.setAlpha(0f);
-                imageView6.animate().alpha(1f).setDuration(300).start();
-
-                // Efecto de rebote en la imagen
-                imageView6.animate()
-                        .scaleX(1.2f).scaleY(1.2f)
-                        .setDuration(200)
-                        .withEndAction(() -> imageView6.animate()
-                                .scaleX(1f).scaleY(1f)
-                                .setDuration(200)
-                                .start())
-                        .start();
-
-                // Guardar la planta seleccionada
-                SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("selectedPlant", plant.getName());
-                editor.apply();
-
-                Intent intent = new Intent(PlantListActivity.this, JardinActivity.class);
-                startActivity(intent);
+        plantAdapter.setOnItemClickListener(plant -> {
+            // Check if the plant has a nickname
+            if (plant.getNickname() == null || plant.getNickname().isEmpty()) {
+                showNicknameDialog(plant);
+            } else {
+                saveSelectedPlantAndGoToJardin(plant);
             }
         });
+    }
+
+    private void showNicknameDialog(Plant plant) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_nickname);
+
+        final EditText nicknameEditText = dialog.findViewById(R.id.nickname_edit_text);
+        Button cancelButton = dialog.findViewById(R.id.cancel_button);
+        Button saveButton = dialog.findViewById(R.id.save_button);
+
+        cancelButton.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
+
+        saveButton.setOnClickListener(v -> {
+            String nickname = nicknameEditText.getText().toString().trim();
+            if (!nickname.isEmpty()) {
+                plant.setNickname(nickname);
+                DatabaseExecutor.execute(() -> {
+                    dao.update(plant);
+                });
+                saveSelectedPlantAndGoToJardin(plant);
+                dialog.dismiss();
+            } else {
+                Toast.makeText(this, "Please enter a nickname", Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.show();
+    }
+
+    private void saveSelectedPlantAndGoToJardin(Plant plant) {
+        selectedPlant = plant;
+        // Actualizar el texto y mostrar la imagen
+        plantaElegidaTextView.setText("Planta Elegida: " + plant.getName());
+
+        // Animación de desvanecimiento
+        plantaElegidaTextView.setAlpha(0f);
+        plantaElegidaTextView.animate().alpha(1f).setDuration(300).start();
+
+        // Guardar la planta seleccionada
+        SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("selectedPlant", plant.getName());
+        editor.apply();
+
+        Intent intent = new Intent(PlantListActivity.this, JardinActivity.class);
+        startActivity(intent);
     }
 
     // Método para animar los botones de la barra inferior
@@ -109,6 +139,11 @@ public class PlantListActivity extends AppCompatActivity {
     public void setupBottom() {
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
+        SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
+        if (sharedPreferences.getString("selectedPlant",null) == null) {
+            imageButtonMaceta.setEnabled(false); // Deshabilita el botón
+            imageButtonMaceta.setImageAlpha(128); // Oscurece el botón
+        }
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
         imageButtonPlantadex.setEnabled(false); // Deshabilita el botón
         imageButtonPlantadex.setImageAlpha(128); // Oscurece el botón

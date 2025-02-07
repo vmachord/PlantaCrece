@@ -14,14 +14,17 @@ public class Plant {
     private int xp; //opcional
     private int xpMax; //opcional
     private String description; //opcional
+    private String scientificName;
+    private String nickname;
 
-    public Plant(String name, String basePath, int imageResourceId, int xp, int xpMax, String description) {
+    public Plant(String name, String basePath, int imageResourceId, int xp, int xpMax, String description, String scientificName) {
         this.name = name;
         this.basePath = basePath;
         this.imageResourceId = imageResourceId;
         this.xp = xp;
         this.xpMax = xpMax;
         this.description = description;
+        this.scientificName = scientificName;
     }
 
     // Getters para los atributos
@@ -52,9 +55,24 @@ public class Plant {
     public void setId(int id) {
         this.id = id;
     }
-    public void addXp(int xp){ this.xp = this.xp + xp;}
+    public void addXp(int xp){ this.setXp(this.getXp() + xp); }
 
     public void setXp(int i) {
         this.xp = i;
+    }
+    public String getScientificName() {
+        return scientificName;
+    }
+
+    public void setScientificName(String scientificName) {
+        this.scientificName = scientificName;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 }

@@ -1,6 +1,7 @@
 package com.pim.planta;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -58,13 +59,18 @@ public class LoginActivity extends AppCompatActivity {
                             User userLogged = plantRepo.getPlantaDAO().getUserByEmail(email);
                             UserLogged.getInstance().setCurrentUser(userLogged);
                         });
-
+                        SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
+                        if (sharedPreferences.getString("selectedPlant", null) == null) {
+                            Intent intent = new Intent(LoginActivity.this, PlantListActivity.class);
+                            startActivity(intent);
+                            finish();
+                            return;
+                        }
                         Intent intent = new Intent(LoginActivity.this, JardinActivity.class);
                         startActivity(intent);
                         finish(); // Finaliza la LoginActivity para que no vuelva a ella al pulsar back
                     } else {
                         Toast.makeText(LoginActivity.this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
-
                     }
                 });
             }

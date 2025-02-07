@@ -72,13 +72,14 @@ public class RegisterActivity extends AppCompatActivity {
             registerUser(newUser);
             PlantRepository plantRepo = PlantRepository.getInstance(this);
             DAO dao = plantRepo.getPlantaDAO();
-            for (Plant plant : dao.getAllPlantas()) {
+            DatabaseExecutor.executeAndWait(() -> {
+                for (Plant plant : dao.getAllPlantas()) {
                 UserPlantRelation relation = new UserPlantRelation(newUser.getId(), plant.getId()); // growCount is initialized to 0 by default
                 dao.insertUserPlantRelation(relation);
-            }
-
+                }
+            });
             Toast.makeText(RegisterActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(RegisterActivity.this, JardinActivity.class);
+            Intent intent = new Intent(RegisterActivity.this, PlantListActivity.class);
             startActivity(intent);
         });
     }

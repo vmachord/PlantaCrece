@@ -1,17 +1,23 @@
 package com.pim.planta;
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.app.Activity;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -21,7 +27,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.github.mikephil.charting.animation.Easing;
@@ -33,11 +44,16 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.pim.planta.db.DAO;
+import com.pim.planta.db.DatabaseExecutor;
+import com.pim.planta.db.PlantRepository;
+import com.pim.planta.models.Plant;
 import com.pim.planta.models.UserLogged;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -49,32 +65,24 @@ public class PerfilActivity extends AppCompatActivity{
     private ImageView profileImageView;
     private TextView userNameTextView;
     private BarChart barChart;
-    private List<BarDataSet> dataSets;
-    public static int currentImageIndex = 1;
-    private int previousImageIndex = -1;
     private TextView textViewPlantoo;
     private TextView textViewText;
     private TextView textViewText2;
+    private TextView textViewText3;
 
     private boolean isExpanded = false;
 
-    private long instagramUsageTime = 0;
-    private long tiktokUsageTime = 0;
-    private long youtubeUsageTime = 0;
-    private long twitterUsageTime = 0;
-    private long facebookUsageTime = 0;
-
-    private View bottomSection;
     private ImageView imageView12;
-    private boolean isAtTop = false;
 
     private FrameLayout frame;
     private ImageView profileImage;
     private ImageView imageView13;
     private TextView userName;
-    private TextView textView8;
-    private TextView textView9;
     private int currentWeek;
+    private Plant plant;
+    private DAO dao;
+    private static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 100;
+    private ActivityResultLauncher<Intent> galleryLauncher;
 
 
     @Override
@@ -86,17 +94,38 @@ public class PerfilActivity extends AppCompatActivity{
         setUpBottom();
         textViewPlantoo = findViewById(R.id.textView4);
         trackAppUsage2();
-        textViewText = findViewById(R.id.textView8);
-        textViewText.setText("Bloomed on 14th November 2024");
-        textViewText2 = findViewById(R.id.textView9);
-        textViewText2.setText("Scientific plant name: Tulipa\n Nickname: Nacho de Tulipán.");
+        textViewText = findViewById(R.id.textCreationDate);
+        textViewText.setText("Bloomed on: " + UserLogged.getInstance().getCurrentUser().getCreationDate().toString());
+        textViewText2 = findViewById(R.id.textScientificName);
+        textViewText3 = findViewById(R.id.textNickname);
+        SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
+        PlantRepository plantaRepo = PlantRepository.getInstance(this);
+        dao = plantaRepo.getPlantaDAO();
+        String selectedPlantName = sharedPreferences.getString("selectedPlant", "");
+
+        if (!selectedPlantName.isEmpty()) {
+            DatabaseExecutor.executeAndWait(() -> {
+                plant = dao.getPlantaByName(selectedPlantName);
+            });
+            if (plant != null) {
+                // Display the scientific name and nickname
+                textViewText2.setText("Scientific plant name: " + plant.getScientificName());
+                textViewText3.setText("Nickname: " + plant.getNickname());
+            } else {
+                // Handle the case where the plant is not found
+                textViewText2.setText("ERROR ERROR ERROR");
+                textViewText3.setText("ERROR ERROR ERROR");
+            }
+        } else {
+            // Handle the case where no plant is selected
+            textViewText2.setText("ERROR ERROR ERROR");
+            textViewText3.setText("ERROR ERROR ERROR");
+        }
         imageView12 = findViewById(R.id.imageView12);
         frame = findViewById(R.id.frame);
         profileImage = findViewById(R.id.profile_image);
         imageView13 = findViewById(R.id.imageView13);
         userName = findViewById(R.id.user_name);
-        textView8 = findViewById(R.id.textView8);
-        textView9 = findViewById(R.id.textView9);
         setupClickListener();
 
         currentWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
@@ -121,7 +150,27 @@ public class PerfilActivity extends AppCompatActivity{
         });
 
         updateGraphAndData(currentWeek);
-
+        galleryLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            Uri selectedImageUri = data.getData();
+                            if (selectedImageUri != null) {
+                                try {
+                                    InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
+                                    Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                                    profileImageView.setImageBitmap(selectedImage);
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    }
+                }
+        );
     }
 
     private void updateGraphAndData(int selectedWeek) {
@@ -147,15 +196,17 @@ public class PerfilActivity extends AppCompatActivity{
                     profileImage.setVisibility(View.VISIBLE);
                     imageView13.setVisibility(View.VISIBLE);
                     userName.setVisibility(View.VISIBLE);
-                    textView8.setVisibility(View.VISIBLE);
-                    textView9.setVisibility(View.VISIBLE);
+                    textViewText.setVisibility(View.VISIBLE);
+                    textViewText2.setVisibility(View.VISIBLE);
+                    textViewText3.setVisibility(View.VISIBLE);
                 } else {
                     // Ocultar los elementos
                     profileImage.setVisibility(View.GONE);
                     imageView13.setVisibility(View.GONE);
                     userName.setVisibility(View.GONE);
-                    textView8.setVisibility(View.GONE);
-                    textView9.setVisibility(View.GONE);
+                    textViewText.setVisibility(View.GONE);
+                    textViewText2.setVisibility(View.GONE);
+                    textViewText3.setVisibility(View.GONE);
                 }
 
                 // Realizar la animación de expansión/colapso
@@ -258,31 +309,16 @@ public class PerfilActivity extends AppCompatActivity{
         profileImageView = findViewById(R.id.profile_image);
         userNameTextView = findViewById(R.id.user_name);
 
-        profileImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cambiarImagenDePerfil();
-            }
-        });
-        userNameTextView.setText(UserLogged.getInstance().getCurrentUser().getUsername());
+        profileImageView.setOnClickListener(view -> cambiarImagenDePerfil());
+        if (UserLogged.getInstance().getCurrentUser() != null) {
+            String username = UserLogged.getInstance().getCurrentUser().getUsername();
+            userNameTextView.setText(username);
+        } else {
+            userNameTextView.setText("ERROR ERROR ERROR");
+        }
     }
 
-    private  BarDataSet addColorOnGraph(ArrayList<BarEntry> barEntries){
-        BarDataSet barDataSet = new BarDataSet(barEntries, "Progreso Diario");
-        barDataSet.setColors(new int[]{Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN, Color.MAGENTA}); // Colores de la barra
-        return barDataSet;
-    }
 
-    private void cambiarImagenDePerfil() {
-        Toast.makeText(this, "Cambiar imagen de perfil", Toast.LENGTH_SHORT).show();
-
-        // Aquí puedes abrir una actividad para seleccionar una imagen o usar un selector de imágenes
-        // Por ejemplo, puedes abrir la galería con una Intent:
-        // Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        // startActivityForResult(intent, 100);
-
-        profileImageView.setImageResource(R.drawable.default_profile);
-    }
 
     private void animateButton(View view) {
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
@@ -337,96 +373,6 @@ public class PerfilActivity extends AppCompatActivity{
         return totalTimeToday;
     }
 
-    private void trackAppUsage() {
-        UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
-        if (usageStatsManager == null) {
-            Log.e("AppUsage", "UsageStatsManager no está disponible.");
-            return;
-        }
-
-        // Obtén el tiempo total de uso de hoy usando la función
-        long totalTimeToday = getTotalUsageToday();
-        Log.d("AppUsage", "Total Time Today: " + totalTimeToday);
-
-        // Inicializar el uso de las aplicaciones para hoy
-        long instagramUsageTimeToday = 0;
-        long tiktokUsageTimeToday = 0;
-        long youtubeUsageTimeToday = 0;
-        long twitterUsageTimeToday = 0;
-        long facebookUsageTimeToday = 0;
-
-        // Obtén el inicio y final del día de hoy
-        long startOfDay = getStartOfDay();
-        long endOfDay = System.currentTimeMillis();
-
-        // Consulta las estadísticas de uso para el día de hoy
-        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY, startOfDay, endOfDay);
-
-        if (usageStatsList == null || usageStatsList.isEmpty()) {
-            Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
-            return;
-        }
-
-        // Recorrer las estadísticas de uso
-        for (UsageStats usageStats : usageStatsList) {
-            String packageName = usageStats.getPackageName();
-            Log.d("AppUsage", "Paquete encontrado: " + packageName);  // Log para depurar
-
-            switch (packageName) {
-                case "com.instagram.android":
-                    instagramUsageTimeToday = usageStats.getTotalTimeInForeground();
-                    break;
-                case "com.zhiliaoapp.musically":
-                    tiktokUsageTimeToday = usageStats.getTotalTimeInForeground();
-                    break;
-                case "com.google.android.youtube":
-                    youtubeUsageTimeToday = usageStats.getTotalTimeInForeground();
-                    break;
-                case "com.twitter.android":
-                    twitterUsageTimeToday = usageStats.getTotalTimeInForeground();
-                    break;
-                case "com.facebook.katana":
-                    facebookUsageTimeToday = usageStats.getTotalTimeInForeground();
-                    break;
-            }
-        }
-        Calendar calendar = Calendar.getInstance();
-        int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
-
-        // Guarda los datos en SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        // Obtén el día actual y formatea la clave de SharedPreferences
-        String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
-        Log.d("AppUsage", "Hoy es: " + today);  // Log para depurar
-
-        /*editor.putLong(today + "_Total", totalTimeToday);
-        editor.putLong(today + "_Instagram", instagramUsageTimeToday);
-        editor.putLong(today + "_TikTok", tiktokUsageTimeToday);
-        editor.putLong(today + "_YouTube", youtubeUsageTimeToday);
-        editor.putLong(today + "_Twitter", twitterUsageTimeToday);
-        editor.putLong(today + "_Facebook", facebookUsageTimeToday);
-*/
-        String weekKey = "Week" + currentWeek + "_" + today + "_";
-
-        editor.putLong(weekKey + "Total", totalTimeToday);
-        editor.putLong(weekKey + "Instagram", instagramUsageTimeToday);
-        editor.putLong(weekKey + "TikTok", tiktokUsageTimeToday);
-        editor.putLong(weekKey + "YouTube", youtubeUsageTimeToday);
-        editor.putLong(weekKey + "Twitter", twitterUsageTimeToday);
-        editor.putLong(weekKey + "Facebook", facebookUsageTimeToday);
-
-        editor.apply();
-
-        // Actualiza la UI con los datos guardados
-        //updateUsageSummary();
-        //initializeGraph();
-    }
-
-
-
     private void updateUsageSummary(int selectedWeek) {
         SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
 
@@ -456,28 +402,6 @@ public class PerfilActivity extends AppCompatActivity{
         } else {
             Log.e("AppUsage", "TextView no está inicializado.");
         }
-    }
-    private void resetTodayUsage(SharedPreferences.Editor editor) {
-        Calendar calendar = Calendar.getInstance();
-        int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
-        String weekKey = "Week" + currentWeek + "_" + today + "_";
-
-        editor.putLong(weekKey + "Instagram", 0);
-        editor.putLong(weekKey + "TikTok", 0);
-        editor.putLong(weekKey + "YouTube", 0);
-        editor.putLong(weekKey + "Twitter", 0);
-        editor.putLong(weekKey + "Facebook", 0);
-    }
-    private long getStartOfDayUTC() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-
-        return calendar.getTimeInMillis();
     }
 
     private void trackAppUsage2() {
@@ -556,49 +480,6 @@ public class PerfilActivity extends AppCompatActivity{
         initializeGraph(currentWeek);
     }
 
-
-
-    private String getAppNameByIndex(int index) {
-        switch (index) {
-            case 0:
-                return "Instagram";
-            case 1:
-                return "TikTok";
-            case 2:
-                return "YouTube";
-            case 3:
-                return "Twitter";
-            case 4:
-                return "Facebook";
-            default:
-                return "Unknown";
-        }
-    }
-
-
-    private List<String> getTrackedApps() {
-        return Arrays.asList("com.instagram.android", "com.tiktok.android", "com.facebook.katana");
-    }
-
-    private String getDayLabel(int dayIndex) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, -dayIndex);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE", Locale.getDefault());
-        return dateFormat.format(calendar.getTime());
-    }
-
-    private String getAppName(String packageName) {
-        PackageManager pm = getPackageManager();
-        try {
-            ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
-            return pm.getApplicationLabel(info).toString();
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return packageName;
-        }
-    }
-
-
     /**
      * Obtiene el timestamp del inicio del día (medianoche).
      */
@@ -612,29 +493,6 @@ public class PerfilActivity extends AppCompatActivity{
         return calendar.getTimeInMillis();
     }
 
-    /**
-     * Muestra los datos semanales en la UI.
-     */
-    private void updateUsageSummaryWeekly() {
-        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
-
-        String[] packages = {
-                "com.instagram.android",
-                "com.zhiliaoapp.musically",
-                "com.google.android.youtube",
-                "com.twitter.android",
-                "com.facebook.katana"
-        };
-
-        for (String packageName : packages) {
-            for (int i = 0; i < 7; i++) {
-                long usageTime = prefs.getLong(packageName + "_Day" + i, 0);
-                Log.d("WeeklyUsage", "App: " + packageName + " | Day " + i + ": " + usageTime + " ms");
-            }
-        }
-    }
-
-
     private String formatTime(long timeInMillis) {
         long minutes = (timeInMillis / 1000) / 60;
         long hours = minutes / 60;
@@ -642,8 +500,39 @@ public class PerfilActivity extends AppCompatActivity{
 
         return String.format("%d h %02d min", hours, minutes);
     }
+    private void cambiarImagenDePerfil() {
+        // Check if permission is needed (for API levels below 29)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                // Request permission
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE_READ_EXTERNAL_STORAGE);
+            } else {
+                // Permission already granted, open gallery
+                openGallery();
+            }
+        } else {
+            // No permission needed for API level 29 and above, open gallery
+            openGallery();
+        }
+    }
 
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        galleryLauncher.launch(intent);
+    }
 
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_READ_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, open gallery
+                openGallery();
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }
 
