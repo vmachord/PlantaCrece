@@ -30,7 +30,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -67,12 +66,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class JardinActivity extends AppCompatActivity {
+public class JardinActivity extends NotificationActivity {
 
     public static int currentImageIndex = 1;
     private static final int NOTIFICATION_PERMISSION_CODE = 100;
     private PopupWindow tooltipWindow;
-
     private Plant plant;
     private long totalTimeUsage;
     private Typeface aventaFont;

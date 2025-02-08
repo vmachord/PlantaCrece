@@ -15,10 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -42,23 +40,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class DiaryActivity extends AppCompatActivity  {
-
-    private int selectedColor = 0;
+public class DiaryActivity extends NotificationActivity  {
 
     private CalendarDraw calendarDraw;
-
     private PlantRepository plantRepo;
-
     private List<DiaryEntry> diaryEntries;
-
-    private Date date;
-
     private YearSelectorButton yearSelectorButton;
-
     private ImageButton previousMonthButton, nextMonthButton;
     private TextView dateTextView;
-    private LinearLayout bottomNavigation;
     private ConstraintSet initialConstraintSet;
     private boolean isExpanded = false;
     private int selectedEmotion = -1;
@@ -73,8 +62,6 @@ public class DiaryActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary);
         setUpBottom();
-
-        bottomNavigation = findViewById(R.id.bottomNavigation);
 
         calendarDraw = findViewById(R.id.calendar_draw);
         calendarDraw.setVisibility(View.VISIBLE);

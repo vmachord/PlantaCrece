@@ -26,7 +26,9 @@ public class NotificationWorker extends Worker {
     private static final int NOTIFICATION_ID = 1;
     private static final String PREFS_NAME = "app_prefs";
     private static final String TOTAL_USAGE_TIME_KEY = "total_usage_time";
-    private static final long THIRTY_MINUTES_IN_MILLIS = 30 * 60 * 1000; // 30 minutes
+    private static final String FIFTEEN_MINUTES_NOTIFICATION_SENT_KEY = "fifteen_minutes_notification_sent";
+    private static final String TWO_HOURS_NOTIFICATION_SENT_KEY = "two_hours_notification_sent";
+    private static final long FIFTEEN_MINUTES_IN_MILLIS = 15 * 60 * 1000; // 15 minutes
     private static final long TWO_HOURS_IN_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
     private static final List<String> SOCIAL_MEDIA_PACKAGES = Arrays.asList(
             "com.facebook.katana", // Facebook
@@ -36,7 +38,6 @@ public class NotificationWorker extends Worker {
             "com.google.android.youtube" // Youtube
             // More to add here
     );
-
     public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
@@ -48,12 +49,26 @@ public class NotificationWorker extends Worker {
             Log.e("NotificationWorker", "No tiene permisos");
             return Result.failure();
         }
-        long totalUsageTime = trackAppUsage();
-        if (totalUsageTime >= TWO_HOURS_IN_MILLIS) {
-            sendUsageNotification("¡La planta no aguantara mucho mas si sigues asi!");
-        } else if (totalUsageTime >= THIRTY_MINUTES_IN_MILLIS) {
-            sendUsageNotification("¡El uso de las redes está marchitando tu jardín!");
+
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        boolean fifteenMinutesNotificationSent = prefs.getBoolean(FIFTEEN_MINUTES_NOTIFICATION_SENT_KEY, false);
+        boolean twoHoursNotificationSent = prefs.getBoolean(TWO_HOURS_NOTIFICATION_SENT_KEY, false);
+
+        if (twoHoursNotificationSent) {
+            // If the 2-hour notification has been sent, don't do anything else
+            return Result.success();
         }
+
+        long totalUsageTime = trackAppUsage();
+
+        if (totalUsageTime >= TWO_HOURS_IN_MILLIS && !twoHoursNotificationSent) {
+            sendUsageNotification("¡La planta no aguantara mucho mas si sigues asi!");
+            prefs.edit().putBoolean(TWO_HOURS_NOTIFICATION_SENT_KEY, true).apply();
+        } else if (totalUsageTime >= FIFTEEN_MINUTES_IN_MILLIS && !fifteenMinutesNotificationSent) {
+            sendUsageNotification("¡El uso de las redes está marchitando tu jardín!");
+            prefs.edit().putBoolean(FIFTEEN_MINUTES_NOTIFICATION_SENT_KEY, true).apply();
+        }
+
         return Result.success();
     }
 

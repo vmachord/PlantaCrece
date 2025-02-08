@@ -10,8 +10,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.pim.planta.db.DAO;
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
@@ -26,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class InvernaderoActivity extends AppCompatActivity {
+public class InvernaderoActivity extends NotificationActivity {
     private ImageView imageView2;
     private Map<String, Integer> displayedPlantCounts = new HashMap<>();
     private DAO dao;
@@ -38,9 +36,6 @@ public class InvernaderoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invernadero);
         imageView2 = findViewById(R.id.plantoo);
-
-        SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
-        String selectedPlant = sharedPreferences.getString("selectedPlant", null);
 
         PlantRepository repository = PlantRepository.getInstance(this);
         dao = repository.getPlantaDAO();
@@ -207,18 +202,6 @@ public class InvernaderoActivity extends AppCompatActivity {
         }.execute();
     }
 
-    private static void decrementGrowCountInBackground(final int userId, final String plantName, final DAO dao) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                Plant plant = dao.getPlantaByName(plantName);
-                if (plant != null) {
-                    dao.decrementGrowCount(userId, plant.getId());
-                }
-                return null;
-            }
-        }.execute();
-    }
     private void updateImage(String plantName) {
         // Reemplazar los espacios por guiones bajos y eliminar los acentos
         String sanitizedPlantName = plantName.replace(" ", "_").toLowerCase();

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -21,7 +20,7 @@ import com.pim.planta.models.Plant;
 
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends NotificationActivity {
 
     private PlantRepository plantaRepo;
 
@@ -39,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button buttonLogin = findViewById(R.id.buttonEmpezar);
 
-        plantaRepo = new PlantRepository(this);
+        plantaRepo = PlantRepository.getInstance(this);
 
         // Poblar la base de datos en caso de que no lo este
         DatabaseExecutor.execute(() -> {
@@ -61,11 +60,14 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
         });
+
+        scheduleNotificationWorker();
     }
+
     private void scheduleNotificationWorker() {
-        // Define constraints (optional)
+        // Define constraints
         Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.NOT_REQUIRED) // Example: No network required
+                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                 .build();
 
         // Create a PeriodicWorkRequest
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                 15, // Repeat interval
                 TimeUnit.MINUTES
         )
-                .setConstraints(constraints) // Add constraints (optional)
+                .setConstraints(constraints) // Add constraints
                 .build();
 
         // Enqueue the work request

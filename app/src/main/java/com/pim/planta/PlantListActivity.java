@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,7 +29,7 @@ import com.pim.planta.models.UserLogged;
 
 import java.util.List;
 
-public class PlantListActivity extends AppCompatActivity {
+public class PlantListActivity extends NotificationActivity {
 
     private RecyclerView plantListRecyclerView;
     private PlantAdapter plantAdapter;
@@ -38,7 +37,6 @@ public class PlantListActivity extends AppCompatActivity {
     private DAO dao;
     private ImageView imageView6;
     private TextView plantaElegidaTextView;
-    private Plant selectedPlant;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +105,6 @@ public class PlantListActivity extends AppCompatActivity {
     }
 
     private void saveSelectedPlantAndGoToJardin(Plant plant) {
-        selectedPlant = plant;
         // Actualizar el texto y mostrar la imagen
         plantaElegidaTextView.setText("Planta Elegida: " + plant.getName());
 

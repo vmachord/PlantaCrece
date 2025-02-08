@@ -9,7 +9,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.pim.planta.db.DAO;
 import com.pim.planta.db.DatabaseExecutor;
@@ -18,7 +17,7 @@ import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserPlantRelation;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends NotificationActivity {
 
     private EditText emailEditText, passwordEditText, userEditText;
     private Button registerButton;

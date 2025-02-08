@@ -30,7 +30,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -60,7 +59,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class PerfilActivity extends AppCompatActivity{
+public class PerfilActivity extends NotificationActivity{
 
     private ImageView profileImageView;
     private TextView userNameTextView;
@@ -184,6 +183,7 @@ public class PerfilActivity extends AppCompatActivity{
         super.onResume();
         trackAppUsage2();
     }
+
     private void setupClickListener() {
         imageView12.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -500,6 +500,7 @@ public class PerfilActivity extends AppCompatActivity{
 
         return String.format("%d h %02d min", hours, minutes);
     }
+
     private void cambiarImagenDePerfil() {
         // Check if permission is needed (for API levels below 29)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {

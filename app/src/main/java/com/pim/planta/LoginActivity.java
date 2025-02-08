@@ -9,14 +9,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserLogged;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends NotificationActivity {
     private PlantRepository plantRepo;
 
     @Override
