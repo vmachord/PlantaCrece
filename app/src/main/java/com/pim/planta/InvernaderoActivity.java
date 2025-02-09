@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.pim.planta.db.DAO;
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
+import com.pim.planta.models.ImageAdapter;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.UserLogged;
 import com.pim.planta.models.UserPlantRelation;
@@ -230,7 +231,7 @@ public class InvernaderoActivity extends NotificationActivity {
                 .replaceAll("[ç]", "c");
     }
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         restorePlantedPlants();
 

@@ -16,13 +16,13 @@ public class User {
     private String username;
     private String password;
     private String email;
-    private Date creationDate;
+    private long creationDate;
 
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.creationDate = new Date();
+        this.creationDate = new Date().getTime();
     }
 
     public int getId() {
@@ -57,19 +57,27 @@ public class User {
         this.email = email;
     }
 
-    public Date getCreationDate() {
+    public long getCreationDate() {
         return creationDate;
     }
 
     public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate.getTime();
+    }
+
+    public void setCreationDate(long creationDate) {
         this.creationDate = creationDate;
     }
+
     public String getFormattedCreationDate() {
-        Date date = new Date(String.valueOf(creationDate));
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd", Locale.getDefault());
+        Date date = new Date(creationDate);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd", Locale.ENGLISH);
         String day = dateFormat.format(date);
+        if (day.startsWith("0")) {
+            day = day.substring(1);
+        }
         String suffix = getDayOfMonthSuffix(Integer.parseInt(day));
-        SimpleDateFormat fullDateFormat = new SimpleDateFormat("MMMM, yyyy", Locale.getDefault());
+        SimpleDateFormat fullDateFormat = new SimpleDateFormat("MMMM, yyyy", Locale.ENGLISH);
         return day + suffix + " of " + fullDateFormat.format(date);
     }
 

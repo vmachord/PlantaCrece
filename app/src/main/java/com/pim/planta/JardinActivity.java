@@ -45,7 +45,6 @@ import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.UserLogged;
-import com.pim.planta.models.UserPlantRelation;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -63,9 +62,9 @@ public class JardinActivity extends NotificationActivity {
     private static final int NOTIFICATION_PERMISSION_CODE = 100;
     private static final int WATER_XP = 300;
     private PopupWindow tooltipWindow;
-    private Plant plant;
+    public Plant plant;
     private Typeface aventaFont;
-    private CooldownManager cooldownManager;
+    public CooldownManager cooldownManager;
     private static final String PREFS_NAME = "app_prefs";
     private static final String LAST_RESUME_TIME_KEY = "last_resume_time";
     private static final String TOTAL_USAGE_TIME_KEY = "total_usage_time";
@@ -81,7 +80,7 @@ public class JardinActivity extends NotificationActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.plantoo);
+        setContentView(R.layout.activity_jardin);
         PlantRepository plantaRepo = PlantRepository.getInstance(this);
         DAO dao = plantaRepo.getPlantaDAO();
         WorkRequest notificationWorkRequest =
@@ -115,8 +114,7 @@ public class JardinActivity extends NotificationActivity {
         executor.execute(() -> {
             if (dao.getUserPlantRelations(UserLogged.getInstance().getCurrentUser().getId()).isEmpty()) {
                 for (Plant plant : plantaRepo.getPlantaDAO().getAllPlantas()) {
-                    UserPlantRelation relation = new UserPlantRelation(UserLogged.getInstance().getCurrentUser().getId(), plant.getId()); // growCount is initialized to 0 by default
-                    dao.insertUserPlantRelation(relation);
+                    dao.insertUserPlantRelation(UserLogged.getInstance().getCurrentUser().getId(), plant.getId());
                 }
             }
         });
@@ -216,7 +214,7 @@ public class JardinActivity extends NotificationActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         prefs.edit().putLong(LAST_RESUME_TIME_KEY, System.currentTimeMillis()).apply();
@@ -291,7 +289,7 @@ public class JardinActivity extends NotificationActivity {
         return totalUsage;
     }
 
-    private void getPlantFromDB(){
+    public void getPlantFromDB(){
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
 
         PlantRepository plantaRepo = PlantRepository.getInstance(this);
@@ -304,7 +302,7 @@ public class JardinActivity extends NotificationActivity {
         });
     }
 
-    private void updatePlantFromDB(){
+    public void updatePlantFromDB(){
         PlantRepository plantaRepo = PlantRepository.getInstance(this);
         DAO dao = plantaRepo.getPlantaDAO();
 
@@ -483,7 +481,7 @@ public class JardinActivity extends NotificationActivity {
         return mode == AppOpsManager.MODE_ALLOWED;
     }
 
-    private void penalizeIfUsageIncreased(float xp) {
+    public void penalizeIfUsageIncreased(float xp) {
         if (plant != null) {
             if (xp == 0) return;
             // Aquí se llamaría el método para añadir XP, por ejemplo

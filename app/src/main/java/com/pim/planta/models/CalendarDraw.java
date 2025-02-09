@@ -18,11 +18,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class CalendarDraw extends View {
 
@@ -30,10 +27,6 @@ public class CalendarDraw extends View {
     private int currentMonth, currentYear;
     private Typeface customFont, customFontBold;
     private LocalDate highlightedDay;
-
-    // Almacena el color de fondo para cada día
-    private HashMap<Long, Integer> dayBackgroundColors = new HashMap<>();
-    private String currentPerspective;
 
     private List<DiaryEntry> diaryEntries;
 
@@ -43,8 +36,13 @@ public class CalendarDraw extends View {
         currentYear = LocalDate.now().getYear();
     }
 
+    public CalendarDraw(Context context) {
+        super(context);
+        init();
+        currentYear = LocalDate.now().getYear();
+    }
+
     private void init() {
-        dayBackgroundColors = new HashMap<>();
         customFont = ResourcesCompat.getFont(getContext(), R.font.aventa);
         customFontBold = Typeface.create(customFont, Typeface.BOLD);
 
@@ -99,7 +97,7 @@ public class CalendarDraw extends View {
         canvas.clipRect(calendarBounds);
         drawMonthHeader(canvas);
         drawDays(canvas);
-        invalidate();
+        //invalidate();
         //drawButtonChangePerspective(canvas);
     }
     private void drawMonthHeader(Canvas canvas) {
@@ -165,126 +163,13 @@ public class CalendarDraw extends View {
         }
     }
 
-    /*private void drawButtonChangePerspective(Canvas canvas) {
-        // Establecer el tamaño y el color del botón
-        float buttonRadius = 80; // Radio del botón
-        float buttonMargin = 40; // Margen desde el borde
-        float buttonX = getWidth() - buttonRadius - buttonMargin; // Posición X (esquina derecha)
-        float buttonY = getHeight() - buttonRadius - buttonMargin; // Posición Y (esquina inferior)
-
-        // Dibujar el fondo del botón (círculo)
-        buttonPaint.setColor(Color.BLUE); // Cambia el color del botón
-        canvas.drawCircle(buttonX, buttonY, buttonRadius, buttonPaint);
-
-        // Dibujar el texto del botón
-        String buttonText = "MES"; // Texto que cambia según la perspectiva actual
-        buttonPaint.setColor(Color.WHITE); // Color del texto
-        buttonPaint.setTextSize(30); // Tamaño del texto
-        float textWidth = buttonPaint.measureText(buttonText);
-        float textX = buttonX - textWidth / 2;
-        float textY = buttonY + 10; // Ajuste vertical para centrar el texto
-        canvas.drawText(buttonText, textX, textY, buttonPaint);
-    }*/
-
-    // Método para obtener el texto del botón según la perspectiva actual
-    private String getCurrentPerspectiveText() {
-        switch (currentPerspective) {
-            case "WEEK_VIEW":
-                return "Semana";
-            case "DAY_VIEW":
-                return "Día";
-            default:
-                return "Mes";
-        }
-    }
-
-    // Devuelve solo las entradas del mes y año actuales
-    private List<DiaryEntry> getEntriesForCurrentMonth() {
-
-        List<DiaryEntry> prueba = new ArrayList<>();
-        if (diaryEntries == null || diaryEntries.isEmpty()) {
-            return prueba; // Devolver lista vacía si no hay entradas
-        }
-        return diaryEntries.stream()
-                .filter(entry -> isInCurrentMonth(entry.getDate()))
-                .collect(Collectors.toList());
-    }
-
-    private boolean isInCurrentMonth(long dateInMillis) {
-        // Como la fecha esta en long elimina los milisegundos normalizandolo
-        long normalizedDate = normalizeToStartOfDay(dateInMillis);
-        LocalDate date = Instant.ofEpochMilli(normalizedDate).atZone(ZoneId.systemDefault()).toLocalDate();
-        return date.getMonthValue() == currentMonth && date.getYear() == currentYear;
-    }
-
-    private int getDayOfMonthFromMillis(long dateInMillis) {
-        LocalDate date = Instant.ofEpochMilli(dateInMillis).atZone(ZoneId.systemDefault()).toLocalDate();
-        return date.getDayOfMonth();
-    }
-
     @SuppressLint("NewApi")
-    private long normalizeToStartOfDay(long timestamp) {
+    public long normalizeToStartOfDay(long timestamp) {
         return LocalDate.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli();
     }
-
-
-    /*public void showEmotionDialog(long dateInMillis, OnDiaryEntryListener listener) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Seleccione una emoción para el día " +
-                new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dateInMillis));
-
-        final EditText input = new EditText(getContext());
-        input.setHint("Escriba una anotación");
-        builder.setView(input);
-
-        // Definir las emociones disponibles
-        String[] emotions = {"Feliz", "Triste", "Ansioso", "Contento", "Estresado"};
-        final int[] selectedEmotionId = {-1}; // Variable para la emoción seleccionada
-
-        builder.setSingleChoiceItems(emotions, -1, (dialog, which) -> selectedEmotionId[0] = which);
-
-        builder.setPositiveButton("Aceptar", (dialog, which) -> {
-            // Verificar si se ha seleccionado una emoción
-            if (selectedEmotionId[0] != -1) {
-                String annotation = input.getText().toString().trim();
-                if (!annotation.isEmpty()) {
-                    User user = UserLogged.getInstance().getCurrentUser();
-                    DiaryEntry entry = new DiaryEntry(annotation, selectedEmotionId[0]+1, user.getId(), dateInMillis);
-
-                    // Llamar al listener para devolver el DiaryEntry
-                    listener.onDiaryEntryCreated(entry);
-                } else {
-                    // Si la anotación está vacía, mostrar un mensaje de advertencia
-                    Toast.makeText(getContext(), "Por favor, ingrese una anotación antes de guardar.", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                // Si no se ha seleccionado emoción
-                Toast.makeText(getContext(), "Seleccione una emoción antes de guardar.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        builder.setNegativeButton("Cancelar", (dialog, which) -> {
-            // Si se cancela, no hacer nada
-            dialog.dismiss();
-        });
-
-        builder.show();
-    }
-
-
-    private int getColorForEmotion(String emotion) {
-        switch (emotion) {
-            case "Feliz": return Color.YELLOW;
-            case "Triste": return Color.BLUE;
-            case "Ansioso": return Color.RED;
-            case "Contento": return Color.GREEN;
-            case "Estresado": return Color.MAGENTA;
-            default: return Color.WHITE; // Color predeterminado si no hay emoción
-        }
-    }*/
 
     public int getDayFromCoordinates(float x, float y) {
         int calendarStartY = getHeight() / 5;
@@ -333,10 +218,6 @@ public class CalendarDraw extends View {
         invalidate();
     }
 
-    public HashMap<Long, Integer> getDayBackgroundColors() {
-        return dayBackgroundColors;
-    }
-
     public int getCurrentYear() {
         return currentYear;
     }
@@ -354,11 +235,13 @@ public class CalendarDraw extends View {
     public void setCurrentMonth(int monthValue) {
         this.currentMonth = monthValue;
     }
+
     public void highlightDay(LocalDate date) {
         highlightedDay = date;
         invalidate(); // Redraw the calendar
     }
-    private boolean hasEntryForDay(LocalDate day) {
+
+    public boolean hasEntryForDay(LocalDate day) {
         if (diaryEntries == null || diaryEntries.isEmpty()) {
             return false;
         }

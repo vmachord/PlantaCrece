@@ -26,8 +26,7 @@ public class NotificationWorker extends Worker {
     private static final String LAST_RESUME_TIME_KEY = "last_resume_time";
     private static final String LAST_XP_TO_DEDUCT_KEY = "last_xp_to_deduct";
     private static final long TWO_HOURS_IN_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
-    private static final long CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
-    private DAO dao;
+    public DAO dao;
     private Plant plant;
 
     public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -76,7 +75,7 @@ public class NotificationWorker extends Worker {
         return Result.success();
     }
 
-    private void sendUsageNotification(long xpToDeduct, String plantNickname) {
+    public void sendUsageNotification(long xpToDeduct, String plantNickname) {
         createNotificationChannel();
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                 .setSmallIcon(R.drawable.alerta_icon) // Icono de la notificación
@@ -89,7 +88,7 @@ public class NotificationWorker extends Worker {
         manager.notify(NOTIFICATION_ID, builder.build()); // Use the constant ID here
     }
 
-    private void createNotificationChannel() {
+    public void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,

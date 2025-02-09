@@ -1,8 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("jacoco")
-    //id ("com.android.application")
     id("com.google.relay") version "0.3.12"
+    id("org.jetbrains.kotlinx.kover") version "0.7.4"
 }
 
 android {
@@ -20,6 +19,9 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            // isTestCoverageEnabled = true // Removed JaCoCo-specific setting
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -29,35 +31,44 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    buildFeatures {
-        compose = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.6"
-
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
     }
-    buildToolsVersion = "35.0.0"
-
-
 }
 
 dependencies {
-    
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.room.common)
-    implementation(libs.room.runtime.android)
-    implementation(libs.room.common.jvm)
-    implementation("androidx.room:room-runtime:2.5.0")
+    implementation(libs.room.runtime)
+    testImplementation(libs.ext.junit)
+    testImplementation(libs.ext.junit)
+    annotationProcessor(libs.room.compiler)
     implementation(libs.databinding.adapters)
     implementation(libs.places)
-    annotationProcessor("androidx.room:room-compiler:2.5.0")
+    implementation(libs.espresso.contrib)
+    implementation(libs.work.testing)
+    implementation(libs.rules)
+    implementation(libs.espresso.intents)
+    implementation("com.google.guava:guava:33.0.0-jre")
+
+    // Mockito
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    androidTestImplementation(libs.mockito.android)
+
+    // Robolectric
+    implementation(libs.robolectric)
+    testImplementation(libs.robolectric)
+    androidTestImplementation(libs.robolectric)
 
     testImplementation(libs.junit)
     testImplementation(libs.espresso.core)
@@ -65,24 +76,20 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     implementation(libs.mpandroidchart)
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    implementation("androidx.work:work-runtime:2.8.0")
+    implementation(libs.work.runtime)
+    testImplementation(libs.work.testing)
 
-    implementation ("androidx.compose.ui:ui")
-    implementation ("androidx.compose.ui:ui-tooling-preview")
-    implementation ("androidx.compose.runtime:runtime:1.5.3")
-
-    implementation ("com.google.android.material:material:1.5.4")
-
-    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
-
-    implementation ("com.airbnb.android:lottie:6.0.0")
-
-
-    debugImplementation ("androidx.compose.ui:ui-tooling:1.5.3")
-
+    implementation(libs.lottie)
 }
 
-jacoco {
-    toolVersion = "0.8.10"
+kover {
+}
+
+koverReport {
+    filters {
+        excludes {
+            // Exclude generated classes
+            classes("**/R\$*", "**/R", "**/BuildConfig", "**/Manifest*")
+        }
+    }
 }

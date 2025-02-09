@@ -52,24 +52,46 @@ public class Plant {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public String getNickname() {
+        return nickname;
     }
-    public void addXp(int xp){ this.setXp(this.getXp() + xp); }
 
-    public void setXp(int i) {
-        this.xp = i;
-    }
     public String getScientificName() {
         return scientificName;
     }
 
-    public void setScientificName(String scientificName) {
-        this.scientificName = scientificName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getNickname() {
-        return nickname;
+    public void setBasePath(String basePath) {
+        this.basePath = basePath;
+    }
+
+    public void setImageResourceId(int imageResourceId) {
+        this.imageResourceId = imageResourceId;
+    }
+
+    public void setXp(int i) {
+        this.xp = i;
+    }
+
+    public void addXp(int xp){ this.setXp(this.getXp() + xp); }
+
+    public void setXpMax(int xpMax) {
+        this.xpMax = xpMax;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setScientificName(String scientificName) {
+        this.scientificName = scientificName;
     }
 
     public void setNickname(String nickname) {

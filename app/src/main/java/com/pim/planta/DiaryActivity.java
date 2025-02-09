@@ -106,7 +106,7 @@ public class DiaryActivity extends NotificationActivity  {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 RecyclerView yearRecyclerView = yearSelectorButton.yearRecyclerView;
-                YearAdapter yearAdapter = new YearAdapter(yearSelectorButton.getCurrentYear(), yearSelectorButton::onYearSelected, yearSelectorButton.getMinimumYear());
+                YearAdapter yearAdapter = new YearAdapter(yearSelectorButton.getCurrentYear(), yearSelectorButton.getMinimumYear());
                 yearRecyclerView.setAdapter(yearAdapter);
                 yearRecyclerView.setLayoutManager(new LinearLayoutManager(DiaryActivity.this, LinearLayoutManager.HORIZONTAL, false));
 

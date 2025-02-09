@@ -23,8 +23,8 @@ public class YearSelectorButton extends FrameLayout {
 
     private int currentYear;
     public RecyclerView yearRecyclerView;
-    private YearAdapter yearAdapter;
-    private SnapHelper snapHelper;
+    public YearAdapter yearAdapter;
+    public SnapHelper snapHelper;
     private int minimumYear = 2010;
     private int holderWidth;
     private OnYearSelectedListener listener;
@@ -52,7 +52,7 @@ public class YearSelectorButton extends FrameLayout {
         yearRecyclerView = view.findViewById(R.id.year_recycler_view);
 
         currentYear = LocalDate.now().getYear();
-        yearAdapter = new YearAdapter(currentYear, this::onYearSelected, minimumYear);
+        yearAdapter = new YearAdapter(currentYear, minimumYear);
         yearRecyclerView.setAdapter(yearAdapter);
         yearRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
@@ -179,10 +179,6 @@ public class YearSelectorButton extends FrameLayout {
 
     public int getMinimumYear() {
         return minimumYear;
-    }
-
-    public void setOnYearSelectedListener(OnYearSelectedListener listener) {
-        this.listener = listener;
     }
 
     public void setCalendarDraw(CalendarDraw calendarDraw) {

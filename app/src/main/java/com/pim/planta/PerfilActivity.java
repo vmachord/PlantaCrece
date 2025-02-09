@@ -178,7 +178,7 @@ public class PerfilActivity extends NotificationActivity{
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         trackAppUsage2();
     }
@@ -400,7 +400,7 @@ public class PerfilActivity extends NotificationActivity{
         }
     }
 
-    private void trackAppUsage2() {
+    public void trackAppUsage2() {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
         if (usageStatsManager == null) {
             Log.e("AppUsage", "UsageStatsManager no está disponible.");

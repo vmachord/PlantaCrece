@@ -15,7 +15,6 @@ import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
-import com.pim.planta.models.UserPlantRelation;
 
 public class RegisterActivity extends NotificationActivity {
 
@@ -73,8 +72,7 @@ public class RegisterActivity extends NotificationActivity {
             DAO dao = plantRepo.getPlantaDAO();
             DatabaseExecutor.executeAndWait(() -> {
                 for (Plant plant : dao.getAllPlantas()) {
-                UserPlantRelation relation = new UserPlantRelation(newUser.getId(), plant.getId()); // growCount is initialized to 0 by default
-                dao.insertUserPlantRelation(relation);
+                dao.insertUserPlantRelation(newUser.getId(), plant.getId());
                 }
             });
             Toast.makeText(RegisterActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();

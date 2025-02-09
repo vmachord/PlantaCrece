@@ -97,4 +97,12 @@ public class CooldownManager {
 
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
+
+    public static long parseTime(String time) {
+        String[] parts = time.split(":");
+        long hours = Long.parseLong(parts[0]);
+        long minutes = Long.parseLong(parts[1]);
+        long seconds = Long.parseLong(parts[2]);
+        return (hours * 60 * 60 * 1000) + (minutes * 60 * 1000) + (seconds * 1000);
+    }
 }

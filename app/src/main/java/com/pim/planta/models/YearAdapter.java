@@ -14,16 +14,14 @@ import com.pim.planta.R;
 
 public class YearAdapter extends RecyclerView.Adapter<YearAdapter.YearViewHolder> {
 
-    private int currentYear;
-    private OnYearSelectedListener listener;
+    public int currentYear;
     private int minimumYear;
-    private int holderWidth;
+    public int holderWidth;
     public static final int EMPTY_VIEW_TYPE = 0;
     public static final int YEAR_VIEW_TYPE = 1;
 
-    public YearAdapter(int currentYear, OnYearSelectedListener listener, int minimumYear) {
+    public YearAdapter(int currentYear, int minimumYear) {
         this.currentYear = currentYear;
-        this.listener = listener;
         this.minimumYear = minimumYear;
     }
 
@@ -82,16 +80,12 @@ public class YearAdapter extends RecyclerView.Adapter<YearAdapter.YearViewHolder
         notifyDataSetChanged();
     }
 
-    static class YearViewHolder extends RecyclerView.ViewHolder {
-        TextView yearTextView;
+    public static class YearViewHolder extends RecyclerView.ViewHolder {
+        public TextView yearTextView;
 
         YearViewHolder(View itemView) {
             super(itemView);
             yearTextView = itemView.findViewById(R.id.year_text_view);
         }
-    }
-
-    public interface OnYearSelectedListener {
-        void onYearSelected(int year);
     }
 }
