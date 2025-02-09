@@ -94,7 +94,7 @@ public class PerfilActivity extends NotificationActivity{
         textViewPlantoo = findViewById(R.id.textView4);
         trackAppUsage2();
         textViewText = findViewById(R.id.textCreationDate);
-        textViewText.setText("Bloomed on: " + UserLogged.getInstance().getCurrentUser().getCreationDate().toString());
+        textViewText.setText("Bloomed on: " + UserLogged.getInstance().getCurrentUser().getFormattedCreationDate());
         textViewText2 = findViewById(R.id.textScientificName);
         textViewText3 = findViewById(R.id.textNickname);
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
@@ -109,7 +109,7 @@ public class PerfilActivity extends NotificationActivity{
             if (plant != null) {
                 // Display the scientific name and nickname
                 textViewText2.setText("Scientific plant name: " + plant.getScientificName());
-                textViewText3.setText("Nickname: " + plant.getNickname());
+                textViewText3.setText("Plant nickname: " + plant.getNickname());
             } else {
                 // Handle the case where the plant is not found
                 textViewText2.setText("ERROR ERROR ERROR");
@@ -176,7 +176,6 @@ public class PerfilActivity extends NotificationActivity{
         initializeGraph(selectedWeek);
         updateUsageSummary(selectedWeek);
     }
-
 
     @Override
     protected void onResume() {
@@ -304,7 +303,6 @@ public class PerfilActivity extends NotificationActivity{
         barChart.invalidate();
     }
 
-
     private void initializeNameAndProfile(){
         profileImageView = findViewById(R.id.profile_image);
         userNameTextView = findViewById(R.id.user_name);
@@ -317,8 +315,6 @@ public class PerfilActivity extends NotificationActivity{
             userNameTextView.setText("ERROR ERROR ERROR");
         }
     }
-
-
 
     private void animateButton(View view) {
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(

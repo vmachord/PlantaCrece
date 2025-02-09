@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
     <application
+        android:name=".PlantaApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -16,8 +22,8 @@
             android:exported="true" />
 
         <activity
-        android:name=".RegisterActivity"
-        android:exported="true" />
+            android:name=".RegisterActivity"
+            android:exported="true" />
 
         <activity
             android:name=".MainActivity"
@@ -34,8 +40,8 @@
             android:exported="true" />
 
         <activity
-        android:name=".PlantListActivity"
-        android:exported="true" />
+            android:name=".PlantListActivity"
+            android:exported="true" />
 
         <activity
             android:name=".PerfilActivity"

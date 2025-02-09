@@ -137,15 +137,18 @@ public class PlantListActivity extends NotificationActivity {
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
-        if (sharedPreferences.getString("selectedPlant",null) == null) {
-            imageButtonMaceta.setEnabled(false); // Deshabilita el botón
-            imageButtonMaceta.setImageAlpha(128); // Oscurece el botón
-        }
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
         imageButtonPlantadex.setEnabled(false); // Deshabilita el botón
         imageButtonPlantadex.setImageAlpha(128); // Oscurece el botón
         ImageButton imageButtonUsuario = findViewById(R.id.imageButtonUsuario);
-
+        if (sharedPreferences.getString("selectedPlant",null) == null) {
+            imageButtonLupa.setEnabled(false);
+            imageButtonLupa.setImageAlpha(128);
+            imageButtonMaceta.setEnabled(false);
+            imageButtonMaceta.setImageAlpha(128);
+            imageButtonUsuario.setEnabled(false);
+            imageButtonUsuario.setImageAlpha(128);
+        }
         imageButtonLupa.setOnClickListener(v -> {
             animateButton(v); // Añade la animación
             Intent intent = new Intent(PlantListActivity.this, DiaryActivity.class);

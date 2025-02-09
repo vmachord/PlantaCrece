@@ -6,6 +6,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.AppOpsManager;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -45,20 +47,10 @@ import com.pim.planta.models.Plant;
 import com.pim.planta.models.UserLogged;
 import com.pim.planta.models.UserPlantRelation;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -67,14 +59,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class JardinActivity extends NotificationActivity {
-
     public static int currentImageIndex = 1;
     private static final int NOTIFICATION_PERMISSION_CODE = 100;
+    private static final int WATER_XP = 300;
     private PopupWindow tooltipWindow;
     private Plant plant;
-    private long totalTimeUsage;
     private Typeface aventaFont;
     private CooldownManager cooldownManager;
+    private static final String PREFS_NAME = "app_prefs";
+    private static final String LAST_RESUME_TIME_KEY = "last_resume_time";
+    private static final String TOTAL_USAGE_TIME_KEY = "total_usage_time";
+    private static final List<String> SOCIAL_MEDIA_PACKAGES = Arrays.asList(
+            "com.facebook.katana", // Facebook
+            "com.instagram.android", // Instagram
+            "com.twitter.android", // Twitter
+            "com.zhiliaoapp.musically", // Tiktok
+            "com.google.android.youtube" // Youtube
+            // More to add here
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +145,7 @@ public class JardinActivity extends NotificationActivity {
             if (cooldownManager.isWateringCooldownActive()) {
                 showTooltip(v, "Next watering in : " + cooldownManager.getRemainingWateringCooldownTime());
             } else {
-                wateringPlant(300);
+                wateringPlant();
             }
         });
 
@@ -158,34 +160,72 @@ public class JardinActivity extends NotificationActivity {
         });
 
         getPlantFromDB();
-        totalTimeUsage = getTotalUsage();
         if (plant.getXp() == plant.getXpMax())
             showPlantGrownPopup();
     }
 
-    //VANESSAAAAAAAAAAAAAA
-    private long getTotalUsage(){
-        //creo que lo mas importante es esta variable, quiero que la variable siempre sea la de nuestra semana actual, es decir semana 1 de febrero, no se como lo tienes programado
-        int selectedWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);;
-        SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+    //Se llama cada vez que la actividad vuelve a ser visible o creada
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (plant.getXp() == plant.getXpMax()) {
+            showPlantGrownPopup();
+        }
 
-        String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+        updatePlantFromDB();
 
-        long instagramUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Instagram", 0);
-        long tiktokUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_TikTok", 0);
-        long youtubeUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_YouTube", 0);
-        long twitterUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Twitter", 0);
-        long facebookUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Facebook", 0);
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        long lastResumeTime = prefs.getLong(LAST_RESUME_TIME_KEY, 0);
+        long currentTime = System.currentTimeMillis();
 
-        long totalTime = instagramUsage + tiktokUsage + youtubeUsage + twitterUsage + facebookUsage;
+        long usageToAdd = calculateUsageSinceLastResume(lastResumeTime, currentTime);
+        long previousTotalUsageTime = prefs.getLong(TOTAL_USAGE_TIME_KEY, 0);
+        long newTotalUsageTime = previousTotalUsageTime + usageToAdd;
+        prefs.edit().putLong(TOTAL_USAGE_TIME_KEY, newTotalUsageTime).apply();
 
-        return totalTime;
+        String today = LocalDate.now().toString();
+        String lastRecordedDay = prefs.getString("last_recorded_day", "");
+
+        if (today.equals(lastRecordedDay)) {
+            // Same day, check time and update
+            String lastRecordedTimeStr = prefs.getString("last_recorded_time", "00:00");
+            LocalTime lastRecordedTime = LocalTime.parse(lastRecordedTimeStr);
+            long lastRecordedTotalTime = prefs.getLong("last_recorded_total_time", 0);
+
+            if (lastRecordedTime.isBefore(LocalTime.now())) {
+                long difference = newTotalUsageTime - lastRecordedTotalTime;
+                Log.d("PRUEBA", "Ha entrado a la comprobacion de que el tiempo de ahora es mayor que el de antes : " + difference);
+
+                if (difference>0)
+                    penalizeIfUsageIncreased(-difference / 30000);
+
+                // Update SharedPreferences
+                prefs.edit()
+                        .putString("last_recorded_time", LocalTime.now().toString())
+                        .putLong("last_recorded_total_time", newTotalUsageTime)
+                        .apply();
+            }
+        } else {
+            // New day, reset and store new values
+            prefs.edit()
+                    .putString("last_recorded_day", today)
+                    .putString("last_recorded_time", LocalTime.now().toString())
+                    .putLong("last_recorded_total_time", newTotalUsageTime)
+                    .apply();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        prefs.edit().putLong(LAST_RESUME_TIME_KEY, System.currentTimeMillis()).apply();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_O) {
-            wateringPlant(300);
+            wateringPlant();
             return true;
         }
         if (keyCode == KeyEvent.KEYCODE_P) {
@@ -216,6 +256,39 @@ public class JardinActivity extends NotificationActivity {
             return true; // Indica que se manejó la pulsación de la tecla
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    public long calculateUsageSinceLastResume(long lastResumeTime, long currentTime) {
+        if (lastResumeTime == 0) {
+            return 0; // First time, no usage to calculate
+        }
+
+        long totalUsage = 0;
+        UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+        UsageEvents usageEvents = usageStatsManager.queryEvents(lastResumeTime, currentTime);
+
+        if (usageEvents == null) {
+            Log.e("JardinActivity", "Error al obtener los eventos de uso");
+            return 0;
+        }
+
+        UsageEvents.Event event = new UsageEvents.Event();
+        long socialMediaStartTime = 0;
+        while (usageEvents.hasNextEvent()) {
+            usageEvents.getNextEvent(event);
+            if (event.getEventType() == UsageEvents.Event.ACTIVITY_RESUMED && SOCIAL_MEDIA_PACKAGES.contains(event.getPackageName())) {
+                socialMediaStartTime = event.getTimeStamp();
+            } else if (event.getEventType() == UsageEvents.Event.ACTIVITY_PAUSED && SOCIAL_MEDIA_PACKAGES.contains(event.getPackageName())) {
+                if (socialMediaStartTime != 0) {
+                    totalUsage += event.getTimeStamp() - socialMediaStartTime;
+                    socialMediaStartTime = 0;
+                }
+            }
+        }
+        if (socialMediaStartTime != 0) {
+            totalUsage += currentTime - socialMediaStartTime;
+        }
+        return totalUsage;
     }
 
     private void getPlantFromDB(){
@@ -297,12 +370,12 @@ public class JardinActivity extends NotificationActivity {
         plant_name.setText(plant.getNickname() + " | L."  + level);
     }
 
-    private void wateringPlant(int xp) {
-        if ((plant.getXp() + xp) > plant.getXpMax()) {
+    private void wateringPlant() {
+        if ((plant.getXp() + WATER_XP) > plant.getXpMax()) {
             int xp_needed = plant.getXpMax() - plant.getXp();
             plant.addXp(xp_needed);
         } else {
-            plant.addXp(xp);
+            plant.addXp(WATER_XP);
             playWaterAnimation();
         }
         if (plant.getXp() == plant.getXpMax())
@@ -400,165 +473,6 @@ public class JardinActivity extends NotificationActivity {
         );
         animator.setDuration(150); // Duración de la animación
         animator.start();
-    }
-
-    //Se llama cada vez que la actividad vuelve a ser visible
-    @Override
-    protected void onResume() {
-        if (plant.getXp() == plant.getXpMax())
-            showPlantGrownPopup();
-        updatePlantFromDB();
-        super.onResume();
-
-        // Ruta del archivo en el almacenamiento interno
-        File file = new File(getFilesDir(), "Data.csv");
-        String filePathDataCSV = file.getAbsolutePath();
-
-        // Crear el archivo si no existe
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // Leer el archivo CSV
-        //readCSV(filePathDataCSV);
-        List<String> dias = getColumnValues(filePathDataCSV, 0);
-        System.out.println("Días encontrados en el CSV: " + dias);
-
-        if (dias.contains(LocalDate.now().toString())) {
-            //System.out.println("Contenido del CSV:");
-            //readCSV(filePathDataCSV);
-
-
-            System.out.println("Buscando ID para el día: " + LocalDate.now().toString());
-            String id = getIdByValue(filePathDataCSV, LocalDate.now().toString());
-            List<String> valores = getRowValues(filePathDataCSV, id);
-
-            // Verificar que la lista tiene al menos 3 elementos antes de acceder a ellos
-            if (!valores.isEmpty() && valores.size() > 2) {
-                String hora = valores.get(1);
-                LocalTime horaFormat = LocalTime.parse(hora);
-                String tiempototal = valores.get(2);
-
-                try {
-                    long tiempoCSV = Long.parseLong(tiempototal);
-                    Log.d("PRUEBA", "Prueba tiempo que hay en el csv : " + tiempoCSV);
-                    if (horaFormat.isBefore(LocalTime.now())) {
-                        long tiempoTotalAhora = totalTimeUsage; // Este valor debería ser calculado dinámicamente
-                        long difference = tiempoTotalAhora - tiempoCSV;
-                        Log.d("PRUEBA", "Ha entrado a la comprobacion de que el tiempo de ahora es mayor que el de antes : " + difference);
-                        //Cada segundo de uso de aplicaciones = te quita 1 xp
-
-                        penalizeIfUsageIncreased(-difference/30000);
-
-                        // Actualizar el CSV con la nueva hora y tiempo total
-                        updateCSV(filePathDataCSV, id, 1, LocalTime.now().toString());
-                        updateCSV(filePathDataCSV, id, 2, String.valueOf(tiempoTotalAhora));
-                    }
-                } catch (NumberFormatException e) {
-                    System.out.println("Error al convertir tiempoCSV a long: " + tiempototal);
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("Advertencia: No se encontraron valores válidos en la fila con ID: " + id);
-            }
-        } else {
-            // Si el día no existe en el CSV, crear una nueva entrada
-            String[] lista = {
-                    LocalDate.now().toString(),
-                    LocalTime.now().toString(),
-                    "" + totalTimeUsage // Este valor debería ser calculado dinámicamente
-            };
-            Log.d("ELSE", "Ha entrado al else");
-            writeCSV(filePathDataCSV, lista);
-        }
-    }
-
-    public static List<String> getColumnValues(String filePath, int columnIndex) {
-        List<String> values = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (columnIndex < parts.length) {
-                    values.add(parts[columnIndex]);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return values;
-    }
-
-    public static void writeCSV(String fileName, String[] data) {
-        try (FileWriter fw = new FileWriter(fileName, true);
-             BufferedWriter bw = new BufferedWriter(fw);
-             PrintWriter out = new PrintWriter(bw)) {
-            out.println(String.join(",", data));
-            out.flush(); // Asegurar que los datos se escriban en el archivo inmediatamente
-            Log.d("JDR", "Se ha guardado");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void updateCSV(String filePath, String id, int columnIndex, String newValue) {
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length > columnIndex && parts[0].equals(id)) {
-                    parts[columnIndex] = newValue;
-                }
-                lines.add(String.join(",", parts));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, false))) { // Modo sobrescritura
-            for (String updatedLine : lines) {
-                bw.write(updatedLine);
-                bw.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static List<String> getRowValues(String filePath, String id) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length > 0 && parts[0].equals(id)) {
-                    return Arrays.asList(parts);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyList(); // Retorna una lista vacía en lugar de null
-    }
-
-    public static String getIdByValue(String filePath, String value) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length > 0 && parts[0].trim().equals(value.trim())) {
-                    return parts[0].trim(); // Retornamos el día como ID
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return ""; // Si no se encuentra, devolver cadena vacía
     }
 
     //Verifica si la aplicación tiene permiso para acceder a las estadísticas de uso del dispositivo
