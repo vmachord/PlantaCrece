@@ -97,7 +97,7 @@ public class CalendarDraw extends View {
         canvas.clipRect(calendarBounds);
         drawMonthHeader(canvas);
         drawDays(canvas);
-        //invalidate();
+        invalidate();
         //drawButtonChangePerspective(canvas);
     }
     private void drawMonthHeader(Canvas canvas) {
