@@ -84,8 +84,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.596"
-            app:srcCompat="@drawable/image_10" />
+            app:layout_constraintVertical_bias="0.596"/>
 
         <ImageView
             android:id="@+id/imageView5"

@@ -3,8 +3,8 @@ package com.pim.planta;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,22 +35,15 @@ public class RegisterActivity extends NotificationActivity {
         passwordEditText = findViewById(R.id.editTextPassword);
         registerButton = findViewById(R.id.buttonRegister);
         logInText = findViewById(R.id.textViewToLogIn);
+        CheckBox customCheckbox = findViewById(R.id.customCheckBox);
 
-        logInText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                startActivity(intent);
-            }
+        logInText.setOnClickListener(v -> {
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
         });
 
         TextView termsConditions = findViewById(R.id.terms_conditions);
-        termsConditions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showTermsConditionsPopup();
-            }
-        });
+        termsConditions.setOnClickListener(v -> showTermsConditionsPopup());
 
         registerButton.setOnClickListener(v -> {
             String user = userEditText.getText().toString().trim();
@@ -61,6 +54,11 @@ public class RegisterActivity extends NotificationActivity {
             if (email.isEmpty() || password.isEmpty() || user.isEmpty()) {
                 Toast.makeText(RegisterActivity.this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
                 return; // Salir del método si hay campos vacíos
+            }
+
+            if (!customCheckbox.isChecked()) {
+                Toast.makeText(RegisterActivity.this, "Debes aceptar los términos y condiciones", Toast.LENGTH_SHORT).show();
+                return;
             }
 
             if (!isValidEmail(email)) {
