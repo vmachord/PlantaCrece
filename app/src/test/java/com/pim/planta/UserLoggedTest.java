@@ -1,6 +1,9 @@
 package com.pim.planta;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserLogged;

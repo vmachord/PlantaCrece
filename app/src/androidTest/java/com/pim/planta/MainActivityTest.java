@@ -20,8 +20,10 @@ import androidx.work.WorkManager;
 import androidx.work.testing.SynchronousExecutor;
 import androidx.work.testing.WorkManagerTestInitHelper;
 
-import com.pim.planta.db.*;
-import com.pim.planta.models.*;
+import com.pim.planta.db.DAO;
+import com.pim.planta.db.DatabasePlantoo;
+import com.pim.planta.db.PlantRepository;
+import com.pim.planta.models.Plant;
 
 import org.junit.After;
 import org.junit.Before;
