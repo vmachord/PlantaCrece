@@ -3,6 +3,7 @@ package com.pim.planta;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -54,6 +55,7 @@ public class LoginActivity extends NotificationActivity {
                     startActivity(intent);
                     finish(); // Finaliza la LoginActivity para que no vuelva a ella al pulsar back
                 } else {
+                    Looper.prepare();
                     Toast.makeText(LoginActivity.this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
                 }
             });

@@ -35,6 +35,8 @@ public final class DAO_Impl implements DAO {
 
   private final EntityInsertionAdapter<User> __insertionAdapterOfUser;
 
+  private final EntityInsertionAdapter<UserPlantRelation> __insertionAdapterOfUserPlantRelation;
+
   private final EntityDeletionOrUpdateAdapter<Plant> __deletionAdapterOfPlant;
 
   private final EntityDeletionOrUpdateAdapter<DiaryEntry> __deletionAdapterOfDiaryEntry;
@@ -147,6 +149,21 @@ public final class DAO_Impl implements DAO {
           statement.bindString(4, entity.getEmail());
         }
         statement.bindLong(5, entity.getCreationDate());
+      }
+    };
+    this.__insertionAdapterOfUserPlantRelation = new EntityInsertionAdapter<UserPlantRelation>(__db) {
+      @Override
+      @NonNull
+      protected String createQuery() {
+        return "INSERT OR ABORT INTO `user_plant_relation` (`userId`,`plantId`,`growCount`) VALUES (?,?,?)";
+      }
+
+      @Override
+      protected void bind(@NonNull final SupportSQLiteStatement statement,
+          final UserPlantRelation entity) {
+        statement.bindLong(1, entity.userId);
+        statement.bindLong(2, entity.plantId);
+        statement.bindLong(3, entity.growCount);
       }
     };
     this.__deletionAdapterOfPlant = new EntityDeletionOrUpdateAdapter<Plant>(__db) {
@@ -345,6 +362,18 @@ public final class DAO_Impl implements DAO {
     __db.beginTransaction();
     try {
       __insertionAdapterOfUser.insert(usuario);
+      __db.setTransactionSuccessful();
+    } finally {
+      __db.endTransaction();
+    }
+  }
+
+  @Override
+  public void insert(final UserPlantRelation relation) {
+    __db.assertNotSuspendingTransaction();
+    __db.beginTransaction();
+    try {
+      __insertionAdapterOfUserPlantRelation.insert(relation);
       __db.setTransactionSuccessful();
     } finally {
       __db.endTransaction();

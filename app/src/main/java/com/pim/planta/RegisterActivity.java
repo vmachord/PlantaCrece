@@ -2,6 +2,7 @@ package com.pim.planta;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +16,7 @@ import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
+import com.pim.planta.models.UserPlantRelation;
 
 public class RegisterActivity extends NotificationActivity {
 
@@ -67,12 +69,17 @@ public class RegisterActivity extends NotificationActivity {
             }
 
             newUser = new User(user, email, password);
-            registerUser(newUser);
+            this.registerUser(newUser);
             PlantRepository plantRepo = PlantRepository.getInstance(this);
             DAO dao = plantRepo.getPlantaDAO();
             DatabaseExecutor.executeAndWait(() -> {
+                newUser = dao.getUserByEmail(email);
                 for (Plant plant : dao.getAllPlantas()) {
-                dao.insertUserPlantRelation(newUser.getId(), plant.getId());
+                    UserPlantRelation relation = new UserPlantRelation(newUser.getId(), plant.getId());
+                    Log.d("RegisterActivity", "Plant ID: " + plant.getId());
+                    Log.d("RegisterActivity", "User ID: " + newUser.getId());
+                    Log.d("RegisterActivity", "Relation: " + relation.getPlantId() + " " + relation.getUserId() + " " + relation.growCount);
+                    dao.insert(relation);
                 }
             });
             Toast.makeText(RegisterActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();

@@ -27,6 +27,8 @@ public interface DAO {
     void insert(DiaryEntry entrada);
     @Insert
     void insert(User usuario);
+    @Insert
+    void insert(UserPlantRelation relation);
 
     @Update
     void update(Plant planta);
@@ -69,5 +71,4 @@ public interface DAO {
 
     @Query("SELECT growCount FROM user_plant_relation WHERE userId = :userId AND plantId = :plantId")
     int getGrowCount(int userId, int plantId);
-
 }
