@@ -2,7 +2,10 @@ package com.pim.planta.db;
 
 import android.content.Context;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Room;
+
+import com.pim.planta.models.Plant;
 
 public class PlantRepository {
     private DAO dao;
@@ -27,6 +30,10 @@ public class PlantRepository {
 
     public DAO getPlantaDAO() {
         return dao;
+    }
+
+    public LiveData<Plant> getLivePlantaByName(String plantName) {
+        return dao.getLivePlantaByName(plantName);
     }
 }
 

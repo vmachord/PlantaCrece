@@ -10,7 +10,6 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/content_area"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/background_plantoo"
@@ -206,7 +205,6 @@
             app:layout_constraintVertical_bias="0.7" />
 
         <ImageView
-            android:id="@+id/pot_image"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:contentDescription="Pot Image"

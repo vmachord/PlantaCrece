@@ -1,7 +1,5 @@
 package com.pim.planta;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
@@ -10,15 +8,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -48,8 +43,6 @@ public class DiaryActivity extends NotificationActivity  {
     private YearSelectorButton yearSelectorButton;
     private ImageButton previousMonthButton, nextMonthButton;
     private TextView dateTextView;
-    private ConstraintSet initialConstraintSet;
-    private boolean isExpanded = false;
     private int selectedEmotion = -1;
     private EditText highlightInput, annotationInput;
     private List<ImageView> emotionImages;
@@ -76,12 +69,6 @@ public class DiaryActivity extends NotificationActivity  {
         previousMonthButton.setOnClickListener(v -> calendarDraw.prevMonth());
         nextMonthButton = findViewById(R.id.nextMonthButton);
         nextMonthButton.setOnClickListener(v -> calendarDraw.nextMonth());
-
-        ConstraintLayout bottomSection = findViewById(R.id.bottomSection);
-        View greenArrow = findViewById(R.id.greenArrow);
-
-        initialConstraintSet = new ConstraintSet();
-        initialConstraintSet.clone(bottomSection);
 
         highlightInput = findViewById(R.id.highlightInput);
         annotationInput = findViewById(R.id.annotationInput);
@@ -200,35 +187,6 @@ public class DiaryActivity extends NotificationActivity  {
             }
         });
 
-        greenArrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isExpanded = !isExpanded; // Toggle expansion state
-                initialConstraintSet.applyTo(bottomSection);
-                // Define target translationY based on expansion state
-                float targetTranslationY = isExpanded ? -(bottomSection.getTop()) : 0;
-                if (!isExpanded)
-                    greenArrow.setBackground(getResources().getDrawable(R.drawable.ic_arrow_up));
-                else greenArrow.setBackground(getResources().getDrawable(R.drawable.ic_arrow_down));
-                // Animate the transition
-                bottomSection.animate()
-                        .translationY(targetTranslationY)
-                        .setDuration(300)
-                        .setInterpolator(new AccelerateDecelerateInterpolator())
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                super.onAnimationEnd(animation);
-                                // Change arrow direction and update expansion state
-                                boolean isExpanded = bottomSection.getTranslationY() != 0;
-                                if (!isExpanded) { // If bottomSection is collapsed
-                                    initialConstraintSet.applyTo(bottomSection);
-                                }
-                            }
-                        })
-                        .start();
-            }
-        });
         for (final ImageView image : emotionImages) {
             image.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -59,7 +58,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class PerfilActivity extends NotificationActivity{
+public class PerfilActivity extends NotificationActivity {
 
     private ImageView profileImageView;
     private TextView userNameTextView;
@@ -125,7 +124,6 @@ public class PerfilActivity extends NotificationActivity{
         profileImage = findViewById(R.id.profile_image);
         imageView13 = findViewById(R.id.imageView13);
         userName = findViewById(R.id.user_name);
-        setupClickListener();
 
         currentWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
 
@@ -181,48 +179,6 @@ public class PerfilActivity extends NotificationActivity{
     public void onResume() {
         super.onResume();
         trackAppUsage2();
-    }
-
-    private void setupClickListener() {
-        imageView12.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isExpanded = !isExpanded; // Alternar el estado de expansión
-
-                // Cambiar la visibilidad de los elementos
-                if (isExpanded) {
-                    // Mostrar los elementos
-                    profileImage.setVisibility(View.VISIBLE);
-                    imageView13.setVisibility(View.VISIBLE);
-                    userName.setVisibility(View.VISIBLE);
-                    textViewText.setVisibility(View.VISIBLE);
-                    textViewText2.setVisibility(View.VISIBLE);
-                    textViewText3.setVisibility(View.VISIBLE);
-                } else {
-                    // Ocultar los elementos
-                    profileImage.setVisibility(View.GONE);
-                    imageView13.setVisibility(View.GONE);
-                    userName.setVisibility(View.GONE);
-                    textViewText.setVisibility(View.GONE);
-                    textViewText2.setVisibility(View.GONE);
-                    textViewText3.setVisibility(View.GONE);
-                }
-
-                // Realizar la animación de expansión/colapso
-                frame.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        float targetTranslationY = isExpanded ? 0 : -frame.getHeight() / 4;
-
-                        frame.animate()
-                                .translationY(targetTranslationY)
-                                .setDuration(300)
-                                .setInterpolator(new AccelerateDecelerateInterpolator())
-                                .start();
-                    }
-                });
-            }
-        });
     }
 
     private void initializeGraph(int selectedWeek) {
@@ -303,7 +259,7 @@ public class PerfilActivity extends NotificationActivity{
         barChart.invalidate();
     }
 
-    private void initializeNameAndProfile(){
+    private void initializeNameAndProfile() {
         profileImageView = findViewById(R.id.profile_image);
         userNameTextView = findViewById(R.id.user_name);
 
@@ -326,7 +282,7 @@ public class PerfilActivity extends NotificationActivity{
         animator.start();
     }
 
-    public void setUpBottom(){
+    public void setUpBottom() {
         ImageButton imageButtonLupa = findViewById(R.id.imageButtonLupa);
         ImageButton imageButtonMaceta = findViewById(R.id.imageButtonMaceta);
         ImageButton imageButtonPlantadex = findViewById(R.id.imageButtonPlantadex);
@@ -382,12 +338,12 @@ public class PerfilActivity extends NotificationActivity{
 
         String usageSummary = String.format(
                 "\n%-15s %s\n" +
-                        "%-15s     %s\n" +
-                        "%-15s  %s\n" +
-                        "%-15s     %s\n" +
+                        "%-15s %s\n" +
+                        "%-15s %s\n" +
+                        "%-15s %s\n" +
                         "%-15s %s",
                 "Instagram:", formatTime(instagramUsage),
-                "TikTok:     ", formatTime(tiktokUsage),
+                "TikTok:", formatTime(tiktokUsage),
                 "YouTube:", formatTime(youtubeUsage),
                 "Twitter:", formatTime(twitterUsage),
                 "Facebook:", formatTime(facebookUsage)
@@ -511,9 +467,7 @@ public class PerfilActivity extends NotificationActivity{
             // No permission needed for API level 29 and above, open gallery
             openGallery();
         }
-    }
-
-    private void openGallery() {
+    }private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         galleryLauncher.launch(intent);
     }
@@ -532,4 +486,3 @@ public class PerfilActivity extends NotificationActivity{
         }
     }
 }
-

@@ -1,5 +1,6 @@
 package com.pim.planta.db;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -71,4 +72,7 @@ public interface DAO {
 
     @Query("SELECT growCount FROM user_plant_relation WHERE userId = :userId AND plantId = :plantId")
     int getGrowCount(int userId, int plantId);
+
+    @Query("SELECT * FROM plants WHERE name = :plantName")
+    LiveData<Plant> getLivePlantaByName(String plantName);
 }

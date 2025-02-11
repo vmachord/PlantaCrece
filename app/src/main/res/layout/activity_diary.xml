@@ -3,293 +3,295 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/activity_diary"
     android:background="@color/light_green">
 
-    <!-- Cuadro de texto inicial -->
-
-
-    <com.pim.planta.models.CalendarDraw
-        android:id="@+id/calendar_draw"
-        android:layout_width="341dp"
-        android:layout_height="295dp"
-        android:layout_marginTop="28dp"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/year_selector_button" />
-
-    <EditText
-        android:id="@+id/input_annotation"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:hint="Escribe aquí..."
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/calendar_draw" />
-
-    <LinearLayout
-        android:id="@+id/color_picker"
-        android:layout_width="409dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/input_annotation">
-
-        <!-- 5 Opciones de color -->
-        <View
-            android:id="@+id/color1"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="#FF0000" /> <!-- Rojo -->
-
-        <View
-            android:id="@+id/color2"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:background="#00FF00" /> <!-- Verde -->
-
-        <View
-            android:id="@+id/color3"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:background="#0000FF" /> <!-- Azul -->
-
-        <View
-            android:id="@+id/color4"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:background="#FFFF00" /> <!-- Amarillo -->
-
-        <View
-            android:id="@+id/color5"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:background="#FF00FF" /> <!-- Morado -->
-    </LinearLayout>
-
-    <com.pim.planta.models.YearSelectorButton
-        android:id="@+id/year_selector_button"
-        android:layout_width="341dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/previousMonthButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:background="@null"
-        android:src="@drawable/ic_arrow_left"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/calendar_draw"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.278" />
-
-    <ImageButton
-        android:id="@+id/nextMonthButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:background="@null"
-        android:src="@drawable/ic_arrow_right"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/calendar_draw"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.279" />
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottomSection"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:minHeight="1000dp"
-        android:background="@drawable/rounded_background"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/calendar_draw">
-
-        <View
-            android:id="@+id/greenArrow"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
-            android:background="@drawable/ic_arrow_up"
-            android:minWidth="0dp"
-            android:padding="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent="1.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.2" />
-
-        <TextView
-            android:id="@+id/dateTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="68dp"
-            android:fontFamily="@font/aventa"
-            android:text="dd MMM yyyy"
-            android:textColor="@color/dark_green"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/greenArrow" />
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
-            android:id="@+id/emotionsLayout"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@null"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/dateTextView">
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/excitedImage"
+            <com.pim.planta.models.YearSelectorButton
+                android:id="@+id/year_selector_button"
+                android:layout_width="341dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="32dp" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.pim.planta.models.CalendarDraw
+                    android:id="@+id/calendar_draw"
+                    android:layout_width="341dp"
+                    android:layout_height="295dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="28dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/previousMonthButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:src="@drawable/ic_arrow_left"
+                    app:layout_constraintBottom_toBottomOf="@+id/calendar_draw"
+                    app:layout_constraintEnd_toStartOf="@+id/calendar_draw"
+                    app:layout_constraintTop_toTopOf="@+id/calendar_draw" />
+
+                <ImageButton
+                    android:id="@+id/nextMonthButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:src="@drawable/ic_arrow_right"
+                    app:layout_constraintBottom_toBottomOf="@+id/calendar_draw"
+                    app:layout_constraintStart_toEndOf="@+id/calendar_draw"
+                    app:layout_constraintTop_toTopOf="@+id/calendar_draw" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <EditText
+                android:id="@+id/input_annotation"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="16dp"
+                android:hint="Escribe aquí..."
+                android:visibility="gone" />
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:src="@drawable/excited" />
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
 
-            <ImageView
-                android:id="@+id/happyImage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:src="@drawable/happy" />
+                <!-- 5 Opciones de color -->
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="#FF0000" /> <!-- Rojo -->
 
-            <ImageView
-                android:id="@+id/neutralImage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:src="@drawable/neutral" />
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#00FF00" /> <!-- Verde -->
 
-            <ImageView
-                android:id="@+id/sadImage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:src="@drawable/sad" />
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#0000FF" /> <!-- Azul -->
 
-            <ImageView
-                android:id="@+id/verySadImage"
-                android:layout_width="wrap_content"
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#FFFF00" /> <!-- Amarillo -->
+
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#FF00FF" /> <!-- Morado -->
+            </LinearLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bottomSection"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:src="@drawable/very_sad" />
+                android:layout_marginTop="16dp"
+                android:background="@drawable/rounded_background"
+                android:minHeight="1000dp">
+
+                <View
+                    android:id="@+id/greenArrow"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/ic_arrow_up"
+                    android:minWidth="0dp"
+                    android:padding="0dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHeight_percent="1.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintWidth_percent="0.2" />
+
+                <TextView
+                    android:id="@+id/dateTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="68dp"
+                    android:fontFamily="@font/aventa"
+                    android:text="dd MMM yyyy"
+                    android:textColor="@color/dark_green"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/greenArrow" />
+
+                <LinearLayout
+                    android:id="@+id/emotionsLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@null"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/dateTextView">
+
+                    <ImageView
+                        android:id="@+id/excitedImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/excited" />
+
+                    <ImageView
+                        android:id="@+id/happyImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/happy" />
+
+                    <ImageView
+                        android:id="@+id/neutralImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/neutral" />
+
+                    <ImageView
+                        android:id="@+id/sadImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/sad" />
+
+                    <ImageView
+                        android:id="@+id/verySadImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/very_sad" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textHighlight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/aventa"
+                    android:text="Highlight of the day"
+                    android:textColor="#15824F"
+                    android:textSize="20sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/emotionsLayout" />
+
+                <EditText
+                    android:id="@+id/highlightInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/rounded_background_light_green"
+                    android:fontFamily="@font/aventa"
+                    android:gravity="top|start"
+                    android:hint="Your highlight..."
+                    android:inputType="textMultiLine"
+                    android:maxLines="2"
+                    android:padding="16dp"
+                    android:textColor="@color/dark_green"
+                    android:textColorHint="@color/dark_green"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textHighlight" />
+
+                <TextView
+                    android:id="@+id/textAnnotation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/aventa"
+                    android:text="Tell us more"
+                    android:textColor="#15824F"
+                    android:textSize="20sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/highlightInput" />
+
+                <EditText
+                    android:id="@+id/annotationInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/rounded_background_light_green"
+                    android:fontFamily="@font/aventa"
+                    android:gravity="top|start"
+                    android:hint="More about your day here"
+                    android:inputType="textMultiLine"
+                    android:minHeight="200dp"
+                    android:padding="16dp"
+                    android:textColor="@color/dark_green"
+                    android:textColorHint="@color/dark_green"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textAnnotation" />
+
+                <Button
+                    android:id="@+id/buttonSaveEntry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:backgroundTint="@color/dark_green"
+                    android:fontFamily="@font/aventa"
+                    android:text="Save Entry"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/annotationInput" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-        <TextView
-            android:id="@+id/textHighlight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/aventa"
-            android:text="Highlight of the day"
-            android:textSize="20sp"
-            android:textColor="#15824F"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/emotionsLayout" />
-        <EditText
-            android:id="@+id/highlightInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rounded_background_light_green"
-            android:padding="16dp"
-            android:maxLines="2"
-            android:inputType="textMultiLine"
-            android:hint="Your highlight..."
-            android:textColorHint="@color/dark_green"
-            android:textColor="@color/dark_green"
-            android:textSize="14sp"
-            android:fontFamily="@font/aventa"
-            android:gravity="top|start"
-            android:layout_marginTop="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textHighlight"/>
-        <TextView
-            android:id="@+id/textAnnotation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/aventa"
-            android:text="Tell us more"
-            android:textSize="20sp"
-            android:textColor="#15824F"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/highlightInput" />
-        <EditText
-            android:id="@+id/annotationInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:minHeight="200dp"
-            android:background="@drawable/rounded_background_light_green"
-            android:padding="16dp"
-            android:inputType="textMultiLine"
-            android:hint="More about your day here"
-            android:textColorHint="@color/dark_green"
-            android:textColor="@color/dark_green"
-            android:textSize="14sp"
-            android:fontFamily="@font/aventa"
-            android:gravity="top|start"
-            android:layout_marginTop="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textAnnotation"/>
-        <Button
-            android:id="@+id/buttonSaveEntry"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@color/dark_green"
-            android:fontFamily="@font/aventa"
-            android:text="Save Entry"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/annotationInput" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
         android:background="@color/white"
-        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <!-- Lupa Button -->
@@ -331,7 +333,5 @@
             android:background="@android:color/transparent"
             android:contentDescription="Profile"
             android:src="@drawable/ic_profile" />
-
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

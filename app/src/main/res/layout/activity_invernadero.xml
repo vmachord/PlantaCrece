@@ -2,7 +2,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/activity_invernadero"
     android:background="@drawable/invernadero2">
 
 
@@ -19,7 +18,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/growStats"
         android:layout_width="264dp"
         android:layout_height="185dp"
         android:text=""
@@ -57,7 +55,6 @@
             app:layout_constraintVertical_bias="0.921" />   -->
 
         <ImageView
-            android:id="@+id/imageView3"
             android:layout_width="354dp"
             android:layout_height="318dp"
             android:layout_marginStart="248dp"
@@ -66,7 +63,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/maceta" />
         <ImageView
-            android:id="@+id/imageView4"
             android:layout_width="358dp"
             android:layout_height="791dp"
             android:layout_marginTop="208dp"
@@ -87,7 +83,6 @@
             app:layout_constraintVertical_bias="0.596"/>
 
         <ImageView
-            android:id="@+id/imageView5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="604dp"
@@ -97,7 +92,6 @@
             app:srcCompat="@drawable/maceta" />
 
         <ImageView
-            android:id="@+id/imageView7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="216dp"
@@ -107,7 +101,6 @@
             app:srcCompat="@drawable/maceta" />
 
         <ImageView
-            android:id="@+id/imageView8"
             android:layout_width="398dp"
             android:layout_height="850dp"
             android:layout_marginStart="120dp"

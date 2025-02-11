@@ -2,6 +2,8 @@ package com.pim.planta.db;
 
 import android.database.Cursor;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
 import androidx.room.EntityDeletionOrUpdateAdapter;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
@@ -15,6 +17,7 @@ import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserPlantRelation;
 import java.lang.Class;
+import java.lang.Exception;
 import java.lang.Override;
 import java.lang.Runnable;
 import java.lang.String;
@@ -22,6 +25,7 @@ import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 import javax.annotation.processing.Generated;
 
 @Generated("androidx.room.RoomProcessor")
@@ -988,6 +992,90 @@ public final class DAO_Impl implements DAO {
       _cursor.close();
       _statement.release();
     }
+  }
+
+  @Override
+  public LiveData<Plant> getLivePlantaByName(final String plantName) {
+    final String _sql = "SELECT * FROM plants WHERE name = ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    if (plantName == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, plantName);
+    }
+    return __db.getInvalidationTracker().createLiveData(new String[] {"plants"}, false, new Callable<Plant>() {
+      @Override
+      @Nullable
+      public Plant call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfName = CursorUtil.getColumnIndexOrThrow(_cursor, "name");
+          final int _cursorIndexOfBasePath = CursorUtil.getColumnIndexOrThrow(_cursor, "basePath");
+          final int _cursorIndexOfImageResourceId = CursorUtil.getColumnIndexOrThrow(_cursor, "imageResourceId");
+          final int _cursorIndexOfXp = CursorUtil.getColumnIndexOrThrow(_cursor, "xp");
+          final int _cursorIndexOfXpMax = CursorUtil.getColumnIndexOrThrow(_cursor, "xpMax");
+          final int _cursorIndexOfDescription = CursorUtil.getColumnIndexOrThrow(_cursor, "description");
+          final int _cursorIndexOfScientificName = CursorUtil.getColumnIndexOrThrow(_cursor, "scientificName");
+          final int _cursorIndexOfNickname = CursorUtil.getColumnIndexOrThrow(_cursor, "nickname");
+          final Plant _result;
+          if (_cursor.moveToFirst()) {
+            final String _tmpName;
+            if (_cursor.isNull(_cursorIndexOfName)) {
+              _tmpName = null;
+            } else {
+              _tmpName = _cursor.getString(_cursorIndexOfName);
+            }
+            final String _tmpBasePath;
+            if (_cursor.isNull(_cursorIndexOfBasePath)) {
+              _tmpBasePath = null;
+            } else {
+              _tmpBasePath = _cursor.getString(_cursorIndexOfBasePath);
+            }
+            final int _tmpImageResourceId;
+            _tmpImageResourceId = _cursor.getInt(_cursorIndexOfImageResourceId);
+            final int _tmpXp;
+            _tmpXp = _cursor.getInt(_cursorIndexOfXp);
+            final int _tmpXpMax;
+            _tmpXpMax = _cursor.getInt(_cursorIndexOfXpMax);
+            final String _tmpDescription;
+            if (_cursor.isNull(_cursorIndexOfDescription)) {
+              _tmpDescription = null;
+            } else {
+              _tmpDescription = _cursor.getString(_cursorIndexOfDescription);
+            }
+            final String _tmpScientificName;
+            if (_cursor.isNull(_cursorIndexOfScientificName)) {
+              _tmpScientificName = null;
+            } else {
+              _tmpScientificName = _cursor.getString(_cursorIndexOfScientificName);
+            }
+            _result = new Plant(_tmpName,_tmpBasePath,_tmpImageResourceId,_tmpXp,_tmpXpMax,_tmpDescription,_tmpScientificName);
+            final int _tmpId;
+            _tmpId = _cursor.getInt(_cursorIndexOfId);
+            _result.setId(_tmpId);
+            final String _tmpNickname;
+            if (_cursor.isNull(_cursorIndexOfNickname)) {
+              _tmpNickname = null;
+            } else {
+              _tmpNickname = _cursor.getString(_cursorIndexOfNickname);
+            }
+            _result.setNickname(_tmpNickname);
+          } else {
+            _result = null;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
   }
 
   @NonNull
