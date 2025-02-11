@@ -23,7 +23,8 @@ android {
             // isTestCoverageEnabled = true // Removed JaCoCo-specific setting
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -49,16 +50,12 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.room.common)
     implementation(libs.room.runtime)
+    implementation(libs.androidx.work.runtime)
     testImplementation(libs.ext.junit)
     testImplementation(libs.ext.junit)
     annotationProcessor(libs.room.compiler)
     implementation(libs.databinding.adapters)
     implementation(libs.places)
-    implementation(libs.espresso.contrib)
-    implementation(libs.work.testing)
-    implementation(libs.rules)
-    implementation(libs.espresso.intents)
-    implementation("com.google.guava:guava:33.0.0-jre")
 
     // Mockito
     testImplementation(libs.mockito.core)
@@ -66,7 +63,6 @@ dependencies {
     androidTestImplementation(libs.mockito.android)
 
     // Robolectric
-    implementation(libs.robolectric)
     testImplementation(libs.robolectric)
     androidTestImplementation(libs.robolectric)
 
@@ -76,8 +72,6 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     implementation(libs.mpandroidchart)
-    implementation(libs.work.runtime)
-    testImplementation(libs.work.testing)
 
     implementation(libs.lottie)
 }

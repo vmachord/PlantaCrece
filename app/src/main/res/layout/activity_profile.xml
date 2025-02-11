@@ -124,6 +124,7 @@
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="24dp"
                     android:fontFamily="@font/relay_fredoka_medium"
+                    android:textColor="@color/dark_green"
                     android:text="Time use"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />

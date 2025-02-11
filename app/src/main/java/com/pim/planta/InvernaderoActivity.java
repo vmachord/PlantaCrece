@@ -10,6 +10,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import com.pim.planta.db.DAO;
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
@@ -26,9 +28,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class InvernaderoActivity extends NotificationActivity {
-    private ImageView imageView2;
+    private ImageView plantoo;
     private Map<String, Integer> displayedPlantCounts = new HashMap<>();
     private DAO dao;
+    private ImageView agregar1;
+    private ImageView agregar2;
+    private ImageView agregar3;
+    private ImageView agregar4;
+    private ImageView agregar5;
 
     private static int[] IMAGES = {};
 
@@ -36,7 +43,8 @@ public class InvernaderoActivity extends NotificationActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invernadero);
-        imageView2 = findViewById(R.id.plantoo);
+        ConstraintLayout macetaPlantoo = findViewById(R.id.macetaPlantoo);
+        plantoo = macetaPlantoo.findViewById(R.id.plantooImageView);
 
         PlantRepository repository = PlantRepository.getInstance(this);
         dao = repository.getPlantaDAO();
@@ -48,21 +56,27 @@ public class InvernaderoActivity extends NotificationActivity {
         });
 
         setImage(dao);
-        ImageView imageView9 = findViewById(R.id.imageView9);
-        ImageView imageView = findViewById(R.id.imageView);
-        ImageView imageView2 = findViewById(R.id.imageView2);
-        ImageView imageView10 = findViewById(R.id.imageView10);
-        ImageView imageView11 = findViewById(R.id.imageView11);
+        ConstraintLayout maceta1 = findViewById(R.id.macetaAgregar1);
+        ConstraintLayout maceta2 = findViewById(R.id.macetaAgregar2);
+        ConstraintLayout maceta3 = findViewById(R.id.macetaAgregar3);
+        ConstraintLayout maceta4 = findViewById(R.id.macetaAgregar4);
+        ConstraintLayout maceta5 = findViewById(R.id.macetaAgregar5);
+        agregar1 = maceta1.findViewById(R.id.agregarImageView);
+        agregar2 = maceta2.findViewById(R.id.agregarImageView);
+        agregar3 = maceta3.findViewById(R.id.agregarImageView);
+        agregar4 = maceta4.findViewById(R.id.agregarImageView);
+        agregar5 = maceta5.findViewById(R.id.agregarImageView);
+
         restorePlantedPlants();
         // Establecer un OnClickListener para la imagen
-        imageView9.setOnClickListener(v -> showImagePickerDialog("imageView9"));
-        imageView.setOnClickListener(v -> showImagePickerDialog("imageView"));
-        imageView2.setOnClickListener(v -> showImagePickerDialog("imageView2"));
-        imageView10.setOnClickListener(v -> showImagePickerDialog("imageView10"));
-        imageView11.setOnClickListener(v -> showImagePickerDialog("imageView11"));
+        agregar1.setOnClickListener(v -> showImagePickerDialog("agregar1"));
+        agregar2.setOnClickListener(v -> showImagePickerDialog("agregar2"));
+        agregar3.setOnClickListener(v -> showImagePickerDialog("agregar3"));
+        agregar4.setOnClickListener(v -> showImagePickerDialog("agregar4"));
+        agregar5.setOnClickListener(v -> showImagePickerDialog("agregar5"));
     }
 
-    private void showImagePickerDialog(final String imageViewId) {
+    private void showImagePickerDialog(final String agregarId) {
         // Crear el Dialog
         final Dialog dialog = new Dialog(InvernaderoActivity.this);
         dialog.setContentView(R.layout.dialog_image_picker);
@@ -76,13 +90,32 @@ public class InvernaderoActivity extends NotificationActivity {
         // Configurar la acción al seleccionar una imagen
         gridView.setOnItemClickListener((parent, view, position, id) -> {
             int selectedImageId = filteredImages[position];
+            ImageView imageView = null;
+            switch (agregarId) {
+                case "agregar1":
+                    imageView = agregar1;
+                    break;
+                case "agregar2":
+                    imageView = agregar2;
+                    break;
+                case "agregar3":
+                    imageView = agregar3;
+                    break;
+                case "agregar4":
+                    imageView = agregar4;
+                    break;
+                case "agregar5":
+                    imageView = agregar5;
+                    break;
+            }
             if (selectedImageId == R.drawable.ic_x) {
                 // Handle "X" click
-                ImageView imageView = findViewById(getResources().getIdentifier(imageViewId, "id", getPackageName()));
-                imageView.setImageResource(R.drawable.agregar_planta);
+                if (imageView != null) {
+                    imageView.setImageResource(R.drawable.agregar_planta);
+                }
 
                 // Remove the plant from displayedPlantCounts
-                String plantName = getDisplayedPlantName(imageViewId);
+                String plantName = getDisplayedPlantName(agregarId);
                 if (plantName != null) {
                     int currentCount = displayedPlantCounts.getOrDefault(plantName, 0);
                     if (currentCount > 0) {
@@ -96,21 +129,23 @@ public class InvernaderoActivity extends NotificationActivity {
                 // Clear SharedPreferences
                 SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.remove(imageViewId);
+                editor.remove(agregarId);
                 editor.apply();
 
                 dialog.dismiss();
             } else {
                 String selectedPlantName = getPlantNameFromImageId(selectedImageId);
+                ImageView finalImageView = imageView;
                 new CanAddPlantTask(selectedPlantName, dao, canAdd -> {
                     if (canAdd) {
                         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putInt(imageViewId, selectedImageId); // Save the selected image ID
+                        editor.putInt(agregarId, selectedImageId); // Save the selected image ID
                         editor.apply();
 
-                        ImageView imageView = findViewById(getResources().getIdentifier(imageViewId, "id", getPackageName()));
-                        imageView.setImageResource(selectedImageId);
+                        if (finalImageView != null) {
+                            finalImageView.setImageResource(selectedImageId);
+                        }
 
                         // Update displayedPlantCounts
                         displayedPlantCounts.put(selectedPlantName, displayedPlantCounts.getOrDefault(selectedPlantName, 0) + 1);
@@ -128,11 +163,30 @@ public class InvernaderoActivity extends NotificationActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
         Map<String, ?> allEntries = sharedPreferences.getAll();
         for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-            String imageViewId = entry.getKey();
-            if (imageViewId.startsWith("imageView")) {
+            String agregarId = entry.getKey();
+            if (agregarId.startsWith("agregar")) {
                 int selectedImageId = (int) entry.getValue();
-                ImageView imageView = findViewById(getResources().getIdentifier(imageViewId, "id", getPackageName()));
-                imageView.setImageResource(selectedImageId);
+                ImageView imageView = null;
+                switch (agregarId) {
+                    case "agregar1":
+                        imageView = agregar1;
+                        break;
+                    case "agregar2":
+                        imageView = agregar2;
+                        break;
+                    case "agregar3":
+                        imageView = agregar3;
+                        break;
+                    case "agregar4":
+                        imageView = agregar4;
+                        break;
+                    case "agregar5":
+                        imageView = agregar5;
+                        break;
+                }
+                if (imageView != null) {
+                    imageView.setImageResource(selectedImageId);
+                }
 
                 // Update displayedPlantCounts
                 String plantName = getPlantNameFromImageId(selectedImageId);
@@ -158,10 +212,9 @@ public class InvernaderoActivity extends NotificationActivity {
                 // Verifica si el growCount es mayor que 0
                 if (relation.growCount > 0) {
                     // Agrega la imagen correspondiente al arreglo filtrado
-                    switch (plant.getName()) {
-                        case "Rosa":
-                            filteredImages.add(R.drawable.image_rosa);
-                            break;
+                    switch (plant.getName()) {case "Rosa":
+                        filteredImages.add(R.drawable.image_rosa);
+                        break;
                         case "Girasol":
                             filteredImages.add(R.drawable.image_girasol);
                             break;
@@ -209,16 +262,17 @@ public class InvernaderoActivity extends NotificationActivity {
         sanitizedPlantName = removeAccents(sanitizedPlantName); // Eliminar caracteres acentuados
 
         // Crear el nombre del recurso de la imagen usando el nombre de la planta
-        String imageName = "image_" + sanitizedPlantName + JardinActivity.currentImageIndex;;
+        String imageName = "image_" + sanitizedPlantName + JardinActivity.currentImageIndex;
+        ;
         int resID = getResources().getIdentifier(imageName, "drawable", getPackageName());
 
         if (resID != 0) {
-            imageView2.setImageResource(resID);
-        }else{
+            plantoo.setImageResource(resID);
+        } else {
             String imageName2 = "image_" + JardinActivity.currentImageIndex;
             // Accede a la variable estática para la imagen
             int resID2 = getResources().getIdentifier(imageName2, "drawable", getPackageName());
-            imageView2.setImageResource(resID2);
+            plantoo.setImageResource(resID2);
         }
     }
 
@@ -230,6 +284,7 @@ public class InvernaderoActivity extends NotificationActivity {
                 .replaceAll("[úùüû]", "u")
                 .replaceAll("[ç]", "c");
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -237,11 +292,28 @@ public class InvernaderoActivity extends NotificationActivity {
 
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
 
-        String[] imageViewIds = {"imageView9", "imageView", "imageView2", "imageView10","imageView11"};
-        for (String imageViewId : imageViewIds) {
-            int selectedImageId = sharedPreferences.getInt(imageViewId, -1);
-            if (selectedImageId != -1) {
-                ImageView imageView = findViewById(getResources().getIdentifier(imageViewId, "id", getPackageName()));
+        String[] agregarIds = {"agregar1", "agregar2", "agregar3", "agregar4", "agregar5"};
+        for (String agregarId : agregarIds) {
+            int selectedImageId = sharedPreferences.getInt(agregarId, -1);
+            ImageView imageView = null;
+            switch (agregarId) {
+                case "agregar1":
+                    imageView = agregar1;
+                    break;
+                case "agregar2":
+                    imageView = agregar2;
+                    break;
+                case "agregar3":
+                    imageView = agregar3;
+                    break;
+                case "agregar4":
+                    imageView = agregar4;
+                    break;
+                case "agregar5":
+                    imageView = agregar5;
+                    break;
+            }
+            if (selectedImageId != -1 && imageView != null) {
                 imageView.setImageResource(selectedImageId);
             }
         }
@@ -280,6 +352,7 @@ public class InvernaderoActivity extends NotificationActivity {
         filteredImages.add(R.drawable.ic_x);
         return filteredImages.stream().mapToInt(i -> i).toArray();
     }
+
     private String getPlantNameFromImageId(int imageId) {
         if (imageId == R.drawable.image_rosa) {
             return "Rosa";
@@ -295,14 +368,16 @@ public class InvernaderoActivity extends NotificationActivity {
             return "";
         }
     }
-    private String getDisplayedPlantName(String imageViewId) {
+
+    private String getDisplayedPlantName(String agregarId) {
         SharedPreferences sharedPreferences = getSharedPreferences("plant_prefs", MODE_PRIVATE);
-        int imageId = sharedPreferences.getInt(imageViewId, -1);
+        int imageId = sharedPreferences.getInt(agregarId, -1);
         if (imageId != -1) {
             return getPlantNameFromImageId(imageId);
         }
         return null;
     }
+
     private class CanAddPlantTask extends AsyncTask<Void, Void, Boolean> {
         private String plantName;
         private DAO dao;
@@ -331,6 +406,7 @@ public class InvernaderoActivity extends NotificationActivity {
             callback.onResult(canAdd);
         }
     }
+
     interface CanAddPlantCallback {
         void onResult(boolean canAdd);
     }
