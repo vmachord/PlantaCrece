@@ -17,6 +17,9 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Process;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -40,11 +43,8 @@ import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.pim.planta.db.DAO;
-import com.pim.planta.db.DatabaseExecutor;
-import com.pim.planta.db.PlantRepository;
-import com.pim.planta.models.Plant;
-import com.pim.planta.models.UserLogged;
+import com.pim.planta.db.*;
+import com.pim.planta.models.*;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -54,6 +54,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -197,7 +199,7 @@ public class JardinActivity extends NotificationActivity {
                 Log.d("PRUEBA", "Ha entrado a la comprobacion de que el tiempo de ahora es mayor que el de antes : " + difference);
 
                 if (difference>0)
-                    penalizeIfUsageIncreased(-difference / 30000);
+                    penalizeIfUsageIncreased(difference / 30000);
 
                 // Update SharedPreferences
                 prefs.edit()
@@ -229,7 +231,7 @@ public class JardinActivity extends NotificationActivity {
             return true;
         }
         if (keyCode == KeyEvent.KEYCODE_P) {
-            penalizeIfUsageIncreased(-300);
+            penalizeIfUsageIncreased(300);
             return true;
         }
 
@@ -314,6 +316,7 @@ public class JardinActivity extends NotificationActivity {
     private void showDescriptionPopup() {
         // Inflar el diseño del pop-up
         View popupView = findViewById(R.id.plant_desc_popup);
+        popupView.bringToFront();
         popupView.setVisibility(View.VISIBLE);
 
         TextView plantTitle = findViewById(R.id.plant_name_desc);
@@ -368,32 +371,43 @@ public class JardinActivity extends NotificationActivity {
     }
 
     private void wateringPlant() {
-        if ((plant.getXp() + WATER_XP) > plant.getXpMax()) {
-            int xp_needed = plant.getXpMax() - plant.getXp();
-            plant.addXp(xp_needed);
-        } else {
-            plant.addXp(WATER_XP);
-            playWaterAnimation();
-        }
-        if (plant.getXp() == plant.getXpMax())
-            showPlantGrownPopup();
-        calculateXPprogress(plant);
-        calculatePlantIndex(plant);
-        cooldownManager.recordWateringUsage();
-        updatePlantFromDB(plant);
+        DatabaseExecutor.execute(() -> {
+            int xpToAdd;
+            if ((plant.getXp() + WATER_XP) > plant.getXpMax()) {
+                xpToAdd = plant.getXpMax() - plant.getXp();
+            } else {
+                xpToAdd = WATER_XP;
+            }
+            plant.addXp(xpToAdd);
+            runOnUiThread(() -> {
+                if (plant.getXp() == plant.getXpMax())
+                    showPlantGrownPopup();
+                calculateXPprogress(plant);
+                calculatePlantIndex(plant);
+                cooldownManager.recordWateringUsage();
+                updatePlantFromDB(plant);
+                if (xpToAdd == WATER_XP) {
+                    playWaterAnimation();
+                }
+            });
+        });
     }
 
     private void playWaterAnimation() {
         LottieAnimationView lottieView = findViewById(R.id.lottie_water_drops);
         lottieView.setVisibility(View.VISIBLE);
-        lottieView.playAnimation();
 
-        // Ocultar la animación después de reproducirse una vez
-        lottieView.addAnimatorListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                lottieView.setVisibility(View.GONE);
-            }
+        // Use a Handler to post the animation to the main thread
+        new Handler(Looper.getMainLooper()).post(() -> {
+            lottieView.playAnimation();
+            // Ocultar la animación después de reproducirse una vez
+            lottieView.addAnimatorListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    lottieView.setVisibility(View.GONE);
+                    lottieView.removeAllAnimatorListeners(); // Remove the listener to avoid memory leaks
+                }
+            });
         });
     }
 
@@ -476,73 +490,86 @@ public class JardinActivity extends NotificationActivity {
     private boolean hasUsageStatsPermission() {
         AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
         int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                android.os.Process.myUid(), getPackageName());
+                Process.myUid(), getPackageName());
         return mode == AppOpsManager.MODE_ALLOWED;
     }
 
     public void penalizeIfUsageIncreased(float xp) {
         if (xp == 0) return;
-        DatabaseExecutor.executeAndWait(()-> {
-            // Get all plants from the database
-            List<Plant> allPlants = dao.getAllPlantas();
 
-            if (allPlants.isEmpty()) {
-                return; // No plants to penalize
+        // Get all plants from the database
+        List<Plant> allPlants = getAllPlantsFromDB();
+
+        if (allPlants.isEmpty()) {
+            return; // No plants to penalize
+        }
+
+        // Calculate the total XP to remove
+        int totalXpToRemove = (int) xp;
+
+        // Calculate the total XP of all plants that have XP > 0
+        int totalCurrentXp = 0;
+        List<Plant> plantsWithXp = new ArrayList<>();
+        for (Plant p : allPlants) {
+            if (p.getXp() > 0) {
+                totalCurrentXp += p.getXp();
+                plantsWithXp.add(p);
             }
+        }
 
-            // Calculate the total XP to remove
-            int totalXpToRemove = (int) xp;
+        if (totalCurrentXp == 0) {
+            return; // No plants with XP to penalize
+        }
 
-            // Filter plants with XP > 0
-            List<Plant> plantsWithXp = new ArrayList<>();
-            for (Plant p : allPlants) {
-                if (p.getXp() > 0) {
-                    plantsWithXp.add(p);
-                }
+        // Calculate the XP to remove per plant proportionally
+        Map<Plant, Integer> xpToRemovePerPlant = new HashMap<>();
+        int remainingXpToRemove = totalXpToRemove;
+        for (Plant p : plantsWithXp) {
+            int xpToRemove = (int) Math.floor((double) p.getXp() / totalCurrentXp * totalXpToRemove);
+            xpToRemovePerPlant.put(p, xpToRemove);
+            remainingXpToRemove -= xpToRemove;
+        }
+
+        // Distribute the remaining XP to remove
+        int plantsWithXpCount = plantsWithXp.size();
+        int index = 0;
+        while (remainingXpToRemove > 0) {
+            Plant p = plantsWithXp.get(index % plantsWithXpCount);
+            int currentXpToRemove = xpToRemovePerPlant.get(p);
+            xpToRemovePerPlant.put(p, currentXpToRemove + 1);
+            remainingXpToRemove--;
+            index++;
+        }
+        int newSelectedXp = 0;
+        int selectedXpToRemove;
+        // Remove XP from each plant
+        for (Map.Entry<Plant, Integer> entry : xpToRemovePerPlant.entrySet()) {
+            Plant p = entry.getKey();
+            int xpToRemove = entry.getValue();
+            if (p.getId() == plant.getId()) {
+                selectedXpToRemove = xpToRemove;
+                newSelectedXp = Math.max(0, p.getXp() - selectedXpToRemove);
+                plant.setXp(newSelectedXp);
+                continue;
             }
+            int currentXp = p.getXp();
+            int newXp = Math.max(0, currentXp - xpToRemove);
+            p.setXp(newXp);
+            updatePlantFromDB(p);
+        }
+        plant.setXp(newSelectedXp);
+        Toast.makeText(this, "Se te ha quitado -" + xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
+        calculateXPprogress(plant);
+        calculatePlantIndex(plant);
+        updatePlantFromDB(plant);
+    }
 
-            if (plantsWithXp.isEmpty()) {
-                Toast.makeText(this, "Se te ha quitado " + (int) xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
-                return; // No plants with XP to penalize
-            }
-
-            // Calculate the XP to remove per plant equally
-            int plantsWithXpCount = plantsWithXp.size();
-            int xpToRemovePerPlant = totalXpToRemove / plantsWithXpCount;
-            int remainingXpToRemove = totalXpToRemove % plantsWithXpCount;
-
-            // Remove XP from each plant and track negative XP
-            int totalNegativeXp = 0;
-            List<Plant> plantsToUpdate = new ArrayList<>();
-            for (Plant p : plantsWithXp) {
-                int xpToRemove = xpToRemovePerPlant;
-                if (remainingXpToRemove > 0) {
-                    xpToRemove++;
-                    remainingXpToRemove--;
-                }
-
-                int currentXp = p.getXp();
-                int newXp = currentXp - xpToRemove;
-                if (newXp < 0) {
-                    totalNegativeXp += Math.abs(newXp);
-                    newXp = 0;
-                }
-                p.setXp(newXp);
-                calculateXPprogress(p);
-                calculatePlantIndex(p);
-                plantsToUpdate.add(p);
-            }
-            for (Plant p : plantsToUpdate) {
-                updatePlantFromDB(p);
-            }
-
-            // Recursive call if there's negative XP
-            if (totalNegativeXp > 0) {
-                penalizeIfUsageIncreased(totalNegativeXp);
-            } else {
-                Toast.makeText(this, "Se te ha quitado " + (int) xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
-            }
+    private List<Plant> getAllPlantsFromDB() {
+        final List<Plant> plants = new ArrayList<>();
+        DatabaseExecutor.executeAndWait(() -> {
+            plants.addAll(dao.getAllPlantas());
         });
+        return plants;
     }
 
     //Este metodo tiene como entries, el nombre de la planta y el indice de su crecimiento

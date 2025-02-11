@@ -357,11 +357,13 @@ import java.util.Locale;
                 long facebookUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Facebook", 0);
 
                 String usageSummary = String.format(
-                        "\n%-15s %s\n" +
-                                "%-15s %s\n" +
-                                "%-15s %s\n" +
-                                "%-15s %s\n" +
-                                "%-15s %s",
+                                "\n%-4s %s\n" +
+                                "%-10s %s\n" +
+                                "%-7s %s\n" +
+                                "%-8s %s\n" +
+                                "%-8s %s\n" +
+                                "%-9s %s\n",
+                        "Week", selectedWeek,
                         "Instagram:", formatTime(instagramUsage),
                         "TikTok:", formatTime(tiktokUsage),
                         "YouTube:", formatTime(youtubeUsage),
@@ -371,6 +373,7 @@ import java.util.Locale;
 
                 if (textViewPlantoo != null) {
                     textViewPlantoo.setText(usageSummary);
+                    textViewPlantoo.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
                 } else {
                     Log.e("AppUsage", "TextView no está inicializado.");
                 }

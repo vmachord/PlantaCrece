@@ -63,7 +63,7 @@ public class PlantListActivity extends NotificationActivity {
         plantListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         Log.d("PlantListActivity", "User logged: " + UserLogged.getInstance().getCurrentUser().getEmail());
-        plantAdapter = new PlantAdapter(plantList, aventaFont, dao, UserLogged.getInstance().getCurrentUser());
+        plantAdapter = new PlantAdapter(plantList, aventaFont, dao, UserLogged.getInstance().getCurrentUser(), this);
         plantListRecyclerView.setAdapter(plantAdapter);
 
         plantAdapter.setOnItemClickListener(plant -> {

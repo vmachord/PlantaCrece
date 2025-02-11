@@ -1,5 +1,6 @@
 package com.pim.planta.models;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pim.planta.R;
@@ -24,12 +26,14 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
     private Typeface aventaFont;
     private DAO dao;
     private User user;
+    private Context context;
 
-    public PlantAdapter(List<Plant> plantList, Typeface aventaFont, DAO dao, User user) {
+    public PlantAdapter(List<Plant> plantList, Typeface aventaFont, DAO dao, User user, Context context) {
         this.plantList = plantList;
         this.aventaFont = aventaFont;
         this.dao = dao;
         this.user = user;
+        this.context = context;
     }
 
     @NonNull
@@ -47,6 +51,12 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
         else
             holder.plantNameTextView.setText(plant.getName());
         holder.plantImageView.setImageResource(plant.getImageResourceId());
+        holder.plantNameTextView.setTypeface(aventaFont);
+        holder.plantDescriptionTextView.setTypeface(aventaFont);
+        holder.plantGrowthCountTextView.setTypeface(aventaFont);
+        holder.plantNameTextView.setTextColor(ContextCompat.getColor(context,R.color.dark_green));
+        holder.plantDescriptionTextView.setTextColor(ContextCompat.getColor(context,R.color.dark_green));
+        holder.plantGrowthCountTextView.setTextColor(ContextCompat.getColor(context,R.color.dark_green));
         holder.plantDescriptionTextView.setText(plant.getDescription());
         if (user != null) {
             DatabaseExecutor.executeAndWait(() -> {
