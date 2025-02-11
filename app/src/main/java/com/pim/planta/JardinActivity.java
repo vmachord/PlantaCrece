@@ -49,6 +49,7 @@ import com.pim.planta.models.UserLogged;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -76,13 +77,14 @@ public class JardinActivity extends NotificationActivity {
             "com.google.android.youtube" // Youtube
             // More to add here
     );
+    private DAO dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_jardin);
         PlantRepository plantaRepo = PlantRepository.getInstance(this);
-        DAO dao = plantaRepo.getPlantaDAO();
+        dao = plantaRepo.getPlantaDAO();
         WorkRequest notificationWorkRequest =
                 new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
                         .build();
@@ -170,7 +172,7 @@ public class JardinActivity extends NotificationActivity {
             showPlantGrownPopup();
         }
 
-        updatePlantFromDB();
+        updatePlantFromDB(plant);
 
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         long lastResumeTime = prefs.getLong(LAST_RESUME_TIME_KEY, 0);
@@ -302,12 +304,9 @@ public class JardinActivity extends NotificationActivity {
         });
     }
 
-    public void updatePlantFromDB(){
-        PlantRepository plantaRepo = PlantRepository.getInstance(this);
-        DAO dao = plantaRepo.getPlantaDAO();
-
+    public void updatePlantFromDB(Plant p){
         DatabaseExecutor.executeAndWait(() -> {
-            dao.update(plant);
+            dao.update(p);
             Log.d("XPDebug", "updatePlantFromDB: After update - plant.getXp() = " + plant.getXp());
         });
     }
@@ -381,7 +380,7 @@ public class JardinActivity extends NotificationActivity {
         calculateXPprogress(plant);
         calculatePlantIndex(plant);
         cooldownManager.recordWateringUsage();
-        updatePlantFromDB();
+        updatePlantFromDB(plant);
     }
 
     private void playWaterAnimation() {
@@ -410,7 +409,7 @@ public class JardinActivity extends NotificationActivity {
         calculateXPprogress(plant);
         calculatePlantIndex(plant);
         cooldownManager.recordPadUsage();
-        updatePlantFromDB();
+        updatePlantFromDB(plant);
     }
 
     private void showPlantGrownPopup() {
@@ -448,7 +447,7 @@ public class JardinActivity extends NotificationActivity {
             // Reset plant progress
             plant.setXp(0);
             plant.setNickname(null);
-            updatePlantFromDB();
+            updatePlantFromDB(plant);
             InvernaderoActivity.incrementGrowCountInBackground(UserLogged.getInstance().getCurrentUser().getId(), plant.getName(), PlantRepository.getInstance(this).getPlantaDAO());
 
             // Go to PlantListActivity
@@ -482,16 +481,68 @@ public class JardinActivity extends NotificationActivity {
     }
 
     public void penalizeIfUsageIncreased(float xp) {
-        if (plant != null) {
-            if (xp == 0) return;
-            // Aquí se llamaría el método para añadir XP, por ejemplo
-            plant.addXp((int) xp); // Actualizar XP de la planta
-            if (plant.getXp() < 0) plant.setXp(0);
-            calculateXPprogress(plant);
-            calculatePlantIndex(plant);
-            updatePlantFromDB();
-            Toast.makeText(this, "Se te ha quitado " + xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
-        }
+        if (xp == 0) return;
+        DatabaseExecutor.executeAndWait(()-> {
+            // Get all plants from the database
+            List<Plant> allPlants = dao.getAllPlantas();
+
+            if (allPlants.isEmpty()) {
+                return; // No plants to penalize
+            }
+
+            // Calculate the total XP to remove
+            int totalXpToRemove = (int) xp;
+
+            // Filter plants with XP > 0
+            List<Plant> plantsWithXp = new ArrayList<>();
+            for (Plant p : allPlants) {
+                if (p.getXp() > 0) {
+                    plantsWithXp.add(p);
+                }
+            }
+
+            if (plantsWithXp.isEmpty()) {
+                Toast.makeText(this, "Se te ha quitado " + (int) xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
+                return; // No plants with XP to penalize
+            }
+
+            // Calculate the XP to remove per plant equally
+            int plantsWithXpCount = plantsWithXp.size();
+            int xpToRemovePerPlant = totalXpToRemove / plantsWithXpCount;
+            int remainingXpToRemove = totalXpToRemove % plantsWithXpCount;
+
+            // Remove XP from each plant and track negative XP
+            int totalNegativeXp = 0;
+            List<Plant> plantsToUpdate = new ArrayList<>();
+            for (Plant p : plantsWithXp) {
+                int xpToRemove = xpToRemovePerPlant;
+                if (remainingXpToRemove > 0) {
+                    xpToRemove++;
+                    remainingXpToRemove--;
+                }
+
+                int currentXp = p.getXp();
+                int newXp = currentXp - xpToRemove;
+                if (newXp < 0) {
+                    totalNegativeXp += Math.abs(newXp);
+                    newXp = 0;
+                }
+                p.setXp(newXp);
+                calculateXPprogress(p);
+                calculatePlantIndex(p);
+                plantsToUpdate.add(p);
+            }
+            for (Plant p : plantsToUpdate) {
+                updatePlantFromDB(p);
+            }
+
+            // Recursive call if there's negative XP
+            if (totalNegativeXp > 0) {
+                penalizeIfUsageIncreased(totalNegativeXp);
+            } else {
+                Toast.makeText(this, "Se te ha quitado " + (int) xp + " por tu consumo de redes.", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     //Este metodo tiene como entries, el nombre de la planta y el indice de su crecimiento
