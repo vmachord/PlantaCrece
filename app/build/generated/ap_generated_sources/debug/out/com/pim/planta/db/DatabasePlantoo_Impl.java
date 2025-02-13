@@ -32,7 +32,7 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(12) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(14) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `plants` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `basePath` TEXT, `imageResourceId` INTEGER NOT NULL, `xp` INTEGER NOT NULL, `xpMax` INTEGER NOT NULL, `description` TEXT, `scientificName` TEXT, `nickname` TEXT)");
@@ -40,8 +40,9 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
         db.execSQL("CREATE TABLE IF NOT EXISTS `diary-entries` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `highlight` TEXT, `annotation` TEXT, `emotion` INTEGER NOT NULL, `user_id` INTEGER NOT NULL, `date` INTEGER NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS `user_plant_relation` (`userId` INTEGER NOT NULL, `plantId` INTEGER NOT NULL, `growCount` INTEGER NOT NULL, PRIMARY KEY(`userId`, `plantId`), FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`plantId`) REFERENCES `plants`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
         db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_user_plant_relation_userId_plantId` ON `user_plant_relation` (`userId`, `plantId`)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `app_usage` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` INTEGER, `dayOfYear` INTEGER NOT NULL, `appName` TEXT, `usageTime` INTEGER NOT NULL, `weekOfYear` INTEGER NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6efb9309c48e86cb87e8ae467f7a8ca5')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c3428b485e1fa89c7c91a975c109605b')");
       }
 
       @Override
@@ -50,6 +51,7 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
         db.execSQL("DROP TABLE IF EXISTS `users`");
         db.execSQL("DROP TABLE IF EXISTS `diary-entries`");
         db.execSQL("DROP TABLE IF EXISTS `user_plant_relation`");
+        db.execSQL("DROP TABLE IF EXISTS `app_usage`");
         final List<? extends RoomDatabase.Callback> _callbacks = mCallbacks;
         if (_callbacks != null) {
           for (RoomDatabase.Callback _callback : _callbacks) {
@@ -160,9 +162,25 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
                   + " Expected:\n" + _infoUserPlantRelation + "\n"
                   + " Found:\n" + _existingUserPlantRelation);
         }
+        final HashMap<String, TableInfo.Column> _columnsAppUsage = new HashMap<String, TableInfo.Column>(6);
+        _columnsAppUsage.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsAppUsage.put("date", new TableInfo.Column("date", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsAppUsage.put("dayOfYear", new TableInfo.Column("dayOfYear", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsAppUsage.put("appName", new TableInfo.Column("appName", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsAppUsage.put("usageTime", new TableInfo.Column("usageTime", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsAppUsage.put("weekOfYear", new TableInfo.Column("weekOfYear", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysAppUsage = new HashSet<TableInfo.ForeignKey>(0);
+        final HashSet<TableInfo.Index> _indicesAppUsage = new HashSet<TableInfo.Index>(0);
+        final TableInfo _infoAppUsage = new TableInfo("app_usage", _columnsAppUsage, _foreignKeysAppUsage, _indicesAppUsage);
+        final TableInfo _existingAppUsage = TableInfo.read(db, "app_usage");
+        if (!_infoAppUsage.equals(_existingAppUsage)) {
+          return new RoomOpenHelper.ValidationResult(false, "app_usage(com.pim.planta.models.AppUsage).\n"
+                  + " Expected:\n" + _infoAppUsage + "\n"
+                  + " Found:\n" + _existingAppUsage);
+        }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "6efb9309c48e86cb87e8ae467f7a8ca5", "0d65d4a3a5ead97a52431e6610a9b7cf");
+    }, "c3428b485e1fa89c7c91a975c109605b", "817f20224c9bcac261d18f18ac8a2d81");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;
@@ -173,7 +191,7 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
   protected InvalidationTracker createInvalidationTracker() {
     final HashMap<String, String> _shadowTablesMap = new HashMap<String, String>(0);
     final HashMap<String, Set<String>> _viewTables = new HashMap<String, Set<String>>(0);
-    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "plants","users","diary-entries","user_plant_relation");
+    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "plants","users","diary-entries","user_plant_relation","app_usage");
   }
 
   @Override
@@ -193,6 +211,7 @@ public final class DatabasePlantoo_Impl extends DatabasePlantoo {
       _db.execSQL("DELETE FROM `users`");
       _db.execSQL("DELETE FROM `diary-entries`");
       _db.execSQL("DELETE FROM `user_plant_relation`");
+      _db.execSQL("DELETE FROM `app_usage`");
       super.setTransactionSuccessful();
     } finally {
       super.endTransaction();

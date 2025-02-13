@@ -4,15 +4,18 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
 import androidx.room.Update;
 
+import com.pim.planta.models.AppUsage;
 import com.pim.planta.models.DiaryEntry;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserPlantRelation;
 
+import java.util.Date;
 import java.util.List;
 
 @Dao
@@ -30,6 +33,8 @@ public interface DAO {
     void insert(User usuario);
     @Insert
     void insert(UserPlantRelation relation);
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    void insert(AppUsage appUsage);
 
     @Update
     void update(Plant planta);
@@ -37,6 +42,8 @@ public interface DAO {
     void update(DiaryEntry entrada);
     @Update
     void update(User usuario);
+    @Update
+    void update(AppUsage appUsage);
 
     @Delete
     void delete(Plant planta);
@@ -75,4 +82,13 @@ public interface DAO {
 
     @Query("SELECT * FROM plants WHERE name = :plantName")
     LiveData<Plant> getLivePlantaByName(String plantName);
+
+    @Query("SELECT * FROM app_usage WHERE date BETWEEN :startDate AND :endDate")
+    List<AppUsage> getUsageBetweenDates(Date startDate, Date endDate);
+
+    @Query("SELECT * FROM app_usage WHERE dayOfYear = :dayOfYear AND appName = :appName")
+    AppUsage getUsageByDayOfYearAndApp(int dayOfYear, String appName);
+
+    @Query("SELECT * FROM app_usage WHERE weekOfYear = :weekOfYear")
+    List<AppUsage> getUsageByWeek(int weekOfYear);
 }

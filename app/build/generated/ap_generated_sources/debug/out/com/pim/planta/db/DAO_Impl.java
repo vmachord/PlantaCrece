@@ -12,18 +12,22 @@ import androidx.room.SharedSQLiteStatement;
 import androidx.room.util.CursorUtil;
 import androidx.room.util.DBUtil;
 import androidx.sqlite.db.SupportSQLiteStatement;
+import com.pim.planta.models.AppUsage;
+import com.pim.planta.models.Converters;
 import com.pim.planta.models.DiaryEntry;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
 import com.pim.planta.models.UserPlantRelation;
 import java.lang.Class;
 import java.lang.Exception;
+import java.lang.Long;
 import java.lang.Override;
 import java.lang.Runnable;
 import java.lang.String;
 import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import javax.annotation.processing.Generated;
@@ -41,6 +45,8 @@ public final class DAO_Impl implements DAO {
 
   private final EntityInsertionAdapter<UserPlantRelation> __insertionAdapterOfUserPlantRelation;
 
+  private final EntityInsertionAdapter<AppUsage> __insertionAdapterOfAppUsage;
+
   private final EntityDeletionOrUpdateAdapter<Plant> __deletionAdapterOfPlant;
 
   private final EntityDeletionOrUpdateAdapter<DiaryEntry> __deletionAdapterOfDiaryEntry;
@@ -54,6 +60,8 @@ public final class DAO_Impl implements DAO {
   private final EntityDeletionOrUpdateAdapter<DiaryEntry> __updateAdapterOfDiaryEntry;
 
   private final EntityDeletionOrUpdateAdapter<User> __updateAdapterOfUser;
+
+  private final EntityDeletionOrUpdateAdapter<AppUsage> __updateAdapterOfAppUsage;
 
   private final SharedSQLiteStatement __preparedStmtOfInsertUserPlantRelation;
 
@@ -168,6 +176,32 @@ public final class DAO_Impl implements DAO {
         statement.bindLong(1, entity.userId);
         statement.bindLong(2, entity.plantId);
         statement.bindLong(3, entity.growCount);
+      }
+    };
+    this.__insertionAdapterOfAppUsage = new EntityInsertionAdapter<AppUsage>(__db) {
+      @Override
+      @NonNull
+      protected String createQuery() {
+        return "INSERT OR IGNORE INTO `app_usage` (`id`,`date`,`dayOfYear`,`appName`,`usageTime`,`weekOfYear`) VALUES (nullif(?, 0),?,?,?,?,?)";
+      }
+
+      @Override
+      protected void bind(@NonNull final SupportSQLiteStatement statement, final AppUsage entity) {
+        statement.bindLong(1, entity.id);
+        final Long _tmp = Converters.toTimestamp(entity.date);
+        if (_tmp == null) {
+          statement.bindNull(2);
+        } else {
+          statement.bindLong(2, _tmp);
+        }
+        statement.bindLong(3, entity.dayOfYear);
+        if (entity.appName == null) {
+          statement.bindNull(4);
+        } else {
+          statement.bindString(4, entity.appName);
+        }
+        statement.bindLong(5, entity.usageTime);
+        statement.bindLong(6, entity.weekOfYear);
       }
     };
     this.__deletionAdapterOfPlant = new EntityDeletionOrUpdateAdapter<Plant>(__db) {
@@ -318,6 +352,33 @@ public final class DAO_Impl implements DAO {
         statement.bindLong(6, entity.getId());
       }
     };
+    this.__updateAdapterOfAppUsage = new EntityDeletionOrUpdateAdapter<AppUsage>(__db) {
+      @Override
+      @NonNull
+      protected String createQuery() {
+        return "UPDATE OR ABORT `app_usage` SET `id` = ?,`date` = ?,`dayOfYear` = ?,`appName` = ?,`usageTime` = ?,`weekOfYear` = ? WHERE `id` = ?";
+      }
+
+      @Override
+      protected void bind(@NonNull final SupportSQLiteStatement statement, final AppUsage entity) {
+        statement.bindLong(1, entity.id);
+        final Long _tmp = Converters.toTimestamp(entity.date);
+        if (_tmp == null) {
+          statement.bindNull(2);
+        } else {
+          statement.bindLong(2, _tmp);
+        }
+        statement.bindLong(3, entity.dayOfYear);
+        if (entity.appName == null) {
+          statement.bindNull(4);
+        } else {
+          statement.bindString(4, entity.appName);
+        }
+        statement.bindLong(5, entity.usageTime);
+        statement.bindLong(6, entity.weekOfYear);
+        statement.bindLong(7, entity.id);
+      }
+    };
     this.__preparedStmtOfInsertUserPlantRelation = new SharedSQLiteStatement(__db) {
       @Override
       @NonNull
@@ -378,6 +439,18 @@ public final class DAO_Impl implements DAO {
     __db.beginTransaction();
     try {
       __insertionAdapterOfUserPlantRelation.insert(relation);
+      __db.setTransactionSuccessful();
+    } finally {
+      __db.endTransaction();
+    }
+  }
+
+  @Override
+  public void insert(final AppUsage appUsage) {
+    __db.assertNotSuspendingTransaction();
+    __db.beginTransaction();
+    try {
+      __insertionAdapterOfAppUsage.insert(appUsage);
       __db.setTransactionSuccessful();
     } finally {
       __db.endTransaction();
@@ -462,6 +535,18 @@ public final class DAO_Impl implements DAO {
     __db.beginTransaction();
     try {
       __updateAdapterOfUser.handle(usuario);
+      __db.setTransactionSuccessful();
+    } finally {
+      __db.endTransaction();
+    }
+  }
+
+  @Override
+  public void update(final AppUsage appUsage) {
+    __db.assertNotSuspendingTransaction();
+    __db.beginTransaction();
+    try {
+      __updateAdapterOfAppUsage.handle(appUsage);
       __db.setTransactionSuccessful();
     } finally {
       __db.endTransaction();
@@ -1076,6 +1161,168 @@ public final class DAO_Impl implements DAO {
         _statement.release();
       }
     });
+  }
+
+  @Override
+  public List<AppUsage> getUsageBetweenDates(final Date startDate, final Date endDate) {
+    final String _sql = "SELECT * FROM app_usage WHERE date BETWEEN ? AND ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
+    int _argIndex = 1;
+    final Long _tmp = Converters.toTimestamp(startDate);
+    if (_tmp == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, _tmp);
+    }
+    _argIndex = 2;
+    final Long _tmp_1 = Converters.toTimestamp(endDate);
+    if (_tmp_1 == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, _tmp_1);
+    }
+    __db.assertNotSuspendingTransaction();
+    final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+    try {
+      final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+      final int _cursorIndexOfDate = CursorUtil.getColumnIndexOrThrow(_cursor, "date");
+      final int _cursorIndexOfDayOfYear = CursorUtil.getColumnIndexOrThrow(_cursor, "dayOfYear");
+      final int _cursorIndexOfAppName = CursorUtil.getColumnIndexOrThrow(_cursor, "appName");
+      final int _cursorIndexOfUsageTime = CursorUtil.getColumnIndexOrThrow(_cursor, "usageTime");
+      final int _cursorIndexOfWeekOfYear = CursorUtil.getColumnIndexOrThrow(_cursor, "weekOfYear");
+      final List<AppUsage> _result = new ArrayList<AppUsage>(_cursor.getCount());
+      while (_cursor.moveToNext()) {
+        final AppUsage _item;
+        final Date _tmpDate;
+        final Long _tmp_2;
+        if (_cursor.isNull(_cursorIndexOfDate)) {
+          _tmp_2 = null;
+        } else {
+          _tmp_2 = _cursor.getLong(_cursorIndexOfDate);
+        }
+        _tmpDate = Converters.toDate(_tmp_2);
+        final String _tmpAppName;
+        if (_cursor.isNull(_cursorIndexOfAppName)) {
+          _tmpAppName = null;
+        } else {
+          _tmpAppName = _cursor.getString(_cursorIndexOfAppName);
+        }
+        final long _tmpUsageTime;
+        _tmpUsageTime = _cursor.getLong(_cursorIndexOfUsageTime);
+        final int _tmpWeekOfYear;
+        _tmpWeekOfYear = _cursor.getInt(_cursorIndexOfWeekOfYear);
+        _item = new AppUsage(_tmpDate,_tmpAppName,_tmpUsageTime,_tmpWeekOfYear);
+        _item.id = _cursor.getInt(_cursorIndexOfId);
+        _item.dayOfYear = _cursor.getInt(_cursorIndexOfDayOfYear);
+        _result.add(_item);
+      }
+      return _result;
+    } finally {
+      _cursor.close();
+      _statement.release();
+    }
+  }
+
+  @Override
+  public AppUsage getUsageByDayOfYearAndApp(final int dayOfYear, final String appName) {
+    final String _sql = "SELECT * FROM app_usage WHERE dayOfYear = ? AND appName = ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
+    int _argIndex = 1;
+    _statement.bindLong(_argIndex, dayOfYear);
+    _argIndex = 2;
+    if (appName == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, appName);
+    }
+    __db.assertNotSuspendingTransaction();
+    final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+    try {
+      final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+      final int _cursorIndexOfDate = CursorUtil.getColumnIndexOrThrow(_cursor, "date");
+      final int _cursorIndexOfDayOfYear = CursorUtil.getColumnIndexOrThrow(_cursor, "dayOfYear");
+      final int _cursorIndexOfAppName = CursorUtil.getColumnIndexOrThrow(_cursor, "appName");
+      final int _cursorIndexOfUsageTime = CursorUtil.getColumnIndexOrThrow(_cursor, "usageTime");
+      final int _cursorIndexOfWeekOfYear = CursorUtil.getColumnIndexOrThrow(_cursor, "weekOfYear");
+      final AppUsage _result;
+      if (_cursor.moveToFirst()) {
+        final Date _tmpDate;
+        final Long _tmp;
+        if (_cursor.isNull(_cursorIndexOfDate)) {
+          _tmp = null;
+        } else {
+          _tmp = _cursor.getLong(_cursorIndexOfDate);
+        }
+        _tmpDate = Converters.toDate(_tmp);
+        final String _tmpAppName;
+        if (_cursor.isNull(_cursorIndexOfAppName)) {
+          _tmpAppName = null;
+        } else {
+          _tmpAppName = _cursor.getString(_cursorIndexOfAppName);
+        }
+        final long _tmpUsageTime;
+        _tmpUsageTime = _cursor.getLong(_cursorIndexOfUsageTime);
+        final int _tmpWeekOfYear;
+        _tmpWeekOfYear = _cursor.getInt(_cursorIndexOfWeekOfYear);
+        _result = new AppUsage(_tmpDate,_tmpAppName,_tmpUsageTime,_tmpWeekOfYear);
+        _result.id = _cursor.getInt(_cursorIndexOfId);
+        _result.dayOfYear = _cursor.getInt(_cursorIndexOfDayOfYear);
+      } else {
+        _result = null;
+      }
+      return _result;
+    } finally {
+      _cursor.close();
+      _statement.release();
+    }
+  }
+
+  @Override
+  public List<AppUsage> getUsageByWeek(final int weekOfYear) {
+    final String _sql = "SELECT * FROM app_usage WHERE weekOfYear = ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    _statement.bindLong(_argIndex, weekOfYear);
+    __db.assertNotSuspendingTransaction();
+    final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+    try {
+      final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+      final int _cursorIndexOfDate = CursorUtil.getColumnIndexOrThrow(_cursor, "date");
+      final int _cursorIndexOfDayOfYear = CursorUtil.getColumnIndexOrThrow(_cursor, "dayOfYear");
+      final int _cursorIndexOfAppName = CursorUtil.getColumnIndexOrThrow(_cursor, "appName");
+      final int _cursorIndexOfUsageTime = CursorUtil.getColumnIndexOrThrow(_cursor, "usageTime");
+      final int _cursorIndexOfWeekOfYear = CursorUtil.getColumnIndexOrThrow(_cursor, "weekOfYear");
+      final List<AppUsage> _result = new ArrayList<AppUsage>(_cursor.getCount());
+      while (_cursor.moveToNext()) {
+        final AppUsage _item;
+        final Date _tmpDate;
+        final Long _tmp;
+        if (_cursor.isNull(_cursorIndexOfDate)) {
+          _tmp = null;
+        } else {
+          _tmp = _cursor.getLong(_cursorIndexOfDate);
+        }
+        _tmpDate = Converters.toDate(_tmp);
+        final String _tmpAppName;
+        if (_cursor.isNull(_cursorIndexOfAppName)) {
+          _tmpAppName = null;
+        } else {
+          _tmpAppName = _cursor.getString(_cursorIndexOfAppName);
+        }
+        final long _tmpUsageTime;
+        _tmpUsageTime = _cursor.getLong(_cursorIndexOfUsageTime);
+        final int _tmpWeekOfYear;
+        _tmpWeekOfYear = _cursor.getInt(_cursorIndexOfWeekOfYear);
+        _item = new AppUsage(_tmpDate,_tmpAppName,_tmpUsageTime,_tmpWeekOfYear);
+        _item.id = _cursor.getInt(_cursorIndexOfId);
+        _item.dayOfYear = _cursor.getInt(_cursorIndexOfDayOfYear);
+        _result.add(_item);
+      }
+      return _result;
+    } finally {
+      _cursor.close();
+      _statement.release();
+    }
   }
 
   @NonNull

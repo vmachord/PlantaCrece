@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -45,6 +44,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.pim.planta.db.DAO;
 import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
+import com.pim.planta.models.AppUsage;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.UserLogged;
 
@@ -53,12 +53,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 
         public class PerfilActivity extends NotificationActivity {
@@ -70,15 +68,6 @@ import java.util.Locale;
             private TextView textViewText;
             private TextView textViewText2;
             private TextView textViewText3;
-
-            private boolean isExpanded = false;
-
-            private ImageView imageView12;
-
-            private FrameLayout frame;
-            private ImageView profileImage;
-            private ImageView imageView13;
-            private TextView userName;
             private int currentWeek;
             private Plant plant;
             private DAO dao;
@@ -96,6 +85,7 @@ import java.util.Locale;
                 //initializeGraph();
                 setUpBottom();
                 textViewPlantoo = findViewById(R.id.textView4);
+                textViewPlantoo.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
                 trackAppUsage2();
                 textViewText = findViewById(R.id.textCreationDate);
                 textViewText.setText("Bloomed on: " + UserLogged.getInstance().getCurrentUser().getFormattedCreationDate());
@@ -124,11 +114,6 @@ import java.util.Locale;
                     textViewText2.setText("ERROR ERROR ERROR");
                     textViewText3.setText("ERROR ERROR ERROR");
                 }
-                imageView12 = findViewById(R.id.imageView12);
-                frame = findViewById(R.id.frame);
-                profileImage = findViewById(R.id.profile_image);
-                imageView13 = findViewById(R.id.imageView13);
-                userName = findViewById(R.id.user_name);
 
                 currentWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
 
@@ -203,80 +188,112 @@ import java.util.Locale;
             }
 
             private void initializeGraph(int selectedWeek) {
+                Log.d("AppUsage", "initializeGraph() called for week: " + selectedWeek);
+
                 barChart = findViewById(R.id.bar_chart);
-                SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+                if (barChart == null) {
+                    Log.e("AppUsage", "BarChart is null!");
+                    return;
+                }
 
+                // Data structures for the graph
                 float[][] appUsagePerDay = new float[7][5];
-
                 String[] daysOfWeek = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+                String[] appNames = {"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"};
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.WEEK_OF_YEAR, selectedWeek);
                 calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-                for (int i = 0; i < 7; i++) {
-                    String day = daysOfWeek[i];
 
-                    for (int j = 0; j < 5; j++) {
-                        String appName = (j == 0) ? "Instagram" : (j == 1) ? "TikTok" :
-                                (j == 2) ? "YouTube" : (j == 3) ? "Twitter" : "Facebook";
+                dao = PlantRepository.getInstance(this).getPlantaDAO();
 
-                        String appKey = "Week" + selectedWeek + "_" + day + "_" + appName;
-
-                        appUsagePerDay[i][j] = prefs.getLong(appKey, 0) / 3600000f;
-
-                        Log.d("AppUsage", "Cargando datos para: " + appKey + " -> " + appUsagePerDay[i][j] + " horas");
+                // Run database operations in a background thread
+                DatabaseExecutor.execute(() -> {
+                    // Loop through each day of the week
+                    for (int i = 0; i < 7; i++) {
+                        Date currentDate = calendar.getTime();
+                        int currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
+                        // Loop through each app
+                        for (int j = 0; j < 5; j++) {
+                            String appName = appNames[j];
+                            AppUsage usage = dao.getUsageByDayOfYearAndApp(currentDayOfYear, appName);
+                            if (usage != null) {
+                                appUsagePerDay[i][j] = usage.usageTime / 3600000f; // Convert milliseconds to hours
+                            } else {
+                                appUsagePerDay[i][j] = 0f; // No usage for this app on this day
+                            }
+                            Log.d("AppUsage", "Loading data for: " + currentDate + " - " + appName + " -> " + appUsagePerDay[i][j] + " hours");
+                        }
+                        calendar.add(Calendar.DAY_OF_YEAR, 1);
                     }
 
-                    calendar.add(Calendar.DAY_OF_YEAR, 1);
-                }
+                    // Prepare data for the bar chart (must be done on the main thread)
+                    runOnUiThread(() -> {
+                        ArrayList<BarEntry> barEntries = new ArrayList<>();
+                        for (int i = 0; i < 7; i++) {
+                            float[] dailyUsage = new float[5];
+                            for (int j = 0; j < 5; j++) {
+                                dailyUsage[j] = appUsagePerDay[i][j];
+                            }
+                            barEntries.add(new BarEntry(i, dailyUsage));
+                        }
 
-                ArrayList<BarEntry> barEntries = new ArrayList<>();
-                for (int i = 0; i < 7; i++) {
-                    barEntries.add(new BarEntry(i, appUsagePerDay[i]));
-                }
+                        // Configure the bar chart
+                        BarDataSet barDataSet = new BarDataSet(barEntries, "App Usage");
+                        barDataSet.setStackLabels(appNames);
+                        barDataSet.setColors(new int[]{
+                                Color.parseColor("#004D40"),
+                                Color.parseColor("#2E7D32"),
+                                Color.parseColor("#4CAF50"),
+                                Color.parseColor("#81C784"),
+                                Color.parseColor("#A5D6A7")
+                        });
 
-                BarDataSet barDataSet = new BarDataSet(barEntries, "Uso de Aplicaciones");
-                barDataSet.setStackLabels(new String[]{"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"});
+                        BarData data = new BarData(barDataSet);
+                        data.setBarWidth(0.5f);
+                        barChart.setData(data);
 
-                barDataSet.setColors(new int[]{
-                        Color.parseColor("#004D40"),
-                        Color.parseColor("#2E7D32"),
-                        Color.parseColor("#4CAF50"),
-                        Color.parseColor("#81C784"),
-                        Color.parseColor("#A5D6A7")
+                        // Customize the chart's appearance
+                        Typeface aventaFont = ResourcesCompat.getFont(this, R.font.aventa);
+
+                        XAxis xAxis = barChart.getXAxis();
+                        xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));
+                        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                        xAxis.setTextSize(12f);
+                        xAxis.setTextColor(Color.BLACK);
+                        xAxis.setGranularity(1f);
+                        xAxis.setDrawGridLines(false);
+                        if (aventaFont != null) {
+                            xAxis.setTypeface(aventaFont);
+                        }
+
+                        YAxis leftAxis = barChart.getAxisLeft();
+                        leftAxis.setAxisMinimum(0f);
+                        leftAxis.setTextSize(12f);
+                        leftAxis.setTextColor(Color.BLACK);
+                        if (aventaFont != null) {
+                            leftAxis.setTypeface(aventaFont);
+                        }
+
+                        barChart.getAxisRight().setEnabled(false);
+
+                        Legend legend = barChart.getLegend();
+                        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+                        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+                        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+                        legend.setDrawInside(false);
+                        legend.setTextSize(12f);
+                        legend.setTextColor(Color.BLACK);
+                        if (aventaFont != null) {
+                            legend.setTypeface(aventaFont);
+                        }
+
+                        // Animate and refresh the chart
+                        barChart.animateY(1000, Easing.EaseInOutCubic);
+                        barChart.setFitBars(true);
+                        barChart.invalidate();
+                    });
                 });
-
-                BarData data = new BarData(barDataSet);
-                data.setBarWidth(0.5f);
-                barChart.setData(data);
-                Typeface aventaFont = ResourcesCompat.getFont(this, R.font.aventa);
-
-                XAxis xAxis = barChart.getXAxis();
-                xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));
-                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-                xAxis.setTextSize(12f);
-                xAxis.setTextColor(Color.BLACK);
-                xAxis.setGranularity(1f);
-                xAxis.setDrawGridLines(false);
-
-                YAxis leftAxis = barChart.getAxisLeft();
-                leftAxis.setAxisMinimum(0f);
-                leftAxis.setTextSize(12f);
-                leftAxis.setTextColor(Color.BLACK);
-
-                barChart.getAxisRight().setEnabled(false);
-
-                Legend legend = barChart.getLegend();
-                legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-                legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-                legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-                legend.setDrawInside(false);
-                legend.setTextSize(12f);
-                legend.setTextColor(Color.BLACK);
-
-                barChart.animateY(1000, Easing.EaseInOutCubic);
-                barChart.setFitBars(true);
-                barChart.invalidate();
             }
 
             private void initializeNameAndProfile() {
@@ -327,146 +344,185 @@ import java.util.Locale;
                 });
             }
 
-            public long getTotalUsageToday() {
-                UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
-
-                // Obtén el inicio del día a las 00:00:00
-                long startOfDay = getStartOfDay();
-                long endOfDay = System.currentTimeMillis();
-
-                // Consulta las estadísticas de uso para hoy
-                List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startOfDay, endOfDay);
-
-                long totalTimeToday = 0;
-                for (UsageStats usageStats : usageStatsList) {
-                    totalTimeToday += usageStats.getTotalTimeInForeground();
-                }
-
-                return totalTimeToday;
-            }
-
             private void updateUsageSummary(int selectedWeek) {
-                SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
 
-                String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.WEEK_OF_YEAR, selectedWeek);
+                calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 
-                long instagramUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Instagram", 0);
-                long tiktokUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_TikTok", 0);
-                long youtubeUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_YouTube", 0);
-                long twitterUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Twitter", 0);
-                long facebookUsage = prefs.getLong("Week" + selectedWeek + "_" + today + "_Facebook", 0);
+                // Run database operations in a background thread
+                DatabaseExecutor.execute(() -> {
+                    long instagramUsage = 0;
+                    long tiktokUsage = 0;
+                    long youtubeUsage = 0;
+                    long twitterUsage = 0;
+                    long facebookUsage = 0;
 
-                String usageSummary = String.format(
+                    List<AppUsage> usageList = dao.getUsageByWeek(selectedWeek);
+                    for (AppUsage usage : usageList) {
+                        switch (usage.appName) {
+                            case "Instagram":
+                                instagramUsage += usage.usageTime;
+                                break;
+                            case "TikTok":
+                                tiktokUsage += usage.usageTime;
+                                break;
+                            case "YouTube":
+                                youtubeUsage += usage.usageTime;
+                                break;
+                            case "Twitter":
+                                twitterUsage += usage.usageTime;
+                                break;
+                            case "Facebook":
+                                facebookUsage += usage.usageTime;
+                                break;
+                        }
+                    }
+
+                    // Update the UI on the main thread
+                    long finalInstagramUsage = instagramUsage;
+                    long finalTiktokUsage = tiktokUsage;
+                    long finalYoutubeUsage = youtubeUsage;
+                    long finalTwitterUsage = twitterUsage;
+                    long finalFacebookUsage = facebookUsage;
+                    runOnUiThread(() -> {
+                        String usageSummary = String.format(
                                 "\n%-4s %s\n" +
-                                "%-10s %s\n" +
-                                "%-7s %s\n" +
-                                "%-8s %s\n" +
-                                "%-8s %s\n" +
-                                "%-9s %s\n",
-                        "Week", selectedWeek,
-                        "Instagram:", formatTime(instagramUsage),
-                        "TikTok:", formatTime(tiktokUsage),
-                        "YouTube:", formatTime(youtubeUsage),
-                        "Twitter:", formatTime(twitterUsage),
-                        "Facebook:", formatTime(facebookUsage)
-                );
+                                        "%-10s %s\n" +
+                                        "%-7s %s\n" +
+                                        "%-8s %s\n" +
+                                        "%-8s %s\n" +
+                                        "%-9s %s\n",
+                                "Week", selectedWeek,
+                                "Instagram:", formatTime(finalInstagramUsage),
+                                "TikTok:", formatTime(finalTiktokUsage),
+                                "YouTube:", formatTime(finalYoutubeUsage),
+                                "Twitter:", formatTime(finalTwitterUsage),
+                                "Facebook:", formatTime(finalFacebookUsage)
+                        );
 
-                if (textViewPlantoo != null) {
-                    textViewPlantoo.setText(usageSummary);
-                    textViewPlantoo.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
-                } else {
-                    Log.e("AppUsage", "TextView no está inicializado.");
-                }
+                        if (textViewPlantoo != null) {
+                            textViewPlantoo.setText(usageSummary);
+                        } else {
+                            Log.e("AppUsage", "TextView no está inicializado.");
+                        }
+                    });
+                });
             }
 
             public void trackAppUsage2() {
-                UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
+                UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
                 if (usageStatsManager == null) {
-                    Log.e("AppUsage", "UsageStatsManager no está disponible.");
+                    Log.e("AppUsage", "UsageStatsManager is not available.");
                     return;
                 }
 
-                long totalTimeToday = getTotalUsageToday();
+                long currentAccessTime = System.currentTimeMillis();
+                long lastAccessTime = getLastAccessTime();
 
-                long instagramUsageTimeToday = 0;
-                long tiktokUsageTimeToday = 0;
-                long youtubeUsageTimeToday = 0;
-                long twitterUsageTimeToday = 0;
-                long facebookUsageTimeToday = 0;
+                // Save the current access time for the next run
+                saveLastAccessTime();
 
-                long startOfDay = getStartOfDay();
-                long endOfDay = System.currentTimeMillis();
-
-                List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                        UsageStatsManager.INTERVAL_DAILY, startOfDay, endOfDay);
-
-                if (usageStatsList == null || usageStatsList.isEmpty()) {
-                    Log.d("AppUsage", "No hay estadísticas de uso disponibles.");
+                // If it's the first time or the difference is negative, we don't have to do anything
+                if (lastAccessTime == 0 || currentAccessTime < lastAccessTime) {
                     return;
                 }
 
-                for (UsageStats usageStats : usageStatsList) {
-                    String packageName = usageStats.getPackageName();
-                    long totalTime = usageStats.getTotalTimeInForeground();
+                // Run database operations in a background thread using DatabaseExecutor
+                DatabaseExecutor.execute(() -> {
+                    dao = PlantRepository.getInstance(this).getPlantaDAO();
+                    processAppUsageData(usageStatsManager, lastAccessTime, currentAccessTime);
+                });
+            }
 
-                    Log.d("AppUsage", "Paquete encontrado: " + packageName + " - Uso: " + totalTime);
-
-                    switch (packageName) {
-                        case "com.instagram.android":
-                            instagramUsageTimeToday = totalTime;
-                            break;
-                        case "com.zhiliaoapp.musically": // TikTok
-                            tiktokUsageTimeToday = totalTime;
-                            break;
-                        case "com.google.android.youtube":
-                            youtubeUsageTimeToday = totalTime;
-                            break;
-                        case "com.twitter.android":
-                            twitterUsageTimeToday = totalTime;
-                            break;
-                        case "com.facebook.katana":
-                            facebookUsageTimeToday = totalTime;
-                            break;
-                    }
-                }
+            private void processAppUsageData(UsageStatsManager usageStatsManager, long lastAccessTime, long currentAccessTime) {
+                String[] appNames = {"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"};
+                String[] packageNames = {"com.instagram.android", "com.zhiliaoapp.musically", "com.google.android.youtube", "com.twitter.android", "com.facebook.katana"};
 
                 Calendar calendar = Calendar.getInstance();
                 int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
+                Date today = calendar.getTime();
+                int currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
 
-                SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
-                SharedPreferences.Editor editor = prefs.edit();
+                for (int i = 0; i < appNames.length; i++) {
+                    String appName = appNames[i];
+                    String packageName = packageNames[i];
 
-                String today = new SimpleDateFormat("EEE", Locale.getDefault()).format(new Date());
+                    // Get the usage stats for the app between the last access time and the current access time
+                    List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
+                            UsageStatsManager.INTERVAL_DAILY, lastAccessTime, currentAccessTime);
 
-                Log.d("AppUsage", "Hoy es: " + today);
+                    long totalUsageTimeInForeground = 0;
+                    if (usageStatsList != null && !usageStatsList.isEmpty()) {
+                        for (UsageStats usageStats : usageStatsList) {
+                            if (usageStats.getPackageName().equals(packageName)) {
+                                totalUsageTimeInForeground = usageStats.getTotalTimeInForeground();
+                                break;
+                            }
+                        }
+                    }
 
-                String weekKey = "Week" + currentWeek + "_" + today + "_";
+                    // Check if the session spans across midnight
+                    Calendar lastAccessCalendar = Calendar.getInstance();
+                    lastAccessCalendar.setTimeInMillis(lastAccessTime);
+                    Calendar currentAccessCalendar = Calendar.getInstance();
+                    currentAccessCalendar.setTimeInMillis(currentAccessTime);
 
-                editor.putLong(weekKey + "Total", totalTimeToday);
-                editor.putLong(weekKey + "Instagram", instagramUsageTimeToday);
-                editor.putLong(weekKey + "TikTok", tiktokUsageTimeToday);
-                editor.putLong(weekKey + "YouTube", youtubeUsageTimeToday);
-                editor.putLong(weekKey + "Twitter", twitterUsageTimeToday);
-                editor.putLong(weekKey + "Facebook", facebookUsageTimeToday);
+                    if (lastAccessCalendar.get(Calendar.DAY_OF_YEAR) != currentAccessCalendar.get(Calendar.DAY_OF_YEAR)) {
+                        // Session spans across midnight
+                        // Calculate the time until midnight on the last access day
+                        Calendar midnightCalendar = (Calendar) lastAccessCalendar.clone();
+                        midnightCalendar.set(Calendar.HOUR_OF_DAY, 23);
+                        midnightCalendar.set(Calendar.MINUTE, 59);
+                        midnightCalendar.set(Calendar.SECOND, 59);
+                        midnightCalendar.set(Calendar.MILLISECOND, 999);
+                        long timeUntilMidnight = midnightCalendar.getTimeInMillis() - lastAccessTime;
+                        int lastAccessDayOfYear = lastAccessCalendar.get(Calendar.DAY_OF_YEAR);
 
-                editor.apply();
+                        // Calculate the time from midnight on the current access day
+                        long timeFromMidnight = currentAccessTime - midnightCalendar.getTimeInMillis();
+                        int currentAccessDayOfYear = currentAccessCalendar.get(Calendar.DAY_OF_YEAR);
 
-                updateUsageSummary(currentWeek);
-                // Now call initializeGraph() AFTER the data is saved to SharedPreferences
-                initializeGraph(currentWeek);
-            }
+                        // Update the last access day
+                        Date lastAccessDate = lastAccessCalendar.getTime();
+                        AppUsage existingUsageLastDay = dao.getUsageByDayOfYearAndApp(lastAccessDayOfYear, appName);
+                        long newUsageLastDay = Math.min(totalUsageTimeInForeground, timeUntilMidnight);
+                        if (existingUsageLastDay != null) {
+                            existingUsageLastDay.usageTime = newUsageLastDay;
+                            dao.update(existingUsageLastDay);
+                        } else {
+                            AppUsage newUsageLastDayObject = new AppUsage(lastAccessDate, appName, newUsageLastDay, lastAccessCalendar.get(Calendar.WEEK_OF_YEAR));
+                            dao.insert(newUsageLastDayObject);
+                        }
 
-            /**
-             * Obtiene el timestamp del inicio del día (medianoche).
-             */
-            public long getStartOfDay() {
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR_OF_DAY, 0);
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
+                        // Update the current access day
+                        Date currentAccessDate = currentAccessCalendar.getTime();
+                        AppUsage existingUsageCurrentDay = dao.getUsageByDayOfYearAndApp(currentAccessDayOfYear, appName);
+                        long previousUsageCurrentDay = (existingUsageCurrentDay != null) ? existingUsageCurrentDay.usageTime : 0;
+                        long newUsageCurrentDay = Math.min(totalUsageTimeInForeground, timeFromMidnight);
+                        if (existingUsageCurrentDay != null) {
+                            existingUsageCurrentDay.usageTime = newUsageCurrentDay;
+                            dao.update(existingUsageCurrentDay);
+                        } else {
+                            AppUsage newUsageCurrentDayObject = new AppUsage(currentAccessDate, appName, newUsageCurrentDay, currentAccessCalendar.get(Calendar.WEEK_OF_YEAR));
+                           dao.insert(newUsageCurrentDayObject);
+                        }
+                    } else {
+                        // Session is within the same day
+                        // Check if a record exists for this app and date
+                        AppUsage existingUsage = dao.getUsageByDayOfYearAndApp(currentDayOfYear, appName);
 
-                return calendar.getTimeInMillis();
+                        if (existingUsage != null) {
+                            // Update the existing record with the new usage time
+                            existingUsage.usageTime = totalUsageTimeInForeground;
+                            dao.update(existingUsage);
+                        } else {
+                            // Insert a new record
+                            AppUsage newUsageObject = new AppUsage(today, appName, totalUsageTimeInForeground, currentWeek);
+                            dao.insert(newUsageObject);
+                        }
+                    }
+                }
             }
 
             private String formatTime(long timeInMillis) {
@@ -540,5 +596,17 @@ import java.util.Locale;
                     }
                 }
                 return null;
+            }
+
+            private void saveLastAccessTime() {
+                SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putLong("lastAccessTime", System.currentTimeMillis());
+                editor.apply();
+            }
+
+            private long getLastAccessTime() {
+                SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
+                return prefs.getLong("lastAccessTime", 0);
             }
         }

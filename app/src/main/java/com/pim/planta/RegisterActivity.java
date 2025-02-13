@@ -16,6 +16,7 @@ import com.pim.planta.db.DatabaseExecutor;
 import com.pim.planta.db.PlantRepository;
 import com.pim.planta.models.Plant;
 import com.pim.planta.models.User;
+import com.pim.planta.models.UserLogged;
 import com.pim.planta.models.UserPlantRelation;
 
 public class RegisterActivity extends NotificationActivity {
@@ -53,7 +54,7 @@ public class RegisterActivity extends NotificationActivity {
 
             if (email.isEmpty() || password.isEmpty() || user.isEmpty()) {
                 Toast.makeText(RegisterActivity.this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
-                return; // Salir del método si hay campos vacíos
+                return;
             }
 
             if (!customCheckbox.isChecked()) {
@@ -63,7 +64,7 @@ public class RegisterActivity extends NotificationActivity {
 
             if (!isValidEmail(email)) {
                 Toast.makeText(RegisterActivity.this, "Formato de correo electrónico incorrecto", Toast.LENGTH_SHORT).show();
-                return; // Salir del método si el email es inválido
+                return;
             }
 
             newUser = new User(user, email, password);
@@ -72,6 +73,7 @@ public class RegisterActivity extends NotificationActivity {
             DAO dao = plantRepo.getPlantaDAO();
             DatabaseExecutor.executeAndWait(() -> {
                 newUser = dao.getUserByEmail(email);
+                UserLogged.getInstance().setCurrentUser(newUser);
                 for (Plant plant : dao.getAllPlantas()) {
                     UserPlantRelation relation = new UserPlantRelation(newUser.getId(), plant.getId());
                     Log.d("RegisterActivity", "Plant ID: " + plant.getId());
