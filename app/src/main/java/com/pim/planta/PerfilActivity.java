@@ -13,7 +13,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,7 +29,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.BarChart;
@@ -75,6 +73,8 @@ import java.util.List;
             private ActivityResultLauncher<Intent> galleryLauncher;
             private static final String PROFILE_PREFS = "profile_prefs";
             private static final String PROFILE_IMAGE_PATH_KEY = "profile_image_path";
+            private static final String APP_USAGE_PREFS_NAME = "AppUsageTrackingPrefs";
+            private static final String KEY_LAST_ACCESS_TIME = "lastAccessTime";
 
 
             @Override
@@ -188,95 +188,134 @@ import java.util.List;
             }
 
             private void initializeGraph(int selectedWeek) {
-                Log.d("AppUsage", "initializeGraph() called for week: " + selectedWeek);
+                Log.d("AppUsageGraph", "Initializing graph for week: " + selectedWeek);
 
-                barChart = findViewById(R.id.bar_chart);
+                barChart = findViewById(R.id.bar_chart); // Make sure R.id.bar_chart is correct
                 if (barChart == null) {
-                    Log.e("AppUsage", "BarChart is null!");
+                    Log.e("AppUsageGraph", "BarChart view not found!");
+                    // Consider hiding the chart or showing a message if it's null
                     return;
                 }
 
                 // Data structures for the graph
-                float[][] appUsagePerDay = new float[7][5];
-                String[] daysOfWeek = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-                String[] appNames = {"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"};
+                float[][] appUsagePerDay = new float[7][5]; // 7 days, 5 apps
+                String[] daysOfWeekLabels = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}; // For X-axis labels
+                String[] appNamesForStack = {"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"}; // For stack labels & data retrieval order
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.WEEK_OF_YEAR, selectedWeek);
-                calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+                calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY); // Start week on Monday
 
-                dao = PlantRepository.getInstance(this).getPlantaDAO();
+                // Ensure 'dao' is initialized. It could be a class field,
+                // or you can get the instance here.
+                // Example: dao = PlantRepository.getInstance(getApplicationContext()).getPlantaDAO();
+                // For this example, I'll assume 'dao' is an accessible class field.
+                if (dao == null) {
+                    Log.e("AppUsageGraph", "DAO is null. Cannot fetch data.");
+                    // Handle this case, maybe show an error to the user or on the chart
+                    return;
+                }
 
-                // Run database operations in a background thread
                 DatabaseExecutor.execute(() -> {
-                    // Loop through each day of the week
-                    for (int i = 0; i < 7; i++) {
-                        Date currentDate = calendar.getTime();
+                    for (int i = 0; i < 7; i++) { // For each day of the selected week (0=Mon, 1=Tue, ...)
                         int currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
-                        // Loop through each app
-                        for (int j = 0; j < 5; j++) {
-                            String appName = appNames[j];
+                        // int currentYear = calendar.get(Calendar.YEAR); // Crucial if your data spans multiple years
+                        // and dayOfYear alone isn't unique.
+                        // Your AppUsage entity and DAO query would need to support year.
+
+                        Log.d("AppUsageGraph", "Fetching data for day " + i + " (dayOfYear: " + currentDayOfYear +
+                                ", Date: " + calendar.getTime().toString() + ")");
+
+                        for (int j = 0; j < appNamesForStack.length; j++) { // For each app
+                            String appName = appNamesForStack[j];
+
+                            // Fetch the total usage for this specific app on this specific day.
+                            // If your AppUsage table might have entries for the same dayOfYear but different years,
+                            // your getUsageByDayOfYearAndApp query needs to be year-specific.
+                            // For now, assuming dayOfYear is sufficient for your current data scope.
                             AppUsage usage = dao.getUsageByDayOfYearAndApp(currentDayOfYear, appName);
-                            if (usage != null) {
+
+                            if (usage != null && usage.usageTime > 0) {
+                                // usage.usageTime should represent the total milliseconds for that app on that day
                                 appUsagePerDay[i][j] = usage.usageTime / 3600000f; // Convert milliseconds to hours
+                                Log.d("AppUsageGraph", "Data for " + appName + " on day " + daysOfWeekLabels[i] +
+                                        ": " + appUsagePerDay[i][j] + " hours (Raw: " + usage.usageTime + "ms)");
                             } else {
-                                appUsagePerDay[i][j] = 0f; // No usage for this app on this day
+                                appUsagePerDay[i][j] = 0f;
+                                if (usage == null) {
+                                    Log.d("AppUsageGraph", "No usage entry for " + appName + " on day " + daysOfWeekLabels[i]);
+                                } else {
+                                    Log.d("AppUsageGraph", "Zero usage time for " + appName + " on day " + daysOfWeekLabels[i]);
+                                }
                             }
-                            Log.d("AppUsage", "Loading data for: " + currentDate + " - " + appName + " -> " + appUsagePerDay[i][j] + " hours");
                         }
-                        calendar.add(Calendar.DAY_OF_YEAR, 1);
+                        calendar.add(Calendar.DAY_OF_YEAR, 1); // Move to the next day
                     }
 
-                    // Prepare data for the bar chart (must be done on the main thread)
+                    // Update UI (BarChart) on the main thread
                     runOnUiThread(() -> {
-                        ArrayList<BarEntry> barEntries = new ArrayList<>();
-                        for (int i = 0; i < 7; i++) {
-                            float[] dailyUsage = new float[5];
-                            for (int j = 0; j < 5; j++) {
-                                dailyUsage[j] = appUsagePerDay[i][j];
-                            }
-                            barEntries.add(new BarEntry(i, dailyUsage));
+                        // It's good practice to check if the activity is still alive before UI updates
+                        if (isFinishing() || isDestroyed()) {
+                            return;
+                        }
+                        if (barChart == null) { // Should have been caught earlier, but good for robustness
+                            Log.e("AppUsageGraph", "BarChart became null before UI update.");
+                            return;
                         }
 
-                        // Configure the bar chart
-                        BarDataSet barDataSet = new BarDataSet(barEntries, "App Usage");
-                        barDataSet.setStackLabels(appNames);
+                        ArrayList<BarEntry> barEntries = new ArrayList<>();
+                        for (int i = 0; i < 7; i++) { // For each day
+                            // The values for the stack: {app1_usage, app2_usage, ..., app5_usage} for day i
+                            barEntries.add(new BarEntry(i, appUsagePerDay[i]));
+                        }
+
+                        BarDataSet barDataSet = new BarDataSet(barEntries, "Daily App Usage"); // Label for the dataset
+                        barDataSet.setStackLabels(appNamesForStack); // Labels for each part of the stack
+
+                        // Define colors for the stacks (ensure you have enough colors for appNamesForStack)
                         barDataSet.setColors(new int[]{
-                                Color.parseColor("#004D40"),
-                                Color.parseColor("#2E7D32"),
-                                Color.parseColor("#4CAF50"),
-                                Color.parseColor("#81C784"),
-                                Color.parseColor("#A5D6A7")
+                                Color.parseColor("#004D40"), // Instagram
+                                Color.parseColor("#2E7D32"), // TikTok
+                                Color.parseColor("#4CAF50"), // YouTube
+                                Color.parseColor("#81C784"), // Twitter
+                                Color.parseColor("#A5D6A7")  // Facebook
                         });
+                        barDataSet.setValueTextColor(Color.BLACK);
+                        barDataSet.setValueTextSize(10f);
 
-                        BarData data = new BarData(barDataSet);
-                        data.setBarWidth(0.5f);
-                        barChart.setData(data);
+                        BarData barData = new BarData(barDataSet);
+                        barData.setBarWidth(0.8f); // Adjust bar width as needed
 
-                        // Customize the chart's appearance
-                        Typeface aventaFont = ResourcesCompat.getFont(this, R.font.aventa);
+                        barChart.setData(barData);
+                        barChart.setFitBars(true); // Makes the bars fit into the chart area
 
+                        // --- XAxis Configuration ---
                         XAxis xAxis = barChart.getXAxis();
-                        xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeek));
+                        xAxis.setValueFormatter(new IndexAxisValueFormatter(daysOfWeekLabels));
                         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                        xAxis.setGranularity(1f);
+                        xAxis.setGranularityEnabled(true);
+                        xAxis.setDrawGridLines(false);
                         xAxis.setTextSize(12f);
                         xAxis.setTextColor(Color.BLACK);
-                        xAxis.setGranularity(1f);
-                        xAxis.setDrawGridLines(false);
-                        if (aventaFont != null) {
-                            xAxis.setTypeface(aventaFont);
-                        }
+                        // Typeface aventaFont = ResourcesCompat.getFont(this, R.font.aventa); // Assuming R.font.aventa exists
+                        // if (aventaFont != null) {
+                        //     xAxis.setTypeface(aventaFont);
+                        // }
 
+                        // --- YAxis (Left) Configuration ---
                         YAxis leftAxis = barChart.getAxisLeft();
-                        leftAxis.setAxisMinimum(0f);
+                        leftAxis.setAxisMinimum(0f); // Start Y-axis from 0
                         leftAxis.setTextSize(12f);
                         leftAxis.setTextColor(Color.BLACK);
-                        if (aventaFont != null) {
-                            leftAxis.setTypeface(aventaFont);
-                        }
+                        // if (aventaFont != null) {
+                        //     leftAxis.setTypeface(aventaFont);
+                        // }
 
-                        barChart.getAxisRight().setEnabled(false);
+                        // --- YAxis (Right) Configuration ---
+                        barChart.getAxisRight().setEnabled(false); // Disable right Y-axis
 
+                        // --- Legend Configuration ---
                         Legend legend = barChart.getLegend();
                         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
                         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
@@ -284,14 +323,15 @@ import java.util.List;
                         legend.setDrawInside(false);
                         legend.setTextSize(12f);
                         legend.setTextColor(Color.BLACK);
-                        if (aventaFont != null) {
-                            legend.setTypeface(aventaFont);
-                        }
+                        // if (aventaFont != null) {
+                        //     legend.setTypeface(aventaFont);
+                        // }
 
-                        // Animate and refresh the chart
-                        barChart.animateY(1000, Easing.EaseInOutCubic);
-                        barChart.setFitBars(true);
-                        barChart.invalidate();
+                        // --- Chart Description & Animation ---
+                        barChart.getDescription().setEnabled(false); // No description text
+                        barChart.animateY(1000, Easing.EaseInOutCubic); // Animation
+                        barChart.invalidate(); // Refresh the chart
+                        Log.d("AppUsageGraph", "Graph updated and invalidated.");
                     });
                 });
             }
@@ -418,108 +458,102 @@ import java.util.List;
                 }
 
                 long currentAccessTime = System.currentTimeMillis();
-                long lastAccessTime = getLastAccessTime();
+                // getLastAccessTime() should load the time your app was last active
+                // (e.g., saved during a previous onStop or when tracking was last successfully run).
+                long lastSuccessfullyTrackedTime = getLastAccessTime(); // Renamed for clarity
 
-                // Save the current access time for the next run
-                saveLastAccessTime();
+                // Save current time as the new "last access time" immediately.
+                // This marks the end point of the current processing interval if processing happens.
+                // And it's the starting point for the *next* interval if processing is skipped now.
+                saveLastAccessTime(currentAccessTime);
 
-                // If it's the first time or the difference is negative, we don't have to do anything
-                if (lastAccessTime == 0 || currentAccessTime < lastAccessTime) {
+                // If it's the first time (lastSuccessfullyTrackedTime is 0) or
+                // if current time is somehow before the last tracked time (e.g., clock change),
+                // there's no valid interval to process *from*.
+                if (lastSuccessfullyTrackedTime == 0 || currentAccessTime < lastSuccessfullyTrackedTime) {
+                    Log.d("AppUsage", "Skipping usage processing: lastSuccessfullyTrackedTime=" + lastSuccessfullyTrackedTime +
+                            ", currentAccessTime=" + currentAccessTime + ". Will start tracking from currentAccessTime onwards.");
                     return;
                 }
 
-                // Run database operations in a background thread using DatabaseExecutor
+                Log.d("AppUsage", "Preparing to track usage for interval: " +
+                        new Date(lastSuccessfullyTrackedTime) + " to " + new Date(currentAccessTime));
+
+                // Final variables for lambda
+                final long finalLastTrackedTime = lastSuccessfullyTrackedTime;
+                final long finalCurrentAccessTime = currentAccessTime;
+
                 DatabaseExecutor.execute(() -> {
-                    dao = PlantRepository.getInstance(this).getPlantaDAO();
-                    processAppUsageData(usageStatsManager, lastAccessTime, currentAccessTime);
+                    // Use getApplicationContext() for safety if PlantRepository needs a long-lived context
+                    // Ensure your DAO field 'dao' is either correctly initialized here or passed appropriately.
+                    // If 'dao' is a field of PerfilActivity, it's fine.
+                    // If not, you might need: DAO localDao = PlantRepository.getInstance(getApplicationContext()).getPlantaDAO();
+                    dao = PlantRepository.getInstance(getApplicationContext()).getPlantaDAO(); // Assuming 'dao' is a field
+                    processAppUsageData(usageStatsManager, finalLastTrackedTime, finalCurrentAccessTime);
                 });
             }
 
-            private void processAppUsageData(UsageStatsManager usageStatsManager, long lastAccessTime, long currentAccessTime) {
+            private void processAppUsageData(UsageStatsManager usageStatsManager, long intervalStartTime, long intervalEndTime) {
                 String[] appNames = {"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"};
                 String[] packageNames = {"com.instagram.android", "com.zhiliaoapp.musically", "com.google.android.youtube", "com.twitter.android", "com.facebook.katana"};
 
-                Calendar calendar = Calendar.getInstance();
-                int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
-                Date today = calendar.getTime();
-                int currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
+                // Query for usage stats within the specified interval (e.g., since app was last active)
+                // INTERVAL_DAILY means the results will be bucketed by day, but UsageStats.getTotalTimeInForeground()
+                // will be the time used *within that day* AND *within your queried interval*.
+                List<UsageStats> intervalUsageStatsList = usageStatsManager.queryUsageStats(
+                        UsageStatsManager.INTERVAL_DAILY,
+                        intervalStartTime,
+                        intervalEndTime);
+
+                if (intervalUsageStatsList == null || intervalUsageStatsList.isEmpty()) {
+                    Log.d("AppUsage", "No usage stats found in the interval: " + new Date(intervalStartTime) + " to " + new Date(intervalEndTime));
+                    return;
+                }
+
+                Log.d("AppUsage", "Processing " + intervalUsageStatsList.size() + " usage stat entries for interval.");
 
                 for (int i = 0; i < appNames.length; i++) {
                     String appName = appNames[i];
-                    String packageName = packageNames[i];
+                    String targetPackageName = packageNames[i];
 
-                    // Get the usage stats for the app between the last access time and the current access time
-                    List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                            UsageStatsManager.INTERVAL_DAILY, lastAccessTime, currentAccessTime);
+                    for (UsageStats stats : intervalUsageStatsList) {
+                        if (stats.getPackageName().equals(targetPackageName)) {
+                            // This is the time the app was in the foreground during this specific day
+                            // AND within the (intervalStartTime, intervalEndTime) period.
+                            long foregroundTimeThisIntervalForDay = stats.getTotalTimeInForeground();
 
-                    long totalUsageTimeInForeground = 0;
-                    if (usageStatsList != null && !usageStatsList.isEmpty()) {
-                        for (UsageStats usageStats : usageStatsList) {
-                            if (usageStats.getPackageName().equals(packageName)) {
-                                totalUsageTimeInForeground = usageStats.getTotalTimeInForeground();
-                                break;
+                            if (foregroundTimeThisIntervalForDay > 0) {
+                                // Determine the calendar day for this usage stat entry
+                                Calendar eventCalendar = Calendar.getInstance();
+                                // stats.getLastTimeUsed() is a good representation of when this usage block occurred.
+                                eventCalendar.setTimeInMillis(stats.getLastTimeUsed());
+
+                                Date eventDate = eventCalendar.getTime(); // The specific date of this usage
+                                int dayOfYear = eventCalendar.get(Calendar.DAY_OF_YEAR);
+                                int weekOfYear = eventCalendar.get(Calendar.WEEK_OF_YEAR);
+
+                                Log.d("AppUsage", "Found usage for " + appName + " (Package: " + targetPackageName + ") on day " + dayOfYear +
+                                        ". Time in foreground for this interval/day: " + (foregroundTimeThisIntervalForDay / 1000) + "s");
+
+                                AppUsage existingDailyUsage = dao.getUsageByDayOfYearAndApp(dayOfYear, appName);
+
+                                if (existingDailyUsage != null) {
+                                    // Add the newly found usage (from this specific interval) to the existing total for that day
+                                    existingDailyUsage.usageTime += foregroundTimeThisIntervalForDay;
+                                    dao.update(existingDailyUsage);
+                                    Log.d("AppUsage", "Updated " + appName + " for day " + dayOfYear + ". New total daily usage: " + (existingDailyUsage.usageTime / 1000) + "s");
+                                } else {
+                                    // No record for this app on this day yet, create a new one
+                                    AppUsage newDailyUsage = new AppUsage(eventDate, appName, foregroundTimeThisIntervalForDay, weekOfYear);
+                                    dao.insert(newDailyUsage);
+                                    Log.d("AppUsage", "Inserted new usage for " + appName + " for day " + dayOfYear + ". Daily usage: " + (newDailyUsage.usageTime / 1000) + "s");
+                                }
                             }
-                        }
-                    }
-
-                    // Check if the session spans across midnight
-                    Calendar lastAccessCalendar = Calendar.getInstance();
-                    lastAccessCalendar.setTimeInMillis(lastAccessTime);
-                    Calendar currentAccessCalendar = Calendar.getInstance();
-                    currentAccessCalendar.setTimeInMillis(currentAccessTime);
-
-                    if (lastAccessCalendar.get(Calendar.DAY_OF_YEAR) != currentAccessCalendar.get(Calendar.DAY_OF_YEAR)) {
-                        // Session spans across midnight
-                        // Calculate the time until midnight on the last access day
-                        Calendar midnightCalendar = (Calendar) lastAccessCalendar.clone();
-                        midnightCalendar.set(Calendar.HOUR_OF_DAY, 23);
-                        midnightCalendar.set(Calendar.MINUTE, 59);
-                        midnightCalendar.set(Calendar.SECOND, 59);
-                        midnightCalendar.set(Calendar.MILLISECOND, 999);
-                        long timeUntilMidnight = midnightCalendar.getTimeInMillis() - lastAccessTime;
-                        int lastAccessDayOfYear = lastAccessCalendar.get(Calendar.DAY_OF_YEAR);
-
-                        // Calculate the time from midnight on the current access day
-                        long timeFromMidnight = currentAccessTime - midnightCalendar.getTimeInMillis();
-                        int currentAccessDayOfYear = currentAccessCalendar.get(Calendar.DAY_OF_YEAR);
-
-                        // Update the last access day
-                        Date lastAccessDate = lastAccessCalendar.getTime();
-                        AppUsage existingUsageLastDay = dao.getUsageByDayOfYearAndApp(lastAccessDayOfYear, appName);
-                        long newUsageLastDay = Math.min(totalUsageTimeInForeground, timeUntilMidnight);
-                        if (existingUsageLastDay != null) {
-                            existingUsageLastDay.usageTime = newUsageLastDay;
-                            dao.update(existingUsageLastDay);
-                        } else {
-                            AppUsage newUsageLastDayObject = new AppUsage(lastAccessDate, appName, newUsageLastDay, lastAccessCalendar.get(Calendar.WEEK_OF_YEAR));
-                            dao.insert(newUsageLastDayObject);
-                        }
-
-                        // Update the current access day
-                        Date currentAccessDate = currentAccessCalendar.getTime();
-                        AppUsage existingUsageCurrentDay = dao.getUsageByDayOfYearAndApp(currentAccessDayOfYear, appName);
-                        long previousUsageCurrentDay = (existingUsageCurrentDay != null) ? existingUsageCurrentDay.usageTime : 0;
-                        long newUsageCurrentDay = Math.min(totalUsageTimeInForeground, timeFromMidnight);
-                        if (existingUsageCurrentDay != null) {
-                            existingUsageCurrentDay.usageTime = newUsageCurrentDay;
-                            dao.update(existingUsageCurrentDay);
-                        } else {
-                            AppUsage newUsageCurrentDayObject = new AppUsage(currentAccessDate, appName, newUsageCurrentDay, currentAccessCalendar.get(Calendar.WEEK_OF_YEAR));
-                           dao.insert(newUsageCurrentDayObject);
-                        }
-                    } else {
-                        // Session is within the same day
-                        // Check if a record exists for this app and date
-                        AppUsage existingUsage = dao.getUsageByDayOfYearAndApp(currentDayOfYear, appName);
-
-                        if (existingUsage != null) {
-                            // Update the existing record with the new usage time
-                            existingUsage.usageTime = totalUsageTimeInForeground;
-                            dao.update(existingUsage);
-                        } else {
-                            // Insert a new record
-                            AppUsage newUsageObject = new AppUsage(today, appName, totalUsageTimeInForeground, currentWeek);
-                            dao.insert(newUsageObject);
+                            // Since UsageStats are per-package for the interval, once we find our package, we can break
+                            // from iterating through intervalUsageStatsList for *this specific targetPackageName*.
+                            // However, the outer loop for appNames will continue.
+                            // If one UsageStats entry could cover multiple of your target apps (not typical), remove break.
+                            break;
                         }
                     }
                 }
@@ -568,7 +602,6 @@ import java.util.List;
                 }
             }
 
-            // New methods for image persistence
             private String saveImageToInternalStorage(Bitmap bitmap) {
                 // Create a file in the internal storage
                 File directory = getFilesDir();
@@ -598,15 +631,16 @@ import java.util.List;
                 return null;
             }
 
-            private void saveLastAccessTime() {
-                SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putLong("lastAccessTime", System.currentTimeMillis());
-                editor.apply();
+            private long getLastAccessTime() {
+                SharedPreferences prefs = getSharedPreferences(APP_USAGE_PREFS_NAME, MODE_PRIVATE);
+                return prefs.getLong(KEY_LAST_ACCESS_TIME, 0);
             }
 
-            private long getLastAccessTime() {
-                SharedPreferences prefs = getSharedPreferences("AppUsageData", MODE_PRIVATE);
-                return prefs.getLong("lastAccessTime", 0);
+            private void saveLastAccessTime(long time) {
+                SharedPreferences prefs = getSharedPreferences(APP_USAGE_PREFS_NAME, MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putLong(KEY_LAST_ACCESS_TIME, time);
+                editor.apply(); // Use apply() for asynchronous save
+                Log.d("AppUsage", "Saved lastAccessTime: " + new Date(time));
             }
         }
