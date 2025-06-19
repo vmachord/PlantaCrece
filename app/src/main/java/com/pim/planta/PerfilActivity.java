@@ -4,7 +4,7 @@ import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.Activity;
-import android.app.usage.UsageStats;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -54,10 +54,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
-        public class PerfilActivity extends NotificationActivity {
+public class PerfilActivity extends NotificationActivity {
 
             private ImageView profileImageView;
             private TextView userNameTextView;
@@ -200,7 +202,7 @@ import java.util.List;
                 // Data structures for the graph
                 float[][] appUsagePerDay = new float[7][5]; // 7 days, 5 apps
                 String[] daysOfWeekLabels = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}; // For X-axis labels
-                String[] appNamesForStack = {"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"}; // For stack labels & data retrieval order
+                String[] appNamesForStack = {"Instagram", "TikTok", "YouTube", "X", "Facebook"}; // For stack labels & data retrieval order
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.WEEK_OF_YEAR, selectedWeek);
@@ -269,19 +271,19 @@ import java.util.List;
                             barEntries.add(new BarEntry(i, appUsagePerDay[i]));
                         }
 
-                        BarDataSet barDataSet = new BarDataSet(barEntries, "Daily App Usage"); // Label for the dataset
+                        BarDataSet barDataSet = new BarDataSet(barEntries, ""); // Label for the dataset
                         barDataSet.setStackLabels(appNamesForStack); // Labels for each part of the stack
 
                         // Define colors for the stacks (ensure you have enough colors for appNamesForStack)
                         barDataSet.setColors(new int[]{
-                                Color.parseColor("#004D40"), // Instagram
-                                Color.parseColor("#2E7D32"), // TikTok
-                                Color.parseColor("#4CAF50"), // YouTube
-                                Color.parseColor("#81C784"), // Twitter
-                                Color.parseColor("#A5D6A7")  // Facebook
+                                Color.MAGENTA, // Instagram
+                                Color.GRAY, // TikTok
+                                Color.RED, // YouTube
+                                Color.BLACK, // X (Twitter)
+                                Color.BLUE  // Facebook
                         });
                         barDataSet.setValueTextColor(Color.BLACK);
-                        barDataSet.setValueTextSize(10f);
+                        barDataSet.setValueTextSize(0);
 
                         BarData barData = new BarData(barDataSet);
                         barData.setBarWidth(0.8f); // Adjust bar width as needed
@@ -322,6 +324,7 @@ import java.util.List;
                         legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
                         legend.setDrawInside(false);
                         legend.setTextSize(12f);
+                        legend.setXEntrySpace(12f);
                         legend.setTextColor(Color.BLACK);
                         // if (aventaFont != null) {
                         //     legend.setTypeface(aventaFont);
@@ -431,13 +434,13 @@ import java.util.List;
                                         "%-10s %s\n" +
                                         "%-7s %s\n" +
                                         "%-8s %s\n" +
-                                        "%-8s %s\n" +
+                                        "%-2s %s\n" +
                                         "%-9s %s\n",
                                 "Week", selectedWeek,
                                 "Instagram:", formatTime(finalInstagramUsage),
                                 "TikTok:", formatTime(finalTiktokUsage),
                                 "YouTube:", formatTime(finalYoutubeUsage),
-                                "Twitter:", formatTime(finalTwitterUsage),
+                                "X:", formatTime(finalTwitterUsage),
                                 "Facebook:", formatTime(finalFacebookUsage)
                         );
 
@@ -484,79 +487,157 @@ import java.util.List;
                 final long finalCurrentAccessTime = currentAccessTime;
 
                 DatabaseExecutor.execute(() -> {
-                    // Use getApplicationContext() for safety if PlantRepository needs a long-lived context
-                    // Ensure your DAO field 'dao' is either correctly initialized here or passed appropriately.
-                    // If 'dao' is a field of PerfilActivity, it's fine.
-                    // If not, you might need: DAO localDao = PlantRepository.getInstance(getApplicationContext()).getPlantaDAO();
-                    dao = PlantRepository.getInstance(getApplicationContext()).getPlantaDAO(); // Assuming 'dao' is a field
-                    processAppUsageData(usageStatsManager, finalLastTrackedTime, finalCurrentAccessTime);
+                    processAppUsageDataWithUsageEvents(usageStatsManager, finalLastTrackedTime, finalCurrentAccessTime);
                 });
             }
 
-            private void processAppUsageData(UsageStatsManager usageStatsManager, long intervalStartTime, long intervalEndTime) {
-                String[] appNames = {"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"};
-                String[] packageNames = {"com.instagram.android", "com.zhiliaoapp.musically", "com.google.android.youtube", "com.twitter.android", "com.facebook.katana"};
+            // Ensure DAO is passed or accessible
+            private void processAppUsageDataWithUsageEvents(UsageStatsManager usageStatsManager, long intervalStartTime, long intervalEndTime) {
+                String[] targetAppNames = {"Instagram", "TikTok", "YouTube", "Twitter", "Facebook"};
+                String[] targetPackageNames = {"com.instagram.android", "com.zhiliaoapp.musically", "com.google.android.youtube", "com.twitter.android", "com.facebook.katana"};
 
-                // Query for usage stats within the specified interval (e.g., since app was last active)
-                // INTERVAL_DAILY means the results will be bucketed by day, but UsageStats.getTotalTimeInForeground()
-                // will be the time used *within that day* AND *within your queried interval*.
-                List<UsageStats> intervalUsageStatsList = usageStatsManager.queryUsageStats(
-                        UsageStatsManager.INTERVAL_DAILY,
-                        intervalStartTime,
-                        intervalEndTime);
+                Log.i("AppUsage_EVENTS", "--------------------------------------------------------------------");
+                Log.i("AppUsage_EVENTS", "START processAppUsageDataWithUsageEvents Interval: " +
+                        new Date(intervalStartTime) + " [" + intervalStartTime + "] TO " +
+                        new Date(intervalEndTime) + " [" + intervalEndTime + "]");
 
-                if (intervalUsageStatsList == null || intervalUsageStatsList.isEmpty()) {
-                    Log.d("AppUsage", "No usage stats found in the interval: " + new Date(intervalStartTime) + " to " + new Date(intervalEndTime));
+                // This map will store the calculated foreground time (delta) for each app within this specific interval
+                // Key: PackageName, Value: Milliseconds in foreground during this interval
+                HashMap<String, Long> appForegroundTimeDeltasThisInterval = new HashMap<>();
+                for (String pkg : targetPackageNames) {
+                    appForegroundTimeDeltasThisInterval.put(pkg, 0L);
+                }
+
+                // This map tracks the last time an app moved to the foreground *within the current processing of events*
+                // Key: PackageName, Value: Timestamp of last MOVE_TO_FOREGROUND event
+                HashMap<String, Long> lastForegroundEventTimestamp = new HashMap<>();
+
+                UsageEvents usageEvents = usageStatsManager.queryEvents(intervalStartTime, intervalEndTime);
+                if (usageEvents == null) {
+                    Log.w("AppUsage_EVENTS", "UsageEvents query returned null for interval.");
+                    Log.i("AppUsage_EVENTS", "END processAppUsageDataWithUsageEvents (null events)");
+                    Log.i("AppUsage_EVENTS", "--------------------------------------------------------------------");
                     return;
                 }
 
-                Log.d("AppUsage", "Processing " + intervalUsageStatsList.size() + " usage stat entries for interval.");
+                UsageEvents.Event event = new UsageEvents.Event();
+                while (usageEvents.hasNextEvent()) {
+                    usageEvents.getNextEvent(event);
+                    String currentPackageName = event.getPackageName();
+                    long eventTimestamp = event.getTimeStamp();
 
-                for (int i = 0; i < appNames.length; i++) {
-                    String appName = appNames[i];
-                    String targetPackageName = packageNames[i];
-
-                    for (UsageStats stats : intervalUsageStatsList) {
-                        if (stats.getPackageName().equals(targetPackageName)) {
-                            // This is the time the app was in the foreground during this specific day
-                            // AND within the (intervalStartTime, intervalEndTime) period.
-                            long foregroundTimeThisIntervalForDay = stats.getTotalTimeInForeground();
-
-                            if (foregroundTimeThisIntervalForDay > 0) {
-                                // Determine the calendar day for this usage stat entry
-                                Calendar eventCalendar = Calendar.getInstance();
-                                // stats.getLastTimeUsed() is a good representation of when this usage block occurred.
-                                eventCalendar.setTimeInMillis(stats.getLastTimeUsed());
-
-                                Date eventDate = eventCalendar.getTime(); // The specific date of this usage
-                                int dayOfYear = eventCalendar.get(Calendar.DAY_OF_YEAR);
-                                int weekOfYear = eventCalendar.get(Calendar.WEEK_OF_YEAR);
-
-                                Log.d("AppUsage", "Found usage for " + appName + " (Package: " + targetPackageName + ") on day " + dayOfYear +
-                                        ". Time in foreground for this interval/day: " + (foregroundTimeThisIntervalForDay / 1000) + "s");
-
-                                AppUsage existingDailyUsage = dao.getUsageByDayOfYearAndApp(dayOfYear, appName);
-
-                                if (existingDailyUsage != null) {
-                                    // Add the newly found usage (from this specific interval) to the existing total for that day
-                                    existingDailyUsage.usageTime += foregroundTimeThisIntervalForDay;
-                                    dao.update(existingDailyUsage);
-                                    Log.d("AppUsage", "Updated " + appName + " for day " + dayOfYear + ". New total daily usage: " + (existingDailyUsage.usageTime / 1000) + "s");
-                                } else {
-                                    // No record for this app on this day yet, create a new one
-                                    AppUsage newDailyUsage = new AppUsage(eventDate, appName, foregroundTimeThisIntervalForDay, weekOfYear);
-                                    dao.insert(newDailyUsage);
-                                    Log.d("AppUsage", "Inserted new usage for " + appName + " for day " + dayOfYear + ". Daily usage: " + (newDailyUsage.usageTime / 1000) + "s");
-                                }
-                            }
-                            // Since UsageStats are per-package for the interval, once we find our package, we can break
-                            // from iterating through intervalUsageStatsList for *this specific targetPackageName*.
-                            // However, the outer loop for appNames will continue.
-                            // If one UsageStats entry could cover multiple of your target apps (not typical), remove break.
+                    // Check if this event's package is one of the apps we are tracking
+                    boolean isTrackedApp = false;
+                    for (String pkgToTrack : targetPackageNames) {
+                        if (pkgToTrack.equals(currentPackageName)) {
+                            isTrackedApp = true;
                             break;
                         }
                     }
+
+                    if (!isTrackedApp) {
+                        continue; // Skip events from non-tracked apps
+                    }
+
+                    if (event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                        // Store the timestamp when this app moved to the foreground
+                        lastForegroundEventTimestamp.put(currentPackageName, eventTimestamp);
+                        Log.d("AppUsage_EVENTS", "Event: " + currentPackageName + " moved to FOREGROUND at " + new Date(eventTimestamp) + " [" + eventTimestamp + "]");
+                    } else if (event.getEventType() == UsageEvents.Event.MOVE_TO_BACKGROUND) {
+                        // App moved to background, calculate duration if we have a preceding foreground event
+                        Long foregroundStartTime = lastForegroundEventTimestamp.get(currentPackageName);
+                        if (foregroundStartTime != null && eventTimestamp > foregroundStartTime) {
+                            long duration = eventTimestamp - foregroundStartTime;
+                            long currentTotalDelta = appForegroundTimeDeltasThisInterval.getOrDefault(currentPackageName, 0L);
+                            appForegroundTimeDeltasThisInterval.put(currentPackageName, currentTotalDelta + duration);
+
+                            Log.d("AppUsage_EVENTS", "Event: " + currentPackageName + " moved to BACKGROUND at " + new Date(eventTimestamp) + " [" + eventTimestamp + "]" +
+                                    ". Matched with FG event at " + new Date(foregroundStartTime) + " [" + foregroundStartTime + "]" +
+                                    ". Duration in foreground: " + (duration / 1000) + "s. " +
+                                    "New total delta for this app in this run: " + (appForegroundTimeDeltasThisInterval.get(currentPackageName) / 1000) + "s");
+
+                            // Important: Remove the foreground timestamp once it's "used" by a background event
+                            // This prevents incorrect calculations if an app goes FG -> BG -> FG -> BG quickly.
+                            lastForegroundEventTimestamp.remove(currentPackageName);
+                        } else {
+                            Log.d("AppUsage_EVENTS", "Event: " + currentPackageName + " moved to BACKGROUND at " + new Date(eventTimestamp) +
+                                    ", but no matching foreground event found or timestamp issue (FG: " + foregroundStartTime + ", BG: " + eventTimestamp + ")");
+                        }
+                    }
                 }
+                // Handle apps that were still in the foreground when intervalEndTime was reached
+                // (i.e., they have a MOVE_TO_FOREGROUND event but no subsequent MOVE_TO_BACKGROUND within the interval)
+                for (Map.Entry<String, Long> entry : lastForegroundEventTimestamp.entrySet()) {
+                    String packageNameStillInFG = entry.getKey();
+                    Long foregroundStartTimeStillInFG = entry.getValue(); // This is the timestamp it moved to FG
+
+                    // Ensure this foreground event actually started before the interval ended
+                    if (foregroundStartTimeStillInFG != null && intervalEndTime > foregroundStartTimeStillInFG) {
+                        long duration = intervalEndTime - foregroundStartTimeStillInFG; // Duration is from FG start to interval END
+                        long currentTotalDelta = appForegroundTimeDeltasThisInterval.getOrDefault(packageNameStillInFG, 0L);
+                        appForegroundTimeDeltasThisInterval.put(packageNameStillInFG, currentTotalDelta + duration);
+
+                        Log.d("AppUsage_EVENTS", "App " + packageNameStillInFG + " was still in foreground at interval end (" + new Date(intervalEndTime) + "). " +
+                                "Moved to FG at " + new Date(foregroundStartTimeStillInFG) + ". Adding duration: " + (duration / 1000) + "s. " +
+                                "New total delta for this app in this run: " + (appForegroundTimeDeltasThisInterval.get(packageNameStillInFG) / 1000) + "s");
+                    }
+                }
+
+                // Now, update the database with these calculated deltas (totalNewUsageForAppThisInterval)
+                for (int i = 0; i < targetPackageNames.length; i++) {
+                    String packageName = targetPackageNames[i];
+                    String appName = targetAppNames[i];
+                    long totalNewUsageForAppThisInterval = appForegroundTimeDeltasThisInterval.getOrDefault(packageName, 0L);
+
+                    if (totalNewUsageForAppThisInterval <= 0) {
+                        Log.d("AppUsage_EVENTS", "No new usage delta calculated for " + appName + " (Package: " + packageName + ") in this interval. Skipping DB update for this app.");
+                        continue;
+                    }
+
+                    // --- ATTRIBUTION TO DAY ---
+                    // This is a critical part. The totalNewUsageForAppThisInterval might span midnight.
+                    // A truly robust solution would iterate from intervalStartTime to intervalEndTime,
+                    // calculate how much of totalNewUsageForAppThisInterval falls on each day,
+                    // and update the DB for each of those days accordingly.
+
+                    // SIMPLIFIED APPROACH: Attribute all usage to the day of intervalEndTime.
+                    // This is an approximation and will be inaccurate if usage spans midnight significantly.
+                    // For a more accurate daily breakdown, you'd need to process events day by day or
+                    // intelligently split the 'totalNewUsageForAppThisInterval'.
+
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTimeInMillis(intervalEndTime); // Attribute all usage to the day the interval ended
+                    int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
+                    int weekOfYear = cal.get(Calendar.WEEK_OF_YEAR);
+                    // int year = cal.get(Calendar.YEAR); // Important if tracking year
+
+                    Log.d("AppUsage_EVENTS", "Attempting to update DB for " + appName + " on dayOfYear " + dayOfYear +
+                            " with total new usage delta for this interval: " + (totalNewUsageForAppThisInterval / 1000) + "s.");
+
+                    AppUsage existingDailyUsage = dao.getUsageByDayOfYearAndApp(dayOfYear, appName /*, year */);
+
+                    if (existingDailyUsage != null) {
+                        Log.d("AppUsage_EVENTS", "DB: Updating " + appName + " for dayOfYear " + dayOfYear +
+                                ". Current stored usageTime: " + (existingDailyUsage.usageTime / 1000) + "s. Adding delta: " + (totalNewUsageForAppThisInterval / 1000) + "s.");
+                        existingDailyUsage.usageTime += totalNewUsageForAppThisInterval;
+                        dao.update(existingDailyUsage);
+                        Log.d("AppUsage_EVENTS", "DB: Updated. New total usageTime for " + appName + " on dayOfYear " + dayOfYear + ": " + (existingDailyUsage.usageTime / 1000) + "s.");
+                    } else {
+                        // No existing record for this app on this day (as per the simplified attribution).
+                        // Create a new one.
+                        Log.d("AppUsage_EVENTS", "DB: No existing usage for " + appName + " on dayOfYear " + dayOfYear +
+                                ". Inserting new record with usageTime (delta): " + (totalNewUsageForAppThisInterval / 1000) + "s.");
+
+                        // We need the Date object for the AppUsage constructor.
+                        // cal was set to intervalEndTime.
+                        AppUsage newDailyUsage = new AppUsage(cal.getTime(), appName, totalNewUsageForAppThisInterval, weekOfYear /* weekOfYear from cal */);
+                        dao.insert(newDailyUsage);
+                        Log.d("AppUsage_EVENTS", "DB: Inserted new daily usage for " + appName + " on dayOfYear " + dayOfYear + ".");
+                    }
+                }
+
+                Log.i("AppUsage_EVENTS", "END processAppUsageDataWithUsageEvents");
+                Log.i("AppUsage_EVENTS", "--------------------------------------------------------------------");
             }
 
             private String formatTime(long timeInMillis) {
